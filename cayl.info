@@ -1,0 +1,7 @@
+name = Cache As You Link
+description = Configurations settings example for the CAYL functionality
+package = CAYL
+core = 7.x
+files[] = libraries/CAYLStorage.php
+files[] = cayl.test
+configure = admin/config/cayl

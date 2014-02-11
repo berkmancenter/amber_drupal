@@ -1,0 +1,115 @@
+<?php
+
+
+/**
+ * Implements hook_menu().
+ */
+function cayl_menu() {
+  $items = array();
+  $items['admin/config/cayl'] = array(
+    'title' => 'CAYL Configuration',
+    'description' => 'Configuration for the Cache As You Link module',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cayl_config_form'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'cayl.admin.inc',
+  );
+  $items['admin/reports/cayl'] = array(
+    'title' => 'CAYL Dashboard',
+    'description' => 'CAYL Dashboard',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cayl_dashboard_form'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * Lookup a URL using the CAYLStorage class, while caching for the duration of the page load
+ */
+function _cayl_lookup_url($url) {
+  $storage = &drupal_static(__FUNCTION__);
+  if (!isset($storage)) {
+    $storage = new CAYLStorage();
+  }
+  return $storage->lookup_url($url);
+}
+
+/**
+ * Implements hook_preprocess_link()
+ *
+ * Rewrite all cached external links with data-* attributes describing the information in the cache
+ */
+function cayl_preprocess_link(&$variables) {
+  /* If it is an external link, check if cache exists, and add data-* attributes as necessary. */
+  if (url_is_external($variables['path'])) {
+    $attributes = _cayl_lookup_url($variables['path']);
+    if (!empty($attributes)) {
+      if (!isset($variables['options'])) {
+        $variables['options'] = array();
+      }
+      if (isset($variables['options']['attributes']))
+        $variables['options']['attributes'] += $attributes;
+      else
+        $variables['options']['attributes'] = $attributes;
+    }
+
+  }
+}
+
+/**
+ * Implements hook_filter_info().
+ */
+function cayl_filter_info() {
+  $filters['filter_cayl'] = array(
+    'title' => t('CAYL Filter'),
+    'description' => t('Annotate all external links with information about the their local cached copies'),
+    'process callback'  => '_cayl_filter_process',
+    'tips callback' => '_cayl_filter_tips',
+    'weight' => 50
+  );
+  return $filters;
+}
+
+/**
+ * Callback function for updating href's with data-* attrbutes, after they've been identified with a regular expression
+ * @param $matches
+ * @return string
+ */
+function _cayl_filter_callback($matches) {
+  $data = _cayl_lookup_url($matches[1]);
+  $result = $matches[0];
+  foreach ($data as $key => $value) {
+    $result .= " $key=\"$value\"" ;
+  }
+  return $result;
+}
+
+/**
+ * CAYL filter process callback.
+ *
+ * Find all external links and annotate then with data-* attributes describing the information in the cache.
+ * Note: This treats all absolute URLs as external links.
+ */
+function _cayl_filter_process($text, $filter, $format) {
+  $re = '/href=["\'](http[^\s()<>{}\[\]]+)[\'"]/';
+  $text = preg_replace_callback($re, '_cayl_filter_callback', $text);
+  return $text;
+}
+
+
+/**
+ * Filter tips callback for CAYL filter.
+ */
+function _cayl_filter_tips($filter, $format, $long = FALSE) {
+  if (!$long) {
+    // This string will be shown in the content add/edit form
+    return t('Annotate all external links with information about the their local cached copies');
+  }
+  else {
+    return t('Annotate all external links with information about the their local cached copies. Then add some more information about the CAYL project and links to other stuff.');
+  }
+}
+

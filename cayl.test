@@ -1,0 +1,94 @@
+<?php
+
+class CAYLTestCase extends DrupalUnitTestCase {
+
+  public static function getInfo() {
+    return array(
+      'name' => 'CAYL unit tests',
+      'description' => 'Test that link annotation is working properly',
+      'group' => 'CAYL',
+    );
+  }
+
+  /**
+   * Set up the test environment, and load our mock CAYLStorage module
+   */
+  function setUp() {
+    drupal_load('module', 'cayl');
+    module_load_include('inc','cayl','tests/MockCAYLStorage');
+    parent::setUp();
+  }
+
+  /**
+   * Tear down the test environment.
+   * Must clean our MockCAYLStorage class out of the cache
+   */
+  function tearDown() {
+    drupal_static_reset("_cayl_lookup_url");
+    parent::tearDown();
+  }
+
+  /**
+   * Make sure that the Storage class is being called correctly
+   */
+  public function testCAYLLookup() {
+    $result = _cayl_lookup_url("http://google.com");
+    $this->assertTrue(is_array($result));
+    $this->assertTrue($result['data-ircache-date-cached'] == "1/3/2014");
+  }
+
+  public function testpreprocess_link() {
+    $vars = array( 'text' => 'Test link', 'path' => 'http://www.google.com', 'options' => array( 'attributes' => array()) );
+    cayl_preprocess_link($vars);
+    $this->assertTrue($vars['text']);
+    $this->assertTrue($vars['options']['attributes']['data-ircache-date-cached'] == "1/3/2014");
+  }
+
+  public function testpreprocess_linkLocal() {
+    $vars = array( 'text' => 'Test link', 'path' => 'node/1', 'options' => array( 'attributes' => array()) );
+    cayl_preprocess_link($vars);
+    $this->assertTrue($vars['text']);
+    $this->assertTrue(empty($var['options']['attributes']));
+  }
+
+  public function testpreprocess_linkOptionsNotSet() {
+    $vars = array( 'text' => 'Test link', 'path' => 'http://www.google.com');
+    cayl_preprocess_link($vars);
+    $this->assertTrue($vars['text']);
+    $this->assertTrue(empty($var['options']['attributes']));
+  }
+
+  public function testpreprocess_linkExistingAttributes() {
+    $vars = array( 'text' => 'Test link', 'path' => 'http://www.google.com', 'options' => array( 'attributes' => array('data-bogus' => 'Franky')) );
+    cayl_preprocess_link($vars);
+    $this->assertTrue($vars['text']);
+    $this->assertTrue($vars['options']['attributes']['data-ircache-date-cached'] == "1/3/2014");
+    $this->assertTrue($vars['options']['attributes']['data-bogus'] == "Franky");
+  }
+
+  public function testCAYLFilterEmpty() {
+    $text = "";
+    $result = _cayl_filter_process($text,null,null);
+    $this->assertEqual($result,"");
+  }
+
+  public function testCAYLFilterSimpleReplaceSingleQuotes() {
+    $text = "Hi there <a href='http://www.yahoo.com'>Yahoo</a>. Eat my donuts!";
+    $result = _cayl_filter_process($text,null,null);
+    $this->assertTrue(strpos($result,'data-ircache') > 0);
+  }
+
+  public function testCAYLFilterSimpleReplaceDoubleQuotes() {
+    $text = "Hi there <a href=\"http://www.yahoo.com\">Yahoo</a>. Eat my donuts!";
+    $result = _cayl_filter_process($text,null,null);
+    $this->assertTrue(strpos($result,'data-ircache-date-cached') > 0);
+    $this->assertTrue(strpos($result,'data-ircache-location') > 0);
+  }
+
+  public function testCAYLFilterSimpleNoReplace() {
+    $text = "Hi there <a href='node/1'>node links</a>. Eat my meatloaf!";
+    $result = _cayl_filter_process($text,null,null);
+    $this->assertFalse(strpos($result,'data-ircache-date-cached'));
+  }
+
+}
