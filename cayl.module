@@ -1,5 +1,12 @@
 <?php
 
+define("CAYL_ACTION_NONE",0);
+define("CAYL_ACTION_HOVER",1);
+define("CAYL_ACTION_POPUP",2);
+define("CAYL_ACTION_CACHE",3);
+define("CAYL_STATUS_UP","up");
+define("CAYL_STATUS_DOWN","down");
+
 
 /**
  * Implements hook_menu().
@@ -26,6 +33,65 @@ function cayl_menu() {
   return $items;
 }
 
+
+function _cayl_add_behavior($status, $country = NULL) {
+  $result = $status;
+  if (is_null($country)) {
+    if (CAYL_STATUS_UP == $status) {
+      $action = variable_get('cayl_available_action', CAYL_ACTION_NONE);
+      switch ($action) {
+        case CAYL_ACTION_NONE:
+          $result = NULL;
+          break;
+        case CAYL_ACTION_HOVER:
+          $result .= " hover:" . variable_get('cayl_available_action_hover', 2);
+          break;
+        case CAYL_ACTION_POPUP:
+          $result .= " popup";
+          break;
+        }
+    } else if (CAYL_STATUS_DOWN == $status) {
+      $action = variable_get('cayl_unavailable_action', CAYL_ACTION_NONE);
+      switch ($action) {
+        case CAYL_ACTION_NONE:
+          $result = NULL;
+          break;
+        case CAYL_ACTION_HOVER:
+          $result .= " hover:" . variable_get('cayl_unavailable_action_hover', 2);
+          break;
+        case CAYL_ACTION_POPUP:
+          $result .= " popup";
+          break;
+        case CAYL_ACTION_CACHE:
+          $result .= " cache";
+          break;
+        }
+    }
+  }
+  return $result;
+}
+
+
+/**
+ * Build the data- attributes to be added to the anchor tag, given saved metadata
+ * @param $storage_metadata array dictionary from the CAYL Storage module
+ * @return array attribute array to be added to the link
+ */
+function _cayl_build_link_attributes($storage_metadata) {
+  $result = array();
+  if (isset($storage_metadata['cache']['cayl']['location'],$storage_metadata['cache']['cayl']['date'])) {
+    $result['data-cache'] = join(" ",array($storage_metadata['cache']['cayl']['location'],
+                                           $storage_metadata['cache']['cayl']['date']));
+  }
+  if (isset($storage_metadata['status']['cayl']['default'])) {
+    $behavior = _cayl_add_behavior($storage_metadata['status']['cayl']['default']);
+    if ($behavior) {
+      $result['data-cayl-behavior'] = $behavior;
+    }
+  }
+  return $result;
+}
+
 /**
  * Lookup a URL using the CAYLStorage class, while caching for the duration of the page load
  */
@@ -34,7 +100,7 @@ function _cayl_lookup_url($url) {
   if (!isset($storage)) {
     $storage = new CAYLStorage();
   }
-  return $storage->lookup_url($url);
+  return _cayl_build_link_attributes($storage->lookup_url($url));
 }
 
 /**
@@ -55,7 +121,6 @@ function cayl_preprocess_link(&$variables) {
       else
         $variables['options']['attributes'] = $attributes;
     }
-
   }
 }
 
