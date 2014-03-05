@@ -33,7 +33,12 @@ function cayl_menu() {
   return $items;
 }
 
-
+/**
+ * Figure out what behavior to set, based on the status of the page and the configuration settings
+ * @param $status
+ * @param null $country
+ * @return null|string
+ */
 function _cayl_add_behavior($status, $country = NULL) {
   $result = $status;
   if (is_null($country)) {
@@ -74,8 +79,8 @@ function _cayl_add_behavior($status, $country = NULL) {
 
 /**
  * Build the data- attributes to be added to the anchor tag, given saved metadata
- * @param $storage_metadata array dictionary from the CAYL Storage module
- * @return array attribute array to be added to the link
+ * @param array $storage_metadata array dictionary from the CAYL Storage module
+ * @return array attributes to be added to the link
  */
 function _cayl_build_link_attributes($storage_metadata) {
   $result = array();
@@ -96,9 +101,11 @@ function _cayl_build_link_attributes($storage_metadata) {
  * Lookup a URL using the CAYLStorage class, while caching for the duration of the page load
  */
 function _cayl_lookup_url($url) {
+
   $storage = &drupal_static(__FUNCTION__);
   if (!isset($storage)) {
-    $storage = new CAYLStorage();
+    $file_path = join(DIRECTORY_SEPARATOR,array(DRUPAL_ROOT, variable_get('cayl_storage_location', 'sites/default/files/cayl')));
+    $storage = new CAYLStorage($file_path);
   }
   return _cayl_build_link_attributes($storage->lookup_url($url));
 }
@@ -159,7 +166,7 @@ function _cayl_filter_callback($matches) {
  * Note: This treats all absolute URLs as external links.
  */
 function _cayl_filter_process($text, $filter, $format) {
-  $re = '/href=["\'](http[^\s()<>{}\[\]]+)[\'"]/';
+  $re = '/href=["\'](http[^\v()<>{}\[\]]+)[\'"]/';
   $text = preg_replace_callback($re, '_cayl_filter_callback', $text);
   return $text;
 }
@@ -175,6 +182,35 @@ function _cayl_filter_tips($filter, $format, $long = FALSE) {
   }
   else {
     return t('Annotate all external links with information about the their local cached copies. Then add some more information about the CAYL project and links to other stuff.');
+  }
+}
+
+/**
+ * Implements hook_entity_update
+ */
+function cayl_entity_update($entity, $type) {
+  module_load_include('inc', 'cayl', 'cayl.extract');
+  module_load_include('inc', 'cayl', 'cayl.batch');
+  if ("node" == $type) {
+    if (NODE_PUBLISHED == $entity->status) {
+      $links = _cayl_extract_node_links($entity);
+      dpm($links);
+      _cayl_enqueue_cache_links($links);
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_insert
+ */
+function cayl_entity_insert($entity, $type) {
+  module_load_include('inc', 'cayl', 'cayl.extract');
+  module_load_include('inc', 'cayl', 'cayl.batch');
+  if ("node" == $type) {
+    if (NODE_PUBLISHED == $entity->status) {
+      $links = _cayl_extract_node_links($entity);
+      _cayl_enqueue_cache_links($links);
+    }
   }
 }
 

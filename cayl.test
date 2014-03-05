@@ -17,6 +17,7 @@ class CAYLTestCase extends DrupalUnitTestCase {
    */
   function setUp() {
     drupal_load('module', 'cayl');
+    module_load_include('inc', 'cayl', 'cayl.extract');
     module_load_include('inc','cayl','tests/MockCAYLStorage');
     parent::setUp();
   }
@@ -111,8 +112,54 @@ class CAYLTestCase extends DrupalUnitTestCase {
     $this->assertEqual($result,"bogus");
   }
 
-}
+  public function testCAYLLinkDetection() {
+    $body = <<<EOT
+<!-- URL with uncommon chars that could potentially fail to extract. See http://drupal.org/node/465462. -->
+<a href="http://www.lagrandeepicerie.fr/#e-boutique/Les_produits_du_moment,2/coffret_vins_doux_naturels,149">URL with uncommon chars</a>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quare ad ea primum, si videtur; Non quam nostram quidem, inquit Pomponius iocans; Sedulo, inquam, faciam. Zenonis est, inquam, hoc Stoici. Quis istud possit, inquit, negare? Duo Reges: constructio interrete. </p>
+<p>Sed nimis multa. Non est ista, inquam, Piso, magna dissensio. Si longus, levis. Immo alio genere; Satis est ad hoc responsum. Quae sequuntur igitur? </p>
+<a href="http://example.com/foo bar/is_valid-hack.test">URL with space</a>
+<p>Tamen a proposito, inquam, aberramus. Quam si explicavisset, non tam haesitaret. Quamquam id quidem licebit iis existimare, qui legerint. Ut optime, secundum naturam affectum esse possit. Poterat autem inpune; Quamquam tu hanc copiosiorem etiam soles dicere. Quid, quod res alia tota est? At enim sequor utilitatem. </p>
+<p>Sed ad illum redeo. Eam stabilem appellas. Audeo dicere, inquit. Si longus, levis; </p>
+<a href="http://www.pancake.com">Pancjages</a>
+EOT;
 
+    $links = _cayl_extract_links($body);
+    $this->assertEqual(count($links),3);
+  }
+
+  public function testCAYLLinkFilter1() {
+    $blacklist = array("yahoo.com");
+    $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake");
+    $result = _cayl_filter_links($links,$blacklist);
+    $this->assertEqual(count($result),2);
+    $this->assertEqual($result[0],"https://google.com");
+  }
+
+  public function testCAYLLinkFilter2() {
+    $blacklist = array("yahoo.com","www.google.com");
+    $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake");
+    $result = _cayl_filter_links($links,$blacklist);
+    $this->assertEqual(count($result),2);
+    $this->assertEqual($result[1],"http://www.peanuts.com/fruitcake");
+  }
+
+  public function testCAYLLinkFilter3() {
+    $blacklist = array("yahoo.com","google.com");
+    $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake/www.yahoo.com");
+    $result = _cayl_filter_links($links, $blacklist);
+    $this->assertEqual(count($result),1);
+    $this->assertEqual($result[0],"http://www.peanuts.com/fruitcake/www.yahoo.com");
+  }
+
+  public function testCAYLLinkFilter4() {
+    $blacklist = array("yahoo.com ","google.com");
+    $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake/www.yahoo.com");
+    $result = _cayl_filter_links($links, $blacklist);
+    $this->assertEqual(count($result),1);
+  }
+
+}
 
 class CAYLWebTestCase extends DrupalWebTestCase {
 
@@ -120,7 +167,7 @@ class CAYLWebTestCase extends DrupalWebTestCase {
     return array(
       'name' => 'CAYL Drupal tests',
       'description' => 'Test that integration with Drupal configuration is working properly',
-      'group' => 'CAYL',
+      'group' => 'CAYLWeb',
     );
   }
 

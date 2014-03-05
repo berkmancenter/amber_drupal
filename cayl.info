@@ -4,4 +4,5 @@ package = CAYL
 core = 7.x
 files[] = libraries/CAYLStorage.php
 files[] = cayl.test
+files[] = cayl.extract.inc
 configure = admin/config/cayl

@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * Implements hook_uninstall().
+ */
+function cayl_uninstall() {
+  variable_del('cayl_enabled');
+  variable_del('cayl_max_file');
+  variable_del('cayl_max_disk');
+  variable_del('cayl_storage_location');
+  variable_del('cayl_update_strategy');
+  variable_del('cayl_excluded_sites');
+  variable_del('cayl_excluded_formats');
+  variable_del('cayl_available_action');
+  variable_del('cayl_available_action_hover');
+  variable_del('cayl_unavailable_action');
+  variable_del('cayl_unavailable_action_hover');
+  variable_del('cayl_permitted_fields');
+  variable_del('cayl_country_id');
+  variable_del('cayl_country_proxy');
+  variable_del('cayl_country_available_action');
+  variable_del('cayl_country_available_action_hover');
+  variable_del('cayl_country_unavailable_action');
+  variable_del('cayl_country_unavailable_action_hover');
+}
