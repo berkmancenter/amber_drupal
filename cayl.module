@@ -7,6 +7,36 @@ define("CAYL_ACTION_CACHE",3);
 define("CAYL_STATUS_UP","up");
 define("CAYL_STATUS_DOWN","down");
 
+module_load_include('inc', 'cayl', 'cayl.batch');
+
+/**
+ * Get an initialized CAYLStorage module
+ * @return CAYLStorage
+ */
+function cayl_get_storage() {
+  $storage = &drupal_static(__FUNCTION__);
+  if (!isset($storage)) {
+    $file_path = join(DIRECTORY_SEPARATOR, array(
+      DRUPAL_ROOT,
+      variable_get('cayl_storage_location', 'sites/default/files/cayl')
+    ));
+    $storage = new CAYLStorage($file_path);
+  }
+  return $storage;
+}
+
+/**
+ * Return an initialized CAYLFetcher module
+ * @return CAYLFetcher
+ */
+function cayl_get_fetcher() {
+  $fetcher = &drupal_static(__FUNCTION__);
+  if (!isset($fetcher)) {
+    $fetcher = new CAYLFetcher(cayl_get_storage());
+  }
+  return $fetcher;
+}
+
 
 /**
  * Implements hook_menu().
@@ -102,11 +132,7 @@ function _cayl_build_link_attributes($storage_metadata) {
  */
 function _cayl_lookup_url($url) {
 
-  $storage = &drupal_static(__FUNCTION__);
-  if (!isset($storage)) {
-    $file_path = join(DIRECTORY_SEPARATOR,array(DRUPAL_ROOT, variable_get('cayl_storage_location', 'sites/default/files/cayl')));
-    $storage = new CAYLStorage($file_path);
-  }
+  $storage = cayl_get_storage();
   return _cayl_build_link_attributes($storage->lookup_url($url));
 }
 
@@ -186,16 +212,22 @@ function _cayl_filter_tips($filter, $format, $long = FALSE) {
 }
 
 /**
+ * Queue all links in the given node for caching
+ * @param $node object to scan for links to cache
+ */
+function cayl_cache_node($node) {
+  module_load_include('inc', 'cayl', 'cayl.extract');
+  $links = _cayl_extract_node_links($node);
+  cayl_enqueue_cache_links($links);
+}
+
+/**
  * Implements hook_entity_update
  */
 function cayl_entity_update($entity, $type) {
-  module_load_include('inc', 'cayl', 'cayl.extract');
-  module_load_include('inc', 'cayl', 'cayl.batch');
   if ("node" == $type) {
     if (NODE_PUBLISHED == $entity->status) {
-      $links = _cayl_extract_node_links($entity);
-      dpm($links);
-      _cayl_enqueue_cache_links($links);
+      cayl_cache_node($entity);
     }
   }
 }
@@ -204,12 +236,9 @@ function cayl_entity_update($entity, $type) {
  * Implements hook_entity_insert
  */
 function cayl_entity_insert($entity, $type) {
-  module_load_include('inc', 'cayl', 'cayl.extract');
-  module_load_include('inc', 'cayl', 'cayl.batch');
   if ("node" == $type) {
     if (NODE_PUBLISHED == $entity->status) {
-      $links = _cayl_extract_node_links($entity);
-      _cayl_enqueue_cache_links($links);
+      cayl_cache_node($entity);
     }
   }
 }

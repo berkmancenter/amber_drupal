@@ -57,13 +57,17 @@ function _cayl_array_values_recursive(array $array) {
  */
 
 function _cayl_filter_links($links, $blacklist) {
+  if (!$blacklist) {
+    return $links;
+  }
   $result = array();
   foreach ($links as $link) {
     $host = parse_url($link,PHP_URL_HOST);
     if ($host) {
       $exclude = FALSE;
       foreach ($blacklist as $blacklistitem) {
-        if (strpos($host,trim($blacklistitem)) !== FALSE) {
+        $blacklistitem = trim($blacklistitem);
+        if ($blacklistitem && (strpos($host,$blacklistitem) !== FALSE)) {
           $exclude = TRUE;
         }
       }

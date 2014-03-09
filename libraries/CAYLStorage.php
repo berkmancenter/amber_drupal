@@ -1,7 +1,7 @@
 <?php
 
 /**
- * The format for the metadata is of the form:
+ * The metadata is of the form:
  *
  * {
  *  "cache":
@@ -27,8 +27,11 @@
  *
  */
 
+interface iCAYLStorage {
+  function lookup_url($url);
+}
 
-class CAYLStorage {
+class CAYLStorage implements iCAYLStorage {
 
   function __construct($file_root = '/private/tmp/cayl/cache') {
     $this->file_root = $file_root;

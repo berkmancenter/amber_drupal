@@ -1,5 +1,6 @@
 <?php
 
+
 /**
  * Implements hook_uninstall().
  */
@@ -23,3 +24,29 @@ function cayl_uninstall() {
   variable_del('cayl_country_unavailable_action');
   variable_del('cayl_country_unavailable_action_hover');
 }
+
+function cayl_schema() {
+
+  $schema['cayl_queue_cache'] = array(
+    'description' => 'Stores a list of URLs to be cached or updated',
+    'fields' => array(
+      'qid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'url' => array(
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 2000,
+        'description' => 'URL to be cached',
+      ),
+    ),
+    'primary key' => array('qid'),
+  );
+  return $schema;
+}
+
+function cayl_update_7003() {
+  drupal_install_schema('cayl');
+}
+
