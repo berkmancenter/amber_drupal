@@ -27,7 +27,7 @@ class CAYLFetcher implements iCAYLFetcher {
     $existing_cache = $this->storage->lookup_url($url);
     if (!empty($existing_cache)) {
       // TODO: Check to see if we should refresh the cache
-      return;
+
     }
 
     // Check the robots.txt
@@ -58,7 +58,9 @@ class CAYLFetcher implements iCAYLFetcher {
 
     }
 
-
+    if ($this->storage) {
+      $this->storage->save($url,$root_item['body'],array());
+    }
 
   }
 
