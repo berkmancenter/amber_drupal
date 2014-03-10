@@ -25,14 +25,35 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
   /**
    * @dataProvider provider
    */
-  public function testLookupURL($storage, $file) {
-
+  public function testLookupURL(ICAYLStorage $storage, $file) {
     $storage->save("www.example.com",$file);
     $metadata = $storage->lookup_url("www.example.com");
     $this->assertTrue(isset($metadata['cache']['cayl']['date']));
     $this->assertTrue(isset($metadata['cache']['cayl']['location']));
-
   }
+
+  /**
+   * @dataProvider provider
+   */
+  public function testLookupBogusURL(ICAYLStorage $storage, $file) {
+    $storage->save("www.example.com",$file);
+    $metadata = $storage->lookup_url("www.pancakes.com");
+    $this->assertTrue(empty($metadata));
+  }
+
+  /**
+   * @dataProvider provider
+   */
+  public function testSaveTwice(ICAYLStorage $storage, $file) {
+    $storage->save("www.example.com",$file);
+    $metadata = $storage->lookup_url("www.example.com");
+    rewind($file);
+    $storage->save("www.example.com",$file);
+    $metadata2 = $storage->lookup_url("www.example.com");
+    $this->assertTrue($metadata2['cache']['cayl']['date'] >= $metadata['cache']['cayl']['date']);
+    $this->assertTrue($metadata2['cache']['cayl']['location'] == $metadata['cache']['cayl']['location']);
+  }
+
 
 }
  

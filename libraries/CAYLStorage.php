@@ -31,7 +31,7 @@
 
 interface iCAYLStorage {
   function lookup_url($url);
-  function save($url, $root, array $assets);
+  function save($url, $root, array $assets = array());
 }
 
 class CAYLStorage implements iCAYLStorage {
@@ -154,7 +154,7 @@ class CAYLStorage implements iCAYLStorage {
       return false;
     }
     // JSON_UNESCAPED_SLASHES is only defined if PHP >= 5.4
-    if (fwrite($file,json_encode($metadata, defined(JSON_UNESCAPED_SLASHES) ? JSON_UNESCAPED_SLASHES : 0)) === FALSE) {
+    if (fwrite($file,json_encode($metadata, defined('JSON_UNESCAPED_SLASHES') ? JSON_UNESCAPED_SLASHES : 0)) === FALSE) {
       error_log(join(":", array(__FILE__, __METHOD__, "Could not write metadata file", $path)));
       return false;
     }
