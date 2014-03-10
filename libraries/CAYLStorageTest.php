@@ -22,7 +22,7 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
     return array(array($storage, $file));
   }
 
-  /*
+  /**
    * @dataProvider provider
    */
   public function testLookupURL($storage, $file) {
