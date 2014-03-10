@@ -53,7 +53,7 @@ class CAYLStorage implements iCAYLStorage {
    * @param array $assets any additional assets that should be saved (e.g. CSS, javascript)
    * @return bool success or failure
    */
-  function save($url, $root, array $assets) {
+  function save($url, $root, array $assets = array()) {
     $id = $this->url_hash($url);
     $cache_metadata = $this->get_cache_metadata($id);
     $dir = join(DIRECTORY_SEPARATOR, array($this->file_root, $id));
@@ -125,7 +125,6 @@ class CAYLStorage implements iCAYLStorage {
     $path = realpath($this->get_cache_item_metadata_path($id));
     if ($path === false) {
       /* File does not exist. Do not log an error, since there are many cases in which this is expected */
-//      error_log(join(":", array(__FILE__, __METHOD__, "Cache metadata file inaccessible or does not exist", $id)));
       return array();
     }
     if (strpos($path,$this->file_root) !== 0) {
@@ -154,7 +153,8 @@ class CAYLStorage implements iCAYLStorage {
       error_log(join(":", array(__FILE__, __METHOD__, "Could not open metadata file for saving", $path)));
       return false;
     }
-    if (fwrite($file,json_encode($metadata,JSON_UNESCAPED_SLASHES)) === FALSE) {  //TODO: PHP 5.3 compatbility check required
+    // JSON_UNESCAPED_SLASHES is only defined if PHP >= 5.4
+    if (fwrite($file,json_encode($metadata, defined(JSON_UNESCAPED_SLASHES) ? JSON_UNESCAPED_SLASHES : 0)) === FALSE) {
       error_log(join(":", array(__FILE__, __METHOD__, "Could not write metadata file", $path)));
       return false;
     }
