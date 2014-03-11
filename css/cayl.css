@@ -1,0 +1,209 @@
+/* Interstitial page */
+.cayl-overlay {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-color: white;
+  opacity: 0.5;
+}
+
+.cayl-interstitial {
+  height: 515px;
+  width: 750px;           
+  top: 200px;
+  position: fixed;
+  border-radius: 4px;
+  background: #34495e url(../images/Alert-Icon-Large.png) center 30px no-repeat;
+  color: white;
+  font-family: Arial, sans-serif;      
+  line-height: 28px;
+}                          
+            
+.cayl-interstitial a.cayl-close {                                               
+  float: right;
+  display: block;                                                
+  width: 25px;
+  height: 25px;
+  margin: 15px 15px 0 0;
+  background: url(../images/Close-Button.png) top left no-repeat;
+} 
+
+.cayl-body {
+  padding: 100px 50px 15px;
+}                  
+
+.cayl-message {   
+  font-size: 22px;     
+  text-align: center;
+  margin-bottom: 30px;               
+}
+
+.cayl-message span {
+  font-weight: bold;   
+  font-size: 24px;
+}
+
+.cayl-cached {
+  margin-right: 25px;
+}                    
+
+.cayl-interstitial .cayl-cached, 
+.cayl-interstitial .cayl-live {    
+  float: left;
+  display: inline-block;
+  background-color: #5b88b3;
+  width: 260px;
+  height: 215px;
+  padding: 25px;
+}                       
+
+.cayl-interstitial .cayl-cached a, 
+.cayl-interstitial .cayl-live a
+{                                                                        
+  display: block;
+  width: 260px;
+  font-size: 22px;
+  font-weight: bold;
+  color: white;
+  background: url(../images/Arrow-Large-Right.png) right bottom no-repeat; 
+}             
+
+.cayl-interstitial .cayl-live a {
+  margin-top: -190px;
+  padding-top: 190px;
+  position: absolute;
+}
+
+
+.cayl-cached > div {
+  background-color: #546e89;
+  padding: 20px;
+  font-size: 14px;
+  line-height: 16px;
+  text-align: center;     
+  height: 120px;
+  margin-bottom: 30px;
+}             
+
+.cayl-cached > div > div {
+  font-weight: bold;
+  padding-top: 28px;
+}          
+              
+.cayl-live > div {
+  height: 160px;
+  margin-bottom: 30px;
+}              
+
+.cayl-live iframe {
+  width: 400%;
+  height: 400%;
+  overflow: hidden;
+  zoom: 0.25;
+  -moz-transform: scale(0.25);
+  -moz-transform-origin: 0 0;
+  -o-transform: scale(0.25);
+  -o-transform-origin: 0 0;
+  -webkit-transform: scale(0.25);
+  -webkit-transform-origin: 0 0;  
+}
+                                
+.cayl-credit {                       
+  float: left; 
+  width: 100%;
+  font-size: 13px;
+  color: #6294c8;
+}
+
+.cayl-credit a {
+  color: #6294c8;
+  text-decoration: underline;
+}                
+
+.cayl-interstitial .cayl-credit {
+  margin-top: 35px;
+  text-align: center;  
+}                    
+
+/* Hover */
+
+.cayl-hover {
+ position: absolute;
+ font-family: Arial, sans-serif;
+ font-size: 13px;
+ color: white;             
+ line-height: 32px;    
+ border-radius: 4px; 
+}                                      
+
+.cayl-arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;                               
+  margin-top: -4px;
+  margin-left: 60px;
+  background-color: #34495e;
+  transform: rotate(45deg);                                                       
+  -webkit-transform: rotate(45deg);                                                       
+}        
+
+.cayl-down .cayl-arrow {
+  margin-top: 97px;
+  margin-left: 20px;
+}
+                       
+.cayl-hover .cayl-text {
+  display: inline-block;     
+}                     
+
+.cayl-hover.cayl-up {
+  padding-right: 10px;
+  background-color: #5b88b3;  
+} 
+
+.cayl-hover.cayl-up .cayl-text {
+  border-radius: 4px 0 0 4px; 
+  padding: 0 8px 0 36px;
+  background: #34495e url(../images/Checkmark-Small.png) 8px center no-repeat;   
+}
+
+.cayl-hover.cayl-up a,
+.cayl-hover.cayl-down a.cayl-live,
+.cayl-hover.cayl-down a.cayl-cache {
+  color: white;
+  display: inline-block;
+  background:  #5b88b3 url(../images/Arrow-Small-Right.png) right center no-repeat;
+  padding: 0 25px 0 12px;
+}                               
+
+.cayl-down {
+  background-color: #34495e;
+  padding: 4px 0 0 8px;              
+} 
+
+.cayl-down .cayl-text {
+  padding: 0 12px 0 24px;                                 
+  margin-bottom: 5px;
+  background: #34495e url(../images/Alert-Small.png) left center no-repeat;      
+  float: left;
+}
+
+.cayl-down a.cayl-live,
+.cayl-down a.cayl-cache {
+  margin-right: 10px;
+  border-right: 8px solid #5b88b3;
+  float: left;                         
+}                 
+
+.cayl-down a.cayl-live
+{
+  clear: left;
+}                        
+
+.cayl-hover .cayl-credit {
+  font-size: 12px;
+  clear: left;
+}
+
