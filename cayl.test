@@ -112,7 +112,7 @@ class CAYLTestCase extends DrupalUnitTestCase {
     $this->assertEqual($result,"bogus");
   }
 
-  public function testCAYLLinkDetection() {
+  public function testCAYLLinkDetection1() {
     $body = <<<EOT
 <!-- URL with uncommon chars that could potentially fail to extract. See http://drupal.org/node/465462. -->
 <a href="http://www.lagrandeepicerie.fr/#e-boutique/Les_produits_du_moment,2/coffret_vins_doux_naturels,149">URL with uncommon chars</a>
@@ -126,6 +126,31 @@ EOT;
 
     $links = _cayl_extract_links($body);
     $this->assertEqual(count($links),3);
+    $this->assertEqual($links[0],"http://www.lagrandeepicerie.fr/#e-boutique/Les_produits_du_moment,2/coffret_vins_doux_naturels,149");
+    $this->assertEqual($links[1],"http://example.com/foo bar/is_valid-hack.test");
+    $this->assertEqual($links[2],"http://www.pancake.com");
+  }
+
+  public function testCAYLLinkDetectionWithAttributesAndWonkyQuotes() {
+    $body = <<<EOT
+
+<a href="http://example.com" data-attribute="break me!">URL with uncommon chars</a>
+<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quare ad ea primum, si videtur; Non quam nostram quidem, inquit Pomponius iocans; Sedulo, inquam, faciam. Zenonis est, inquam, hoc Stoici. Quis istud possit, inquit, negare? Duo Reges: constructio interrete. </p>
+<p>Sed nimis multa. Non est ista, inquam, Piso, magna dissensio. Si longus, levis. Immo alio genere; Satis est ad hoc responsum. Quae sequuntur igitur? </p>
+<a href='http://example.com/foo bar/is_valid-hack.test' alt='eatshorts.img'>URL with space</a>
+<p>Tamen a proposito, inquam, aberramus. Quam si explicavisset, non tam haesitaret. Quamquam id quidem licebit iis existimare, qui legerint. Ut optime, secundum naturam affectum esse possit. Poterat autem inpune; Quamquam tu hanc copiosiorem etiam soles dicere. Quid, quod res alia tota est? At enim sequor utilitatem. </p>
+<p>Sed ad illum redeo. Eam stabilem appellas. Audeo dicere, inquit. Si longus, levis; </p>
+<a href='http://www.pancake.com' alt="something else">Pancjages</a>
+<a href="http://www.waffles.com" alt='something else'>Pancjages</a>
+EOT;
+
+    $links = _cayl_extract_links($body);
+    $this->assertEqual(count($links),4);
+    $this->assertEqual($links[0],"http://example.com");
+    $this->assertEqual($links[1],"http://example.com/foo bar/is_valid-hack.test");
+    $this->assertEqual($links[2],"http://www.pancake.com");
+    $this->assertEqual($links[3],"http://www.waffles.com");
+
   }
 
   public function testCAYLLinkFilter1() {
