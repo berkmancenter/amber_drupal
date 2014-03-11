@@ -10,23 +10,20 @@ require_once("CAYLStorage.php");
 
 class CAYLStorageTest extends PHPUnit_Framework_TestCase {
 
-  var $storagepath;
-
-  public function setUp() {
+  protected function setUp() {
     date_default_timezone_set('UTC');
   }
 
-  public function tearDown() {
-    $this->rrmdir($this->storagepath);
+  protected function tearDown() {
+    $this->rrmdir($this->get_storage_path(), FALSE);
   }
 
   public function provider() {
-    print sys_get_temp_dir();
-    $this->storagepath = join(PATH_SEPARATOR,array(realpath(sys_get_temp_dir()),"cayl"));
-    if (!file_exists($this->storagepath))
-      mkdir($this->storagepath,0777);
+    $storage_path = $this->get_storage_path();
+    if (!file_exists($storage_path))
+      mkdir($storage_path,0777);
 
-    $storage = new CAYLStorage($this->storagepath);
+    $storage = new CAYLStorage($storage_path);
     $file = tmpfile();
     fwrite($file,"I am a temporary file");
     rewind($file);
@@ -41,6 +38,7 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
     $metadata = $storage->lookup_url("www.example.com");
     $this->assertTrue(isset($metadata['cache']['cayl']['date']));
     $this->assertTrue(isset($metadata['cache']['cayl']['location']));
+
   }
 
   /**
@@ -85,11 +83,11 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
   }
 
   /**
-   * Recursively delete all files in a directory
+   * Recursively delete a directory
    * Credit: http://stackoverflow.com/a/3338133
    * @param $dir
    */
-  private function rrmdir($dir) {
+  private function rrmdir($dir, $delete_dir = TRUE) {
      if (is_dir($dir)) {
        $objects = scandir($dir);
        foreach ($objects as $object) {
@@ -98,8 +96,13 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
          }
        }
        reset($objects);
-       rmdir($dir);
+       if ($delete_dir)
+        rmdir($dir);
      }
    }
+
+  private function get_storage_path() {
+    return join(DIRECTORY_SEPARATOR,array(realpath(sys_get_temp_dir()),"cayl"));
+  }
 }
  

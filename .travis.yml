@@ -23,6 +23,9 @@ install:
   - phpenv rehash
 
 before_script:
+  # Setup /tmp directory for tests
+  - mkdir /tmp/cayl
+
   # navigate out of module directory to prevent blown stack by recursive module lookup
   - cd ../..
 
