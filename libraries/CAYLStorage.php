@@ -4,6 +4,7 @@
  * The metadata is of the form:
  *
  * {
+ *  "id" : ID,
  *  "cache":
  *   {
  *     "cayl" : {
@@ -32,6 +33,7 @@
 interface iCAYLStorage {
   function lookup_url($url);
   function save($url, $root, array $assets = array());
+  function get($id);
 }
 
 class CAYLStorage implements iCAYLStorage {
@@ -65,6 +67,7 @@ class CAYLStorage implements iCAYLStorage {
         }
       }
       $cache_metadata = array(
+        'id' => $id,
         'cache' => array (
           $this->name => array()
         )
@@ -96,6 +99,16 @@ class CAYLStorage implements iCAYLStorage {
   }
 
 
+  function get($id) {
+    $result = NULL;
+    if ($path = $this->get_cache_item_path($id)) {
+      if (file_exists($path)) {
+        $result = file_get_contents($path);
+      }
+    }
+    return $result;
+  }
+
   /**
    * Return an MD5 hash for a normalized form of the URL to be used as a cached document id
    * @param string $url to be hashed
@@ -107,13 +120,44 @@ class CAYLStorage implements iCAYLStorage {
   }
 
   /**
-   * Get the path to the metadata in the directory where a cached item and its metadata will be stored
+   * Validate that a path points to a file within our cache directory. Used to ensure that calls to this module
+   * cannot retrieve arbitrary files from the file system.
+   * If the file does not exist, return TRUE
+   * @param $path string to be validated
+   * @return bool
+   */
+  private function is_within_cache_directory($path) {
+    if (!realpath($path)) {
+      // File does not exist.
+      return TRUE;
+    }
+    if (strpos(realpath($path),realpath($this->file_root)) !== 0) {
+      /* File is outside root directory for cache files */
+      error_log(join(":", array(__FILE__, __METHOD__, "Attempt to access file outside file root", realpath($path), realpath($this->file_root))));
+      return FALSE;
+    } else {
+      return TRUE;
+    }
+  }
+
+  /**
+   * Get the path to the metadata for a cached item
    * @param $id string
-   * @return string path to the file that
+   * @return string path to the file that contains the metadata
    */
   private function get_cache_item_metadata_path($id) {
     $path = join(DIRECTORY_SEPARATOR, array($this->file_root, $id, "${id}.json"));
-    return $path;
+    return ($this->is_within_cache_directory($path)) ? $path : NULL;
+  }
+
+  /**
+   * Get the path to the root cached item
+   * @param $id string
+   * @return string path to the file that contains the root cached item
+   */
+  private function get_cache_item_path($id) {
+    $path = join(DIRECTORY_SEPARATOR, array($this->file_root, $id, $id));
+    return ($this->is_within_cache_directory($path)) ? $path : NULL;
   }
 
   /**
@@ -127,9 +171,8 @@ class CAYLStorage implements iCAYLStorage {
       /* File does not exist. Do not log an error, since there are many cases in which this is expected */
       return array();
     }
-    if (strpos($path,$this->file_root) !== 0) {
+    if (!$this->is_within_cache_directory($path)) {
       /* File is outside root directory for cache files */
-      error_log(join(":", array(__FILE__, __METHOD__, "Attempt to access file outside file root", $path)));
       return array();
     }
     try {
