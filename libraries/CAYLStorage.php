@@ -34,6 +34,7 @@ interface iCAYLStorage {
   function lookup_url($url);
   function save($url, $root, array $assets = array());
   function get($id);
+  function clear_cache();
 }
 
 class CAYLStorage implements iCAYLStorage {
@@ -75,6 +76,7 @@ class CAYLStorage implements iCAYLStorage {
     }
     $cache_metadata['cache'][$this->name]['date'] = date(DATE_ISO8601);
     $cache_metadata['cache'][$this->name]['location'] = join("/", array($this->url_prefix, 'cache',$id));
+    $cache_metadata['status'][$this->name]['default'] = "up"; //TODO: Do not always assume it is up
 
     // Save metadata
     $this->save_cache_metadata($id, $cache_metadata);
@@ -107,6 +109,15 @@ class CAYLStorage implements iCAYLStorage {
       }
     }
     return $result;
+  }
+
+  /**
+   *  Delete the entire contents of the cache
+   */
+  function clear_cache() {
+    if ($this->file_root) {
+      $this->rrmdir($this->file_root);
+    }
   }
 
   /**
@@ -207,5 +218,27 @@ class CAYLStorage implements iCAYLStorage {
     }
     return true;
   }
+
+  /**
+   * Recursively delete a directory
+   * Credit: http://stackoverflow.com/a/3338133
+   * @param $dir
+   * @param $delete_dir boolean whether to delete the top-level directory, as opposed to just all files and directories
+   *        within it
+   */
+  private function rrmdir($dir, $delete_dir = TRUE) {
+     if (is_dir($dir)) {
+       $objects = scandir($dir);
+       foreach ($objects as $object) {
+         if ($object != "." && $object != "..") {
+           if (filetype($dir."/".$object) == "dir") $this->rrmdir($dir."/".$object); else unlink($dir."/".$object);
+         }
+       }
+       reset($objects);
+       if ($delete_dir)
+        rmdir($dir);
+     }
+   }
+
 
 }

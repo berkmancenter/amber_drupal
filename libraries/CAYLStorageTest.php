@@ -15,7 +15,8 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
   }
 
   protected function tearDown() {
-    $this->rrmdir($this->get_storage_path(), FALSE);
+    $storage = new CAYLStorage($this->get_storage_path());
+    $storage->clear_cache();
   }
 
   public function provider() {
@@ -83,23 +84,14 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
   }
 
   /**
-   * Recursively delete a directory
-   * Credit: http://stackoverflow.com/a/3338133
-   * @param $dir
+   * @dataProvider provider
    */
-  private function rrmdir($dir, $delete_dir = TRUE) {
-     if (is_dir($dir)) {
-       $objects = scandir($dir);
-       foreach ($objects as $object) {
-         if ($object != "." && $object != "..") {
-           if (filetype($dir."/".$object) == "dir") $this->rrmdir($dir."/".$object); else unlink($dir."/".$object);
-         }
-       }
-       reset($objects);
-       if ($delete_dir)
-        rmdir($dir);
-     }
-   }
+  public function testClearCache(iCAYLStorage $storage, $file) {
+    $storage->save("www.example.com",$file);
+    $storage->clear_cache();
+    $metadata = $storage->lookup_url("www.example.com");
+    $this->assertTrue(empty($metadata));
+  }
 
   private function get_storage_path() {
     return join(DIRECTORY_SEPARATOR,array(realpath(sys_get_temp_dir()),"cayl"));
