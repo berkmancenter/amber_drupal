@@ -65,7 +65,7 @@ function cayl_menu() {
     'description' => 'Retrieve items from the cache',
     'page callback' => 'cayl_retrieve_cache_item',
     'access callback' => true,
-//    'delivery callback' => 'cayl_deliver_cache_item',
+    'delivery callback' => 'cayl_deliver_cache_item',
     'type' => MENU_CALLBACK,
   );
   return $items;
@@ -251,7 +251,26 @@ function cayl_entity_insert($entity, $type) {
   }
 }
 
-function cayl_retrieve_cache_item($args) {
-
+/**
+ * Retrieve an item from the cache for display
+ * @param $id string identifying the item to return
+ * @return null|string
+ */
+function cayl_retrieve_cache_item($id) {
+  $storage = cayl_get_storage();
+  $data = $storage->get($id);
+  return ($data) ? $data : MENU_NOT_FOUND;
 }
 
+/**
+ * Display the data returned from the cache without any Drupal doodads
+ * @param $data
+ */
+function cayl_deliver_cache_item($data) {
+  if (is_int($data) && $data == MENU_NOT_FOUND) {
+    drupal_deliver_page(MENU_NOT_FOUND,'drupal_deliver_html_page');
+  } else {
+    print($data);
+  }
+
+}
