@@ -21,6 +21,7 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
   }
 
   public function provider() {
+    print sys_get_temp_dir();
     $this->storagepath = join(PATH_SEPARATOR,array(realpath(sys_get_temp_dir()),"cayl"));
     if (!file_exists($this->storagepath))
       mkdir($this->storagepath,0777);
