@@ -9,4 +9,4 @@ files[] = cayl.extract.inc
 files[] = cayl.drush.inc
 scripts[] = js/cayl.js
 stylesheets[all][] = css/cayl.css
-configure = admin/config/cayl
+configure = admin/config/content/cayl

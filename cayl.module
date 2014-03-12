@@ -53,8 +53,8 @@ function cayl_init() {
  */
 function cayl_menu() {
   $items = array();
-  $items['admin/config/cayl'] = array(
-    'title' => 'CAYL Configuration',
+  $items['admin/config/content/cayl'] = array(
+    'title' => 'Cache As You Link',
     'description' => 'Configuration for the Cache As You Link module',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cayl_config_form'),
@@ -331,7 +331,6 @@ The cached page is displayed below
 </body>
 </html>
 EOD;
-
   }
 }
 
