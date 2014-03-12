@@ -24,7 +24,7 @@ class CAYLFetcher implements iCAYLFetcher {
    * @param $url
    */
   public function fetch($url) {
-    $existing_cache = $this->storage->lookup_url($url);
+    $existing_cache = $this->storage->get_metadata($url);
     if (!empty($existing_cache)) {
       // TODO: Check to see if we should refresh the cache
     }
@@ -58,7 +58,7 @@ class CAYLFetcher implements iCAYLFetcher {
     }
 
     if ($this->storage) {
-      $this->storage->save($url,$root_item['body'],array());
+      $this->storage->save($url, $root_item['body'], $root_item['headers'], array());
     }
 
   }

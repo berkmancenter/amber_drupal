@@ -2,7 +2,7 @@
 
 class CAYLStorage {
 
-  function lookup_url($url) {
+  function get_metadata($url) {
     if ($url == "http://nodata.example.com") {
       return array();
     } else {

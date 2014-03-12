@@ -5,6 +5,8 @@
  *
  * {
  *  "id" : ID,
+ *  "url" : URL,
+ *  "type" : MIME-TYPE,
  *  "cache":
  *   {
  *     "cayl" : {
@@ -31,8 +33,8 @@
  */
 
 interface iCAYLStorage {
-  function lookup_url($url);
-  function save($url, $root, array $assets = array());
+  function get_metadata($key);
+  function save($url, $root, array $headers, array $assets = array());
   function get($id);
   function clear_cache();
 }
@@ -49,18 +51,29 @@ class CAYLStorage implements iCAYLStorage {
     $this->name = 'cayl'; // Used to identify the metadata that belongs to this implementation of iCAYLStorage
   }
 
-  function lookup_url($url) {
-    return $this->get_cache_metadata($this->url_hash($url));
+  /**
+   * Lookup metadata for a cached item based on ID or URL
+   * @param $key string URL or an MD5 hash
+   * @return array
+   */
+  function get_metadata($key) {
+    /* Check if it's an ID */
+    if (strlen($key) == 32 && ctype_xdigit($key)) {
+      return $this->get_cache_metadata($key);
+    } else {
+      return $this->get_cache_metadata($this->url_hash($key));
+    }
   }
 
   /**
    * Save a file to the cache
    * @param $url string original location of the file that we're saving
    * @param $root resource the file to be saved
+   * @param array $headers HTTP headers returned along with the original file
    * @param array $assets any additional assets that should be saved (e.g. CSS, javascript)
    * @return bool success or failure
    */
-  function save($url, $root, array $assets = array()) {
+  function save($url, $root, array $headers = array('type' => 'text/html'), array $assets = array()) {
     $id = $this->url_hash($url);
     $cache_metadata = $this->get_cache_metadata($id);
     $dir = join(DIRECTORY_SEPARATOR, array($this->file_root, $id));
@@ -73,6 +86,8 @@ class CAYLStorage implements iCAYLStorage {
       }
       $cache_metadata = array(
         'id' => $id,
+        'url' => $url,
+        'type' => $headers['Content-Type'],
         'cache' => array (
           $this->name => array()
         )
