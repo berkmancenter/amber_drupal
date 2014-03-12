@@ -10,8 +10,8 @@ var cayl = {
       '<div class="cayl-cached"><div>The live link may not lead to the page you are looking for and may have been replaced or routed to another server.<div>Our cached link is from<br/>  ' +
       '{{DATE}}</div></div><a href="{{CACHE}}">View the cached link</a></div><div class="cayl-live"><div><iframe src="{{LINK}}"/></div><a href="{{LINK}}">View the live link</a></div>' +
       '<div class="cayl-credit">Balatarin uses <a href="#">CAYL</a></div></div></div>',
-      hover_html_up : '<div class="cayl-hover cayl-up"><div class="cayl-text">This site should be available</div><a href="{{LINK}}">View the Live Link</a><a href="{{CACHE}}">View the Cached Link</a><div class="cayl-arrow"></div></div>',
-      hover_html_down : '<div class="cayl-hover cayl-down"><div class="cayl-text">This site may not be available</div><a href="{{LINK}}" class="cayl-live">View the Live Link</a><a href="{{CACHE}}" class="cayl-cache">View the Cached Link</a><div class="cayl-credit">Balatarin uses <a href="#">CAYL</a></div><div class="cayl-arrow"></div></div>',      
+      hover_html_up   : '<div class="cayl-hover cayl-up"><div class="cayl-text"><div class="cayl-status-text">This page should be available</div><div class="cayl-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="cayl-links"><a href="{{CACHE}}">View the cache</a><a href="{{LINK}}" class="cayl-focus">Continue to the page</a></div><div class="cayl-arrow"></div></div>',
+      hover_html_down : '<div class="cayl-hover cayl-down"><div class="cayl-text"><div class="cayl-status-text">This page may not be available</div><div class="cayl-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="cayl-links"><a href="{{CACHE}}" class="cayl-focus">View the cache</a><a href="{{LINK}}">Continue to the page</a></div><div class="cayl-arrow"></div></div>'
     },
     fa : {
         interstitial_html : 
@@ -113,7 +113,7 @@ var cayl = {
       var replacements = {
         '{{DATE}}' : cache.default.date,
         '{{LINK}}' : jQuery(this).attr("href"),
-        '{{CACHE}}' : cache.default.cache
+        '{{CACHE}}' : cache.default.cache,
       }
 
       jQuery("body").append(cayl.replace_args(cayl.get_text('interstitial_html'), replacements));
@@ -144,11 +144,7 @@ var cayl = {
   calculate_hover_position : function (target, status) {
     var offset = jQuery(target).offset();
     var result = {};
-    if (status == "up") {
-      result = {"left" : offset.left - 30, "top" : offset.top - 35}
-    } else {
-      result = {"left" : offset.left - 15, "top" : offset.top - 115}
-    }                                 
+    result = {"left" : offset.left - 30, "top" : offset.top - 105}
     if (cayl.rtl) {
       result.left = result.left + jQuery(target).width() - jQuery(".cayl-hover").width();
     }          
@@ -160,8 +156,9 @@ var cayl = {
     var behavior = cayl.parse_behavior(jQuery(this).attr("data-cayl-behavior"));
     if (behavior.default.action == "hover") {
       var cache = cayl.parse_cache(jQuery(this).attr("data-cache"));
-
       var args = {
+        '{{DATE}}' : new Date(cache.default.date).toLocaleDateString(),
+        '{{NAME}}' : (cayl.name == undefined) ? "This site" : cayl.name,
         '{{CACHE}}' : cache.default.cache,
         '{{LINK}}' : jQuery(this).attr("href")
       };
@@ -195,4 +192,8 @@ var cayl = {
 jQuery(document).ready(function($) {
     $("a[data-cache][data-cayl-behavior*=popup]").click(cayl.show_interstitial);
     $("a[data-cache][data-cayl-behavior*=hover]").hover(cayl.start_link_hover, cayl.end_link_hover);
-  }); 
+
+    /* Drupal-specific code */
+    cayl.name = Drupal.settings.cayl.name;
+  });
+

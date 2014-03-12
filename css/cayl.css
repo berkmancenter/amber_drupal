@@ -134,9 +134,10 @@
  font-family: Arial, sans-serif;
  font-size: 13px;
  color: white;             
- line-height: 32px;    
- border-radius: 4px; 
-}                                      
+ border-radius: 4px;
+ background-color: #5b88b3;
+ min-width: 350px;
+}
 
 .cayl-arrow {
   position: absolute;
@@ -144,63 +145,71 @@
   height: 8px;                               
   margin-top: -4px;
   margin-left: 60px;
-  background-color: #34495e;
+  background-color: #5b88b3;
   transform: rotate(45deg);                                                       
   -webkit-transform: rotate(45deg);                                                       
 }        
 
-.cayl-down .cayl-arrow {
-  margin-top: 97px;
-  margin-left: 20px;
-}
-                       
 .cayl-hover .cayl-text {
-  display: inline-block;     
-}                     
-
-.cayl-hover.cayl-up {
-  padding-right: 10px;
-  background-color: #5b88b3;  
-} 
-
-.cayl-hover.cayl-up .cayl-text {
-  border-radius: 4px 0 0 4px; 
-  padding: 0 8px 0 36px;
-  background: #34495e url(../images/Checkmark-Small.png) 8px center no-repeat;   
-}
-
-.cayl-hover.cayl-up a,
-.cayl-hover.cayl-down a.cayl-live,
-.cayl-hover.cayl-down a.cayl-cache {
-  color: white;
-  display: inline-block;
-  background:  #5b88b3 url(../images/Arrow-Small-Right.png) right center no-repeat;
-  padding: 0 25px 0 12px;
-}                               
-
-.cayl-down {
+  border-radius: 4px 4px 0 0;
+  width: 100%;
+  line-height: 20px;
+  padding: 8px 0 4px;
   background-color: #34495e;
-  padding: 4px 0 0 8px;              
-} 
-
-.cayl-down .cayl-text {
-  padding: 0 12px 0 24px;                                 
-  margin-bottom: 5px;
-  background: #34495e url(../images/Alert-Small.png) left center no-repeat;      
-  float: left;
 }
 
-.cayl-down a.cayl-live,
-.cayl-down a.cayl-cache {
-  margin-right: 10px;
-  border-right: 8px solid #5b88b3;
-  float: left;                         
-}                 
+.cayl-hover .cayl-status-text {
+  font-weight: bold;
+  padding-left: 40px;
+  background-position: 8px center;
+  background-repeat: no-repeat;
+}
 
-.cayl-down a.cayl-live
-{
-  clear: left;
-}                        
+.cayl-up .cayl-status-text {
+  background-image: url(check-small.png);
+}
+
+.cayl-down .cayl-status-text {
+  background-image: url(alert-small.png);
+}
+
+.cayl-hover .cayl-cache-text {
+  padding-left: 40px;
+  color: #86b0dc;
+}
+
+.cayl-hover .cayl-links {
+  border-radius: 0 0 4px 4px;
+  padding: 8px 0;
+  width: 100%;
+}
+
+.cayl-hover a {
+  color: white !important;
+  display: inline-block;
+  font-size: 12px;
+  text-decoration: underline !important;
+  line-height: 30px;
+  margin-left: 30px;
+}
+
+.cayl-hover a:first-child {
+  margin-left: 40px;
+}
+
+.cayl-hover a:hover {
+  color: white !important;
+}
+
+.cayl-hover a.cayl-focus {
+  font-weight: bold;
+  border-radius: 4px;
+  font-size: 14px;
+  text-decoration: none !important;
+  background-color: #86b0dc;
+  padding: 0 25px;
+}
+
 
 .cayl-hover .cayl-credit {
   font-size: 12px;

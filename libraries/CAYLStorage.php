@@ -39,6 +39,10 @@ interface iCAYLStorage {
 
 class CAYLStorage implements iCAYLStorage {
 
+  /* The default ISO8601 date string formatter doesn't include the colons in the time-zone component, which
+     is incompatible with javascript's date.parse() function in at least some implementations (Safari, definitely) */
+  var $ISO8601_FORMAT = 'Y-m-d\TH:i:sP';
+
   function __construct($file_root = '/private/tmp/cayl/cache') {
     $this->file_root = $file_root;
     $this->url_prefix = 'CAYL';
@@ -74,7 +78,8 @@ class CAYLStorage implements iCAYLStorage {
         )
       );
     }
-    $cache_metadata['cache'][$this->name]['date'] = date(DATE_ISO8601);
+
+    $cache_metadata['cache'][$this->name]['date'] = date($this->ISO8601_FORMAT);
     $cache_metadata['cache'][$this->name]['location'] = join("/", array($this->url_prefix, 'cache',$id));
     $cache_metadata['status'][$this->name]['default'] = "up"; //TODO: Do not always assume it is up
 
@@ -92,10 +97,10 @@ class CAYLStorage implements iCAYLStorage {
     }
     fclose($root_file);
 
-    // Save asset files
+    // TODO: Save asset files
 
-    // Check files sizes against maximum files size permitted
-    // Check for overall file size, and purge old files if necessary
+    // TODO: Check files sizes against maximum files size permitted
+    // TODO: Check for overall file size, and purge old files if necessary
 
     return true;
   }

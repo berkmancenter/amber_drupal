@@ -27,7 +27,6 @@ class CAYLFetcher implements iCAYLFetcher {
     $existing_cache = $this->storage->lookup_url($url);
     if (!empty($existing_cache)) {
       // TODO: Check to see if we should refresh the cache
-
     }
 
     // Check the robots.txt
@@ -52,9 +51,9 @@ class CAYLFetcher implements iCAYLFetcher {
     if (($content_type = $root_item['headers']['Content-Type']) &&
         (strpos(strtolower($content_type),"text/html") !== FALSE)) {
 
-      // Download other assets that are hosted on the same server
-      // Check total file size of all assets to see if below limit
-      // Rewrite links in core file (if HTML)
+      // TODO: Download other assets that are hosted on the same server
+      // TODO: Check total file size of all assets to see if below limit
+      // TODO: Rewrite links in core file (if HTML)
 
     }
 
@@ -66,7 +65,7 @@ class CAYLFetcher implements iCAYLFetcher {
 
 
   private function cacheable_item($data) {
-    // TODO: Add logic to actually test if we should cache it
+    // TODO: Add logic to actually test if we should cache it, based on file size, content-type, etc.
     return TRUE;
   }
 
@@ -82,7 +81,6 @@ class CAYLFetcher implements iCAYLFetcher {
     $data = $this->open_url($robots_url, array(CURLOPT_FAILONERROR => FALSE));
     return (!$data || CAYLRobots::url_permitted($data,$url));
   }
-
 
   private function curl_installed() {
     return in_array("curl", get_loaded_extensions());
@@ -173,7 +171,7 @@ class CAYLFetcher implements iCAYLFetcher {
       return array("headers" => $headers, "body" => $body);
 
     } else {
-      // TODO: See if remote file opening is enabled, and fall back to that method
+      // TODO: If curl is not installed, see if remote file opening is enabled, and fall back to that method
       error_log(join(":", array(__FILE__, __METHOD__, "CURL not installed")));
       return FALSE;
     }

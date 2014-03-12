@@ -37,6 +37,16 @@ function cayl_get_fetcher() {
   return $fetcher;
 }
 
+/**
+ * Implements hook_init()
+ */
+function cayl_init() {
+  drupal_add_js(array(
+    'cayl' => array(
+      'name' => variable_get('site_name',t('This site')),
+    )), 'setting');
+}
+
 
 /**
  * Implements hook_menu().
@@ -66,6 +76,14 @@ function cayl_menu() {
     'page callback' => 'cayl_retrieve_cache_item',
     'access callback' => true,
     'delivery callback' => 'cayl_deliver_cache_item',
+    'type' => MENU_CALLBACK,
+  );
+  $items['cayl/display/id'] = array(
+    'title' => 'CAYL Cache Disply',
+    'description' => 'Display item from the cache',
+    'page callback' => 'cayl_display_cache_item',
+    'access callback' => true,
+    'delivery callback' => 'cayl_deliver_cache_item_page',
     'type' => MENU_CALLBACK,
   );
   return $items;
@@ -123,7 +141,9 @@ function _cayl_add_behavior($status, $country = NULL) {
 function _cayl_build_link_attributes($storage_metadata) {
   $result = array();
   if (isset($storage_metadata['cache']['cayl']['location'],$storage_metadata['cache']['cayl']['date'])) {
-    $result['data-cache'] = join(" ",array($storage_metadata['cache']['cayl']['location'],
+    /* The storage service gives us the path to the cached item. We want to display the cached item in an iframe,
+       so, need to diddle the URL */
+    $result['data-cache'] = join(" ",array(base_path() . str_replace("/cache/","/display/id/",$storage_metadata['cache']['cayl']['location']),
                                            $storage_metadata['cache']['cayl']['date']));
   }
   if (isset($storage_metadata['status']['cayl']['default'])) {
@@ -268,11 +288,53 @@ function cayl_retrieve_cache_item($id) {
  */
 function cayl_deliver_cache_item($data) {
   if (is_int($data) && $data == MENU_NOT_FOUND) {
-    drupal_deliver_page(MENU_NOT_FOUND,'drupal_deliver_html_page');
+    drupal_deliver_html_page(MENU_NOT_FOUND);
   } else {
     print($data);
   }
 }
+
+/**
+ * Display a cached item for the end user
+ * @param $id string identifying the item to return
+ * @return null|string
+ */
+function cayl_display_cache_item($id) {
+  if (!$id) {
+    return(MENU_NOT_FOUND);
+  } else {
+    return $id;
+  }
+}
+
+/**
+ * Display the data returned from the cache in an iframe
+ * @param $data string or error code returned from cayl_retrieve_cache_item to be displayed
+ */
+function cayl_deliver_cache_item_page($data) {
+  if (is_int($data) && $data == MENU_NOT_FOUND) {
+    drupal_deliver_html_page(MENU_NOT_FOUND);
+  } else {
+    drupal_add_http_header('Content-Type', 'text/html; charset=utf-8');
+    // Send appropriate HTTP-Header for browsers and search engines.
+    global $language;
+    drupal_add_http_header('Content-Language', $language->language);
+    $iframe_url = check_url(base_path() . "cayl/cache/" . $data);
+    print <<<EOD
+<html>
+<head><title>Cached page</title></head>
+<body style="margin: 0; padding: 0;">
+<div style="background-color: black; width: 100%; height: 30px; line-height: 30px; color: white; text-align: center;">
+The cached page is displayed below
+</div>
+<iframe style="width: 100%; height: 90%;" src="${iframe_url}"/>
+</body>
+</html>
+EOD;
+
+  }
+}
+
 
 /**
  * Delete the contents of the cache
