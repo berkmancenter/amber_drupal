@@ -222,7 +222,15 @@ function cayl_config_form($form, &$form_state) {
      ),
   );
 
-  return system_settings_form($form);
+  $form = system_settings_form($form);
+  $form['#submit'][] = 'cayl_settings_submit';
+  return $form;
+}
+
+/* Custom submit handler to flush filter cache after the settings are updated */
+function cayl_settings_submit($form, &$form_state) {
+  cache_clear_all('*', 'cache_filter',TRUE);
+  cache_clear_all('*', 'cache_field',TRUE);
 }
 
 function cayl_dashboard_form($form, &$form_state) {
