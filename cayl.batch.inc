@@ -26,6 +26,10 @@ function cayl_process_cache_queue($item) {
   try {
     $fetcher = cayl_get_fetcher();
     $fetcher->fetch($item);
+    /* Clear caches that could contain HTML with versions of the links that don't contain data- attributes */
+    /* TODO: Ideally we would clear the cache only once pre cron job */
+    cache_clear_all('*', 'cache_filter',TRUE);
+    cache_clear_all('*', 'cache_field',TRUE);
   } catch (Exception $e) {
     // If there is an error on fetching, log the error, and then continue. Otherwise the bad item
     // will not be removed from the queue
