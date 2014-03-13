@@ -73,7 +73,7 @@ class CAYLStorage implements iCAYLStorage {
    * @param array $assets any additional assets that should be saved (e.g. CSS, javascript)
    * @return bool success or failure
    */
-  function save($url, $root, array $headers = array('type' => 'text/html'), array $assets = array()) {
+  function save($url, $root, array $headers = array('Content-Type' => 'text/html'), array $assets = array()) {
     $id = $this->url_hash($url);
     $cache_metadata = $this->get_cache_metadata($id);
     $dir = join(DIRECTORY_SEPARATOR, array($this->file_root, $id));
