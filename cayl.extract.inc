@@ -141,6 +141,7 @@ function _cayl_parse_fields($entity_type, $bundle_name, $entity) {
           foreach ($language as $item) {
             $options = drupal_parse_url($item['url']);
             $title = !empty($item['title']) ? $item['title'] : '';
+            // TODO: Handle link items that don't specify a protocol (e.g. "http://")
             $text_items[] = l($title, $options['path'], $options);
             $text_items[] = check_markup($title, NULL, _cayl_entity_language($entity_type, $entity), TRUE);
           }
