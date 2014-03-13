@@ -111,10 +111,12 @@ function _cayl_extract_links($text) {
  */
 function _cayl_parse_fields($entity_type, $bundle_name, $entity) {
   $text_items = array();
-
   // Collect the fields from this entity_type and bundle.
   foreach (field_info_instances($entity_type, $bundle_name) as $field_name => $instance) {
     $field = field_info_field($field_name);
+    if (!isset($entity->$field['field_name'])) {
+      continue;
+    }
     $entity_field = $entity->$field['field_name'];
     switch ($field['type']) {
       // Core fields.
