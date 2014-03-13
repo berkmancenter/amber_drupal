@@ -79,7 +79,7 @@ function cayl_menu() {
     'type' => MENU_CALLBACK,
   );
   $items['cayl/display/id'] = array(
-    'title' => 'CAYL Cache Disply',
+    'title' => 'CAYL Cache Display',
     'description' => 'Display item from the cache',
     'page callback' => 'cayl_display_cache_item',
     'access callback' => true,
@@ -305,7 +305,19 @@ function cayl_display_cache_item($id) {
   if (!$id) {
     return(MENU_NOT_FOUND);
   } else {
-    return $id;
+
+    /* If this is not an HTML file, get a filename to append to the end of the link to the cached item, to properly
+       set the filename if the browser attempts to download the cached item */
+    $filename = "";
+    $storage = cayl_get_storage();
+    $metadata = $storage->get_metadata($id);
+    if (strpos(strtolower($metadata['type']),"text/html") === FALSE) {
+      $path = parse_url($metadata['url'],PHP_URL_PATH);
+      if ($path) {
+        $filename = array_pop(explode('/',$path));
+      }
+    }
+    return array('id' => $id, 'filename' => $filename);
   }
 }
 
@@ -321,7 +333,11 @@ function cayl_deliver_cache_item_page($data) {
     // Send appropriate HTTP-Header for browsers and search engines.
     global $language;
     drupal_add_http_header('Content-Language', $language->language);
-    $iframe_url = check_url(base_path() . "cayl/cache/" . $data);
+    $path = array('cayl/cache',$data['id']);
+    if ($data['filename']) {
+      $path[] = $data['filename'];
+    }
+    $iframe_url = check_url(base_path() . join('/',$path));
     print <<<EOD
 <html>
 <head><title>Cached page</title></head>
