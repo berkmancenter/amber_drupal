@@ -12,8 +12,26 @@ class CAYLRobotsTest extends \PHPUnit_Framework_TestCase {
 
   public function testRobotsParse()
   {
-    $this->assertTrue(CAYLRobots::url_permitted(NULL,"www.google.com"));
+    $this->assertTrue(CAYLRobots::url_permitted("","www.google.com"));
     $this->assertTrue(CAYLRobots::url_permitted("Donuts","www.google.com"));
+    $this->assertFalse(CAYLRobots::url_permitted(<<<EOD
+User-agent: *
+Disallow: /
+
+EOD
+,"/a_url"));
+    $this->assertTrue(CAYLRobots::url_permitted(<<<EOD
+User-agent: *
+Disallow: /man
+
+EOD
+,"/a_url"));
+    $this->assertFalse(CAYLRobots::url_permitted(<<<EOD
+User-agent: *
+Disallow: /man
+
+EOD
+,"/man/a_url"));
   }
 
 }

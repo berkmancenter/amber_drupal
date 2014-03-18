@@ -324,9 +324,19 @@ EOD;
 
 class CAYLRobots {
 
+  /**
+   * Is the URL allowed by the robots.txt file.
+   * @param $robots
+   * @param $url
+   * @return bool
+   */
   public static function url_permitted($robots, $url) {
-    //TODO: Implement parsing and checking against the robots.txt file
-    return true;
+    require_once("robotstxtparser.php");
+    $parser = new robotstxtparser($robots);
+    return !$parser->isDisallowed($url);
   }
+
+
+
 
 }
