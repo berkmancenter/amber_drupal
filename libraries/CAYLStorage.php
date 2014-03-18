@@ -239,6 +239,12 @@ class CAYLStorage implements iCAYLStorage {
     return $result;
   }
 
+  /**
+   * Save metadata for a cached item
+   * @param $id string of the item
+   * @param $metadata array with the metadata to save
+   * @return bool
+   */
   private function save_cache_metadata($id, $metadata) {
     $path = $this->get_cache_item_metadata_path($id);
     $file = fopen($path,'w');
@@ -312,7 +318,5 @@ class CAYLStorage implements iCAYLStorage {
         rmdir($dir);
      }
    }
-
-//  private function save_asset($base_path, )
 
 }
