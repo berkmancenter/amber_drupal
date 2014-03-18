@@ -53,7 +53,7 @@ class CAYLFetcher implements iCAYLFetcher {
 
       $body = stream_get_contents($root_item['body']);
       $asset_paths = $this->assetHelper->extract_assets($body);
-      $assets = $this->assetHelper->expand_asset_references($url,$asset_paths);
+      $assets = $this->assetHelper->expand_asset_references($url, $asset_paths);
       $assets = $this->download_assets($assets);
       $body = $this->assetHelper->rewrite_links($body, $assets);
       $body = $this->assetHelper->insert_banner($body);
@@ -229,17 +229,16 @@ class CAYLAssetHelper {
       $refs = $this->extract_dom_tag_attributes($dom, 'img', 'src');
       $refs = array_merge($refs,$this->extract_dom_tag_attributes($dom, 'script', 'src'));
       $refs = array_merge($refs,$this->extract_dom_link_references($dom));
+      $refs = array_merge($refs,$this->extract_dom_style_references($dom));
 
       /* Exclude all absolute URLs. TODO: Don't exclude absolute URLs to the site being cached */
       foreach ($refs as $ref) {
         if (strpos($ref,'://') === FALSE)
           $result[] = $ref;
       }
-
     }
     return $result;
   }
-
   /**
    * Given a base URL and a list of assets referenced from that page, return an array list of absolute URIs
    * to each of the assets keyed by the path used to reference it
@@ -283,7 +282,20 @@ EOD;
     return $result;
   }
 
-
+  /**
+   * Extract references to external files that use an @import directive in  <style> tag
+   * @param $dom
+   * @return array
+   */
+  private function extract_dom_style_references($dom) {
+    $attributes = array();
+    foreach ($dom->getElementsByTagName('style') as $t) {
+      if (preg_match("/@import\s*['\"](.*)['\"]/",$t->nodeValue,$matches)) {
+        $attributes[] = $matches[1];
+      }
+    }
+    return $attributes;
+  }
 
   private function extract_dom_tag_attributes($dom, $tag, $attribute) {
     $attributes = array();
