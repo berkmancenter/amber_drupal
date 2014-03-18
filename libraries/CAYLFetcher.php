@@ -247,7 +247,7 @@ class CAYLAssetHelper {
    * @param $assets
    */
   public function expand_asset_references($base, $assets) {
-    $result = [];
+    $result = array();
     $p = parse_url($base);
     if ($p) {
       $path_array = explode('/',$p[PHP_URL_PATH]);
