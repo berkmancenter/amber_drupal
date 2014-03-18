@@ -246,11 +246,16 @@ class CAYLAssetHelper {
       array_pop($path_array);
       $base = $p['scheme'] . "://" . $p['host'] . (isset($p['port']) ? ":" . $p['port'] : '') . join('/',$path_array);
       foreach ($assets as $asset) {
-        $asset_url = parse_url($asset);
+        $asset_copy = $asset;
+        if (version_compare(phpversion(), '5.4.7', '<') && (strpos($asset,"//") === 0)) {
+          /* Workaround for bug in parse_url: http://us2.php.net/parse_url#refsect1-function.parse-url-changelog */
+          $asset_copy = "http:${asset_copy}";
+        }
+        $asset_url = parse_url($asset_copy);
         if ($asset_url) {
           if ((isset($asset_url['host']) && ($asset_url['host'] == $p['host'])) || !isset($asset_url['host'])) {
-            $asset_trimmed = preg_replace("/^\\//","", $asset_url['path']); /* Remove leading '/' */
-            $asset_path = join('/',array($base, $asset_trimmed));
+            $asset_copy = preg_replace("/^\\//","", $asset_url['path']); /* Remove leading '/' */
+            $asset_path = join('/',array($base, $asset_copy));
             $result[$asset]['url'] = $asset_path;
           }
         }
@@ -264,7 +269,6 @@ class CAYLAssetHelper {
     if ($body && !empty($assets)) {
       foreach ($assets as $key => $asset) {
         $p = "assets" . parse_url($asset['url'],PHP_URL_PATH);
-        print_r(array($key,$p));
         $result = str_replace($key,$p,$result);
       }
     }
