@@ -249,7 +249,7 @@ class CAYLAssetHelper {
         $asset_copy = $asset;
         if (version_compare(phpversion(), '5.4.7', '<') && (strpos($asset,"//") === 0)) {
           /* Workaround for bug in parse_url: http://us2.php.net/parse_url#refsect1-function.parse-url-changelog */
-          $asset_copy = "http:${asset_copy}";
+          $asset_copy = "${p['scheme']}:${asset_copy}";
         }
         $asset_url = parse_url($asset_copy);
         if ($asset_url) {
