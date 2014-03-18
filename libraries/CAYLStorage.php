@@ -204,7 +204,6 @@ class CAYLStorage implements iCAYLStorage {
   private function get_cache_item_path($id, $asset_path = NULL) {
     if ($asset_path) {
       $path = join(DIRECTORY_SEPARATOR, array_merge(array($this->file_root, $id, "assets"), explode('/',$asset_path)));
-      error_log(join(":", array(__FILE__, __METHOD__, "Hello",$path)));
     } else {
       $path = join(DIRECTORY_SEPARATOR, array($this->file_root, $id, $id));
     }
