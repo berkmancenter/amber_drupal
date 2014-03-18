@@ -250,7 +250,7 @@ class CAYLAssetHelper {
     $result = array();
     $p = parse_url($base);
     if ($p) {
-      $path_array = explode('/',$p[PHP_URL_PATH]);
+      $path_array = explode('/',$p['path']);
       array_pop($path_array);
       $base = $p['scheme'] . "://" . $p['host'] . ($p['port'] ? ":" . $p['port'] : '') . join('/',$path_array);
       foreach ($assets as $asset) {
