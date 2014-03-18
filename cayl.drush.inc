@@ -20,12 +20,23 @@ function cayl_drush_command() {
   $commands['cayl-clear-cache'] = array(
     'description' => 'Delete the contents of the cache',
   );
+  $commands['cayl-cache-url'] = array(
+    'description' => 'Cache a single URL',
+    'arguments' => array(
+      'url' => 'A URL to save to the cache',
+    ),
+    'aliases' => array('ccu'),
+  );
 
   return $commands;
 }
 
+/**
+ * Scan a single node, or all nodes, for links to cache
+ * @param null $nid
+ * @return bool
+ */
 function drush_cayl_scan($nid = NULL) {
-
   if (!$nid) {
     drush_set_error(dt("Specify either a node ID to scan, or 'all'."));
     return FALSE;
@@ -59,9 +70,23 @@ function drush_cayl_scan($nid = NULL) {
   }
 }
 
-
-
+/**
+ * Delete the entire cache
+ */
 function drush_cayl_clear_cache() {
   cayl_clear_cache();
   drush_print("Cache cleared");
 }
+
+function drush_cayl_cache_url($url) {
+  if ($url) {
+    $fetcher = cayl_get_fetcher();
+    $fetcher->fetch($url);
+    drush_print("URL fetched");
+  } else {
+    drush_set_error(dt("Specify a URL to cache"));
+    return FALSE;
+  }
+}
+
+
