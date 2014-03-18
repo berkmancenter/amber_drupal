@@ -33,9 +33,10 @@
  */
 
 interface iCAYLStorage {
+  function get($id);
+  function get_asset($id, $path);
   function get_metadata($key);
   function save($url, $root, array $headers, array $assets = array());
-  function get($id);
   function clear_cache();
 }
 
@@ -49,6 +50,27 @@ class CAYLStorage implements iCAYLStorage {
     $this->file_root = $file_root;
     $this->url_prefix = 'CAYL';
     $this->name = 'cayl'; // Used to identify the metadata that belongs to this implementation of iCAYLStorage
+  }
+
+
+  public function get($id) {
+    $result = NULL;
+    if ($path = $this->get_cache_item_path($id)) {
+      if (file_exists($path)) {
+        $result = file_get_contents($path);
+      }
+    }
+    return $result;
+  }
+
+  public function get_asset($id, $path) {
+    $result = NULL;
+    if ($path = $this->get_cache_item_path($id, $path)) {
+      if (file_exists($path)) {
+        $result = file_get_contents($path);
+      }
+    }
+    return $result;
   }
 
   /**
@@ -95,8 +117,8 @@ class CAYLStorage implements iCAYLStorage {
     }
 
     $cache_metadata['cache'][$this->name]['date'] = date($this->ISO8601_FORMAT);
-    $cache_metadata['cache'][$this->name]['location'] = join("/", array($this->url_prefix, 'cache',$id));
-    $cache_metadata['status'][$this->name]['default'] = "up"; //TODO: Do not always assume it is up
+    $cache_metadata['cache'][$this->name]['location'] = join("/", array($this->url_prefix, 'cache', $id, ""));
+    $cache_metadata['status'][$this->name]['default'] = "up";
 
     // Save metadata
     $this->save_cache_metadata($id, $cache_metadata);
@@ -112,7 +134,9 @@ class CAYLStorage implements iCAYLStorage {
     }
     fclose($root_file);
 
-    // TODO: Save asset files
+    if (!empty($assets)) {
+      $this->save_assets($id, $assets);
+    }
 
     // TODO: Check files sizes against maximum files size permitted
     // TODO: Check for overall file size, and purge old files if necessary
@@ -121,20 +145,10 @@ class CAYLStorage implements iCAYLStorage {
   }
 
 
-  function get($id) {
-    $result = NULL;
-    if ($path = $this->get_cache_item_path($id)) {
-      if (file_exists($path)) {
-        $result = file_get_contents($path);
-      }
-    }
-    return $result;
-  }
-
   /**
    *  Delete the entire contents of the cache
    */
-  function clear_cache() {
+  public function clear_cache() {
     if ($this->file_root) {
       $this->rrmdir($this->file_root);
     }
@@ -182,12 +196,18 @@ class CAYLStorage implements iCAYLStorage {
   }
 
   /**
-   * Get the path to the root cached item
+   * Get the path to the root cached item or asset
    * @param $id string
+   * @param $asset_path string with the path to the asset
    * @return string path to the file that contains the root cached item
    */
-  private function get_cache_item_path($id) {
-    $path = join(DIRECTORY_SEPARATOR, array($this->file_root, $id, $id));
+  private function get_cache_item_path($id, $asset_path = NULL) {
+    if ($asset_path) {
+      $path = join(DIRECTORY_SEPARATOR, array_merge(array($this->file_root, $id, "assets"), explode('/',$asset_path)));
+      error_log(join(":", array(__FILE__, __METHOD__, "Hello",$path)));
+    } else {
+      $path = join(DIRECTORY_SEPARATOR, array($this->file_root, $id, $id));
+    }
     return ($this->is_within_cache_directory($path)) ? $path : NULL;
   }
 
@@ -240,6 +260,40 @@ class CAYLStorage implements iCAYLStorage {
   }
 
   /**
+   * Save a list of assets for an ID to a directory within the cache file system
+   * @param $id string of the item for which the assets are being saved
+   * @param array $assets with the url and an open resource for each asset to be saved
+   * @return bool
+   */
+  private function save_assets($id, array $assets) {
+    $base_asset_path = join(DIRECTORY_SEPARATOR, array($this->file_root, $id, "assets"));
+    if (!$this->is_within_cache_directory($base_asset_path)) {
+      return false;
+    }
+    foreach ($assets as $asset) {
+      $url_path = parse_url($asset['url'], PHP_URL_PATH);
+      $url_path = preg_replace("/^\\//","",$url_path); /* Remove leading '/' */
+      if ($url_path) {
+        $path_array = explode('/',$url_path);
+        $asset_path = join(DIRECTORY_SEPARATOR,array_merge(array($base_asset_path), $path_array));
+        if (!file_exists(dirname($asset_path))) {
+          mkdir(dirname($asset_path), 0755, true);
+        }
+        $asset_file = fopen($asset_path,"w");
+        while ($line = fgets($asset['body'])) {
+          fputs($asset_file,$line);
+        }
+        fclose($asset_file);
+      } else {
+        error_log(join(":", array(__FILE__, __METHOD__, "Could not parse asset URL", $id, $asset['url'])));
+      }
+    }
+    return true;
+  }
+
+
+
+  /**
    * Recursively delete a directory
    * Credit: http://stackoverflow.com/a/3338133
    * @param $dir
@@ -260,5 +314,6 @@ class CAYLStorage implements iCAYLStorage {
      }
    }
 
+//  private function save_asset($base_path, )
 
 }

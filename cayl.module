@@ -284,6 +284,20 @@ function cayl_retrieve_cache_item($id) {
 }
 
 /**
+ * Retrieve an asset from the cache for display
+ * @param $id string identifying the item to return
+ * @return null|string
+ */
+function cayl_retrieve_cache_asset() {
+  $args = func_get_args();
+  $id = array_shift($args);
+  $storage = cayl_get_storage();
+  $data = $storage->get_asset($id, join('/',$args));
+
+  return ($data ) ? array('data' => $data) : MENU_NOT_FOUND;
+}
+
+/**
  * Display the data returned from the cache without any Drupal doodads
  * @param $data string or error code returned from cayl_retrieve_cache_item to be displayed
  */
