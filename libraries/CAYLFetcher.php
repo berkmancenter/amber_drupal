@@ -250,9 +250,9 @@ class CAYLAssetHelper {
     $result = array();
     $p = parse_url($base);
     if ($p) {
-      $path_array = explode('/',$p['path']);
+      $path_array = explode('/',isset($p['path']) ? $p['path'] : "");
       array_pop($path_array);
-      $base = $p['scheme'] . "://" . $p['host'] . ($p['port'] ? ":" . $p['port'] : '') . join('/',$path_array);
+      $base = $p['scheme'] . "://" . $p['host'] . (isset($p['port']) ? ":" . $p['port'] : '') . join('/',$path_array);
       foreach ($assets as $asset) {
         $asset_trimmed = preg_replace("/^\\//","",$asset); /* Remove leading '/' */
         $asset_path = join('/',array($base,$asset_trimmed));
