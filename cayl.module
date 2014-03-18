@@ -85,7 +85,6 @@ function cayl_menu() {
     'page arguments' => array(2),
     'access callback' => true,
     'delivery callback' => 'cayl_deliver_cache_item',
-//    'delivery callback' => 'drupal_deliver_html_page',
     'type' => MENU_CALLBACK,
   );
   return $items;
@@ -295,7 +294,7 @@ function cayl_retrieve_cache_asset() {
   $d = $storage->get_asset($id, join('/',$args));
   if ($d) {
     $data['data'] = $d;
-    // Set the mime-type correctly if this is a CSS file. 
+    // Set the mime-type correctly if this is a CSS file.
     if (substr($args[count($args) - 1],-3) == "css") {
       $data['metadata']['type'] = 'text/css';
     }
