@@ -283,8 +283,10 @@ EOD;
     return $result;
   }
 
+
+
   private function extract_dom_tag_attributes($dom, $tag, $attribute) {
-    $attributes = [];
+    $attributes = array();
     foreach ($dom->getElementsByTagName($tag) as $t) {
       if ($t->hasAttribute($attribute)) {
         $attributes[] = $t->getAttribute($attribute);
@@ -294,7 +296,7 @@ EOD;
   }
 
   private function extract_dom_link_references($dom) {
-    $attributes = [];
+    $attributes = array();
     foreach ($dom->getElementsByTagName('link') as $t) {
       if ($t->hasAttribute('rel') && ($t->getAttribute('rel') == 'stylesheet')) {
         $attributes[] = $t->getAttribute('href');
