@@ -2,7 +2,7 @@
 
 class CAYLTestCase extends DrupalUnitTestCase {
 
-  var $MOCK_METADATA = "/CAYL/display/id/0a137b375cc3881a70e186ce2172c8d1 2014-02-11T10:22:46Z";
+  var $MOCK_METADATA = "/CAYL/cache/0a137b375cc3881a70e186ce2172c8d1 2014-02-11T10:22:46Z";
 
   public static function getInfo() {
     return array(
@@ -38,14 +38,14 @@ class CAYLTestCase extends DrupalUnitTestCase {
   public function testCAYLLookup() {
     $result = _cayl_lookup_url("http://google.com");
     $this->assertTrue(is_array($result));
-    $this->assertTrue($result['data-cache'] == $this->MOCK_METADATA);
+    $this->assertEqual($result['data-cache'],$this->MOCK_METADATA);
   }
 
   public function testpreprocess_link() {
     $vars = array( 'text' => 'Test link', 'path' => 'http://www.google.com', 'options' => array( 'attributes' => array()) );
     cayl_preprocess_link($vars);
     $this->assertTrue($vars['text']);
-    $this->assertTrue($vars['options']['attributes']['data-cache'] == $this->MOCK_METADATA);
+    $this->assertEqual($vars['options']['attributes']['data-cache'],$this->MOCK_METADATA);
   }
 
   public function testpreprocess_linkLocal() {
