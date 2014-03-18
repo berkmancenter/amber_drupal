@@ -166,11 +166,11 @@ class CAYLFetcher implements iCAYLFetcher {
         );
 
         if (curl_setopt_array($ch, $additional_options + $options) === FALSE) {
-          throw new ErrorException(join(":", array(__FILE__, __METHOD__, "Error setting CURL options", $url, curl_error($ch))));
+          throw new RuntimeException(join(":", array(__FILE__, __METHOD__, "Error setting CURL options", $url, curl_error($ch))));
         }
 
         if (($data = curl_exec($ch)) === FALSE) {
-          throw new ErrorException(join(":", array(__FILE__, __METHOD__, "Error executing CURL request", $url, curl_error($ch))));
+          throw new RuntimeException(join(":", array(__FILE__, __METHOD__, "Error executing CURL request", $url, curl_error($ch))));
         }
 
         $header_size = curl_getinfo($ch,CURLINFO_HEADER_SIZE);
