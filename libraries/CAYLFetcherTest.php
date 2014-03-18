@@ -53,7 +53,7 @@ EOF;
 
     $result = $a->extract_assets($s);
     $this->assertTrue(count($result) == 1);
-    $this->assertTrue($result[0] == "../peacock.png");
+    $this->assertEquals($result[0],"../peacock.png");
   }
 
   /**
@@ -67,8 +67,9 @@ EOF;
 EOF;
 
     $result = $a->extract_assets($s);
-    $this->assertEquals(count($result),1);
+    $this->assertEquals(count($result),2);
     $this->assertEquals($result[0],"../peacock.png");
+    $this->assertEquals($result[1],"http://band.com/band.jpg");
   }
 
   /**
@@ -114,11 +115,13 @@ EOF;
 EOF;
 
     $result = $a->extract_assets($s);
-    $this->assertEquals(count($result),3);
+    $this->assertEquals(count($result),4);
     sort($result);
     $this->assertTrue($result[0] == "../peacock.png");
     $this->assertTrue($result[1] == "banana.css");
     $this->assertTrue($result[2] == "banana.js");
+    $this->assertEquals($result[3],"http://band.com/band.jpg");
+
   }
 
   /**
@@ -136,6 +139,22 @@ EOF;
   /**
    * @dataProvider provider
    */
+  public function testExpandReferencesMix(CAYLAssetHelper $a)
+  {
+    $url = "http://example.com";
+    $assets = array("banana.jpg", 'scripts/ban.js', 'http://example.com/example.jpg', 'http://othersite.org/frank/james.css', '//example.com/funky.jpg', '/abs.css');
+    $result = $a->expand_asset_references($url,$assets);
+    $this->assertEquals(count($result),5);
+    $this->assertEquals($result['banana.jpg']['url'],'http://example.com/banana.jpg');
+    $this->assertEquals($result['scripts/ban.js']['url'],'http://example.com/scripts/ban.js');
+    $this->assertEquals($result['http://example.com/example.jpg']['url'],'http://example.com/example.jpg');
+    $this->assertEquals($result['//example.com/funky.jpg']['url'],'http://example.com/funky.jpg');
+    $this->assertEquals($result['/abs.css']['url'],'http://example.com/abs.css');
+  }
+
+  /**
+   * @dataProvider provider
+   */
   public function testWatermarkBanner(CAYLAssetHelper $a)
   {
     $s = <<<EOF
@@ -145,9 +164,9 @@ EOF;
 EOF;
     $expected_result = <<<EOF
 <html><head><script src="banana.js" ></head>
-<body><div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:999;background-color:rgba(0,0,0,0.5);;color:white;text-align:center;line-height:30px;">
-This is a cached page</div>And the band played on....And the BAND said to the
-<a href="leader.html">leader</a>.</body></html>
+<body>And the band played on....And the BAND said to the
+<a href="leader.html">leader</a>.<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:999;background-color:rgba(0,0,0,0.5);;color:white;text-align:center;line-height:30px;">
+This is a cached page</div></body></html>
 EOF;
     $result = $a->insert_banner($s);
     $this->assertEquals($result,$expected_result);

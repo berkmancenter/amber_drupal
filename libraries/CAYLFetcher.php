@@ -34,8 +34,7 @@ class CAYLFetcher implements iCAYLFetcher {
 
     // Check the robots.txt
     if (!$this->robots_allowed($url)) {
-      //TODO: Figure out how to return an error message
-      return;
+      return false;
     }
 
     // Send a GET request
@@ -43,8 +42,7 @@ class CAYLFetcher implements iCAYLFetcher {
 
     // Decide whether the item should be cached
     if (!$this->cacheable_item($root_item)) {
-      //TODO: Figure out how to return an error message
-      return;
+      return false;
     }
 
     // Get other assets
@@ -63,7 +61,6 @@ class CAYLFetcher implements iCAYLFetcher {
       $root_item['body'] = $stream;
 
       // TODO: Check total file size of all assets to see if below limit
-      // TODO: Rewrite links in core file (if HTML, and there are absolute links that we've downloaded as relative links)
     }
 
     if ($this->storage) {
@@ -71,6 +68,7 @@ class CAYLFetcher implements iCAYLFetcher {
       $this->storage->save($url, $root_item['body'], $root_item['headers'], isset($assets) ? $assets : array());
     }
     fclose($root_item['body']);
+    return true;
   }
 
 
@@ -218,7 +216,6 @@ class CAYLAssetHelper {
    * @param $file
    */
   public function extract_assets($body) {
-    $result = array();
     if ($body) {
       $dom = new DOMDocument;
       $old_setting = libxml_use_internal_errors(true);
@@ -230,14 +227,10 @@ class CAYLAssetHelper {
       $refs = array_merge($refs,$this->extract_dom_tag_attributes($dom, 'script', 'src'));
       $refs = array_merge($refs,$this->extract_dom_link_references($dom));
       $refs = array_merge($refs,$this->extract_dom_style_references($dom));
-
-      /* Exclude all absolute URLs. TODO: Don't exclude absolute URLs to the site being cached */
-      foreach ($refs as $ref) {
-        if (strpos($ref,'://') === FALSE)
-          $result[] = $ref;
-      }
+      return $refs;
+    } else {
+      return array();
     }
-    return $result;
   }
   /**
    * Given a base URL and a list of assets referenced from that page, return an array list of absolute URIs
@@ -253,9 +246,14 @@ class CAYLAssetHelper {
       array_pop($path_array);
       $base = $p['scheme'] . "://" . $p['host'] . (isset($p['port']) ? ":" . $p['port'] : '') . join('/',$path_array);
       foreach ($assets as $asset) {
-        $asset_trimmed = preg_replace("/^\\//","",$asset); /* Remove leading '/' */
-        $asset_path = join('/',array($base,$asset_trimmed));
-        $result[$asset]['url'] = $asset_path;
+        $asset_url = parse_url($asset);
+        if ($asset_url) {
+          if ((isset($asset_url['host']) && ($asset_url['host'] == $p['host'])) || !isset($asset_url['host'])) {
+            $asset_trimmed = preg_replace("/^\\//","", $asset_url['path']); /* Remove leading '/' */
+            $asset_path = join('/',array($base, $asset_trimmed));
+            $result[$asset]['url'] = $asset_path;
+          }
+        }
       }
     }
     return $result;
@@ -266,6 +264,7 @@ class CAYLAssetHelper {
     if ($body && !empty($assets)) {
       foreach ($assets as $key => $asset) {
         $p = "assets" . parse_url($asset['url'],PHP_URL_PATH);
+        print_r(array($key,$p));
         $result = str_replace($key,$p,$result);
       }
     }
@@ -278,7 +277,7 @@ class CAYLAssetHelper {
 This is a cached page</div>
 EOD;
     //TODO: Translation
-    $result = str_ireplace("<body>","<body>${banner}",$body);
+    $result = str_ireplace("</body>","${banner}</body>",$body);
     return $result;
   }
 
@@ -316,6 +315,7 @@ EOD;
     }
     return $attributes;
   }
+
 }
 
 class CAYLRobots {
