@@ -292,9 +292,15 @@ function cayl_retrieve_cache_asset() {
   $args = func_get_args();
   $id = array_shift($args);
   $storage = cayl_get_storage();
-  $data = $storage->get_asset($id, join('/',$args));
-
-  return ($data ) ? array('data' => $data) : MENU_NOT_FOUND;
+  $d = $storage->get_asset($id, join('/',$args));
+  if ($d) {
+    $data['data'] = $d;
+    // Set the mime-type correctly if this is a CSS file. 
+    if (substr($args[count($args) - 1],-3) == "css") {
+      $data['metadata']['type'] = 'text/css';
+    }
+  }
+  return (isset($data)) ? $data : MENU_NOT_FOUND;
 }
 
 /**
@@ -305,7 +311,7 @@ function cayl_deliver_cache_item($data) {
   if (is_int($data) && $data == MENU_NOT_FOUND) {
     drupal_deliver_html_page(MENU_NOT_FOUND);
   } else {
-    if ($data['metadata']) {
+    if (isset($data['metadata']['type'])) {
       drupal_add_http_header('Content-Type', $data['metadata']['type']);
     }
     //TODO: Tack the filename onto the end of the URL (either when rendering, or as a redirect, if non-HTML)
