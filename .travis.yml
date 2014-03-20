@@ -46,12 +46,11 @@ before_script:
 
   - cd sites/all/modules/cayl/libraries
   - composer install --dev --no-interaction
-  - cd ../../../..
 
 script:
   - drush test-run 'CAYL, CAYLWeb' --uri=http://127.0.0.1:8080
   - mkdir -p build/logs
-  - phpunit sites/all/modules/cayl/libraries
+  - phpunit .
 
 after_script:
- - php sites/all/modules/cayl/libraries/vendor/bin/coveralls -v
+ - php vendor/bin/coveralls -v
