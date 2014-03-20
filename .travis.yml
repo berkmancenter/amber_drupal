@@ -51,7 +51,7 @@ before_script:
 script:
   - drush test-run 'CAYL, CAYLWeb' --uri=http://127.0.0.1:8080
   - mkdir -p build/logs
-  - phpunit --coverage-clover build/logs/clover.xml sites/all/modules/cayl/libraries
+  - phpunit sites/all/modules/cayl/libraries
 
 after_script:
  - php sites/all/modules/cayl/libraries/vendor/bin/coveralls -v
