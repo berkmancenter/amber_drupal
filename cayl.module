@@ -16,10 +16,8 @@ module_load_include('inc', 'cayl', 'cayl.batch');
 function cayl_get_storage() {
   $storage = &drupal_static(__FUNCTION__);
   if (!isset($storage)) {
-    $file_path = join(DIRECTORY_SEPARATOR, array(
-      DRUPAL_ROOT,
-      variable_get('cayl_storage_location', 'sites/default/files/cayl')
-    ));
+    $file_path = join(DIRECTORY_SEPARATOR,
+      array(DRUPAL_ROOT, variable_get('cayl_storage_location', 'sites/default/files/cayl')));
     $storage = new CAYLStorage($file_path);
   }
   return $storage;
@@ -159,6 +157,7 @@ function _cayl_build_link_attributes($storage_metadata) {
                                            $storage_metadata['cache']['cayl']['date']));
   }
   if (isset($storage_metadata['status']['cayl']['default'])) {
+    //TODO: Should this be drawn from the cayl_status table instead?
     $behavior = _cayl_add_behavior($storage_metadata['status']['cayl']['default']);
     if ($behavior) {
       $result['data-cayl-behavior'] = $behavior;
@@ -171,7 +170,6 @@ function _cayl_build_link_attributes($storage_metadata) {
  * Lookup a URL using the CAYLStorage class, while caching for the duration of the page load
  */
 function _cayl_lookup_url($url) {
-
   $storage = cayl_get_storage();
   return _cayl_build_link_attributes($storage->get_metadata($url));
 }
@@ -247,6 +245,7 @@ function _cayl_filter_tips($filter, $format, $long = FALSE) {
     return t('Annotate all external links with information about the their local cached copies');
   }
   else {
+    //TODO: Get help content to display here
     return t('Annotate all external links with information about the their local cached copies. Then add some more information about the CAYL project and links to other stuff.');
   }
 }
@@ -328,32 +327,6 @@ function cayl_deliver_cache_item($data) {
     }
     //TODO: Tack the filename onto the end of the URL (either when rendering, or as a redirect, if non-HTML)
     print($data['data']);
-  }
-}
-
-/**
- * Display a cached item for the end user
- * @param $id string identifying the item to return
- * @return null|string
- */
-function cayl_display_cache_item($id) {
-  if (!$id) {
-    return(MENU_NOT_FOUND);
-  } else {
-
-    /* If this is not an HTML file, get a filename to append to the end of the link to the cached item, to properly
-       set the filename if the browser attempts to download the cached item */
-    $filename = "";
-    $storage = cayl_get_storage();
-    $metadata = $storage->get_metadata($id);
-    if (strpos(strtolower($metadata['type']),"text/html") === FALSE) {
-      $path = parse_url($metadata['url'],PHP_URL_PATH);
-      if ($path) {
-        $path_array = explode('/',$path);
-        $filename = array_pop($path_array);
-      }
-    }
-    return array('id' => $id, 'filename' => $filename);
   }
 }
 
