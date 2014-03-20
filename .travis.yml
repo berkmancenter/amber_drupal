@@ -45,7 +45,7 @@ before_script:
   - until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
 
   - cd sites/all/modules/cayl/libraries
-  - php composer.phar install --dev --no-interaction
+  - composer install --dev --no-interaction
   - cd ../../../..
 
 script:
