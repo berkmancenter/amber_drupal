@@ -23,8 +23,6 @@ install:
   - phpenv rehash
 
 before_script:
-
-
   # Setup /tmp directory for tests
   - mkdir /tmp/cayl
 
@@ -44,14 +42,6 @@ before_script:
   - drush runserver 127.0.0.1:8080 &
   - until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
 
-  - cd ../libraries
-  - php composer.phar install --dev --no-interaction
-  - cd ..
-
 script:
   - drush test-run 'CAYL, CAYLWeb' --uri=http://127.0.0.1:8080
-  - mkdir -p build/logs
-  - phpunit sites/all/modules/cayl/libraries --coverage-clover build/logs/clover.xml
-
-after_script:
- - php vendor/bin/coveralls -v
+  - phpunit sites/all/modules/cayl/libraries
