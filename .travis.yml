@@ -44,10 +44,9 @@ before_script:
   - drush runserver 127.0.0.1:8080 &
   - until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
 
-  - pwd
-  - ls
+  - cd sites/all/modules/cayl/libraries
   - php composer.phar install --dev --no-interaction
-  - cd ..
+  - cd ../../../..
 
 script:
   - drush test-run 'CAYL, CAYLWeb' --uri=http://127.0.0.1:8080
