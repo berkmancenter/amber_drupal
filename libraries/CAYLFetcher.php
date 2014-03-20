@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jlicht
- * Date: 3/5/14
- * Time: 3:19 PM
- */
 
 //TODO: Namespace
 
@@ -33,12 +27,12 @@ class CAYLFetcher implements iCAYLFetcher {
     }
 
     // Check the robots.txt
-    if (!$this->robots_allowed($url)) {
+    if (!CAYLRobots::robots_allowed($url)) {
       return false;
     }
 
     // Send a GET request
-    $root_item = $this->open_url($url);
+    $root_item = CAYLNetworkUtils::open_url($url);
 
     // Decide whether the item should be cached
     if (!$this->cacheable_item($root_item)) {
@@ -63,11 +57,13 @@ class CAYLFetcher implements iCAYLFetcher {
       // TODO: Check total file size of all assets to see if below limit
     }
 
-    if ($this->storage) {
+    if ($this->storage && $root_item) {
       rewind($root_item['body']);
       $this->storage->save($url, $root_item['body'], $root_item['headers'], isset($assets) ? $assets : array());
     }
-    fclose($root_item['body']);
+    if ($root_item) {
+      fclose($root_item['body']);
+    }
     return true;
   }
 
@@ -75,23 +71,6 @@ class CAYLFetcher implements iCAYLFetcher {
   private function cacheable_item($data) {
     // TODO: Add logic to actually test if we should cache it, based on file size, content-type, etc.
     return TRUE;
-  }
-
-  /**
-   * Find out if the access to the given URL is permitted by the robots.txt
-   * @param $url
-   * @return bool
-   */
-  private function robots_allowed($url) {
-    $p = parse_url($url);
-    $p['path'] = "robots.txt";
-    $robots_url = $p['scheme'] . "://" . $p['host'] . ($p['port'] ? ":" . $p['port'] : '') . '/robots.txt';
-    $data = $this->open_url($robots_url, array(CURLOPT_FAILONERROR => FALSE));
-    return (!$data || CAYLRobots::url_permitted($data,$url));
-  }
-
-  private function curl_installed() {
-    return in_array("curl", get_loaded_extensions());
   }
 
   /**
@@ -104,7 +83,7 @@ class CAYLFetcher implements iCAYLFetcher {
   private function download_assets($assets) {
     $result = array();
     foreach ($assets as $key => $asset) {
-      $f = $this->open_url($asset['url']);
+      $f = CAYLNetworkUtils::open_url($asset['url']);
       if ($f) {
         $result[$key] = array_merge($f,$asset);
       }
@@ -112,101 +91,6 @@ class CAYLFetcher implements iCAYLFetcher {
     return $result;
   }
 
-  /**
-   * Transform raw HTTP headers into a dictionary
-   * @param $raw_headers string of headers from the HTTP response header
-   * @return array
-   */
-  private function extract_headers($raw_headers) {
-    $headers = array();
-      if ($raw_headers) {
-      foreach (explode(PHP_EOL,$raw_headers) as $line) {
-        $header = explode(":",$line);
-        if (count($header) == 2) {
-          $headers[$header[0]] = trim($header[1]);
-        }
-      }
-    }
-    return $headers;
-  }
-
-  /**
-   * Open a URL, and return an array with dictionary of header information and a stream to the contents of the URL
-   * @param $url string of resource to download
-   * @return array dictionary of header information and a stream to the contents of the URL
-   */
-  private function open_url($url, $additional_options = array()) {
-    if ($this->curl_installed()) {
-      if (($ch = curl_init($url)) === FALSE) {
-        error_log(join(":", array(__FILE__, __METHOD__, $url, "CURL init error")));
-        return FALSE;
-      }
-
-      $tmp_header_file_name = tempnam(sys_get_temp_dir(),'cayl');
-      $tmp_body_file_name = tempnam(sys_get_temp_dir(),'cayl');
-      $tmp_header_file = fopen($tmp_header_file_name ,"wr");
-      $tmp_body_file = fopen($tmp_body_file_name ,"wr");
-
-      try {
-        if (($tmp_header_file === FALSE) || ($tmp_body_file === FALSE)) {
-          throw new RuntimeException(join(":", array(__FILE__, __METHOD__, "Error creating temporary files for CURL download")));
-        }
-
-        $options = array(
-          CURLOPT_FAILONERROR => TRUE,      /* Don't ignore HTTP errors */
-          CURLOPT_FOLLOWLOCATION => TRUE,   /* Follow redirects */
-          CURLOPT_MAXREDIRS => 10,          /* No more than 10 redirects */
-          CURLOPT_CONNECTTIMEOUT => 10,     /* 10 second timeout */
-          CURLOPT_RETURNTRANSFER => 1,      /* Return the output as a string */
-          CURLOPT_HEADER => TRUE,           /* Return header information as part of the file */
-          CURLOPT_FILE => $tmp_body_file,
-          CURLOPT_WRITEHEADER => $tmp_header_file,
-        );
-
-        if (curl_setopt_array($ch, $additional_options + $options) === FALSE) {
-          throw new RuntimeException(join(":", array(__FILE__, __METHOD__, "Error setting CURL options", $url, curl_error($ch))));
-        }
-
-        if (($data = curl_exec($ch)) === FALSE) {
-          throw new RuntimeException(join(":", array(__FILE__, __METHOD__, "Error executing CURL request", $url, curl_error($ch))));
-        }
-
-        $header_size = curl_getinfo($ch,CURLINFO_HEADER_SIZE);
-        curl_close($ch);
-        fclose($tmp_header_file);
-        fclose($tmp_body_file);
-
-      } catch (RuntimeException $e) {
-        error_log($e->getMessage());
-        curl_close($ch);
-        fclose($tmp_header_file);
-        fclose($tmp_body_file);
-        return FALSE;
-      }
-
-      $headers = $this->extract_headers(file_get_contents($tmp_header_file_name));
-
-      // Create new file for the content without the http headers. It woud be better to do this as part of saving the file
-      $tmp_body_file_name_stripped = tempnam(sys_get_temp_dir(),'cayl');
-      $tmp_body_file_stripped = fopen($tmp_body_file_name_stripped ,"w");
-      $tmp_body_file = fopen($tmp_body_file_name,"r");
-      fseek($tmp_body_file,$header_size);
-      while ($line = fgets($tmp_body_file)) {
-        fputs($tmp_body_file_stripped,$line);
-      }
-      fclose($tmp_body_file_stripped);
-      fclose($tmp_body_file);
-      //TODO: Clean up all temp files
-
-      $body = fopen($tmp_body_file_name_stripped,"r");
-      return array("headers" => $headers, "body" => $body);
-
-    } else {
-      // TODO: If curl is not installed, see if remote file opening is enabled, and fall back to that method
-      error_log(join(":", array(__FILE__, __METHOD__, "CURL not installed")));
-      return FALSE;
-    }
-  }
 }
 
 class CAYLAssetHelper {
@@ -322,6 +206,111 @@ EOD;
 
 }
 
+class CAYLNetworkUtils {
+
+  private static function curl_installed() {
+    return in_array("curl", get_loaded_extensions());
+  }
+
+  /**
+   * Transform raw HTTP headers into a dictionary
+   * @param $raw_headers string of headers from the HTTP response header
+   * @return array
+   */
+  private static function extract_headers($raw_headers) {
+    $headers = array();
+      if ($raw_headers) {
+      foreach (explode(PHP_EOL,$raw_headers) as $line) {
+        $header = explode(":",$line);
+        if (count($header) == 2) {
+          $headers[$header[0]] = trim($header[1]);
+        }
+      }
+    }
+    return $headers;
+  }
+
+  /**
+   * Open a URL, and return an array with dictionary of header information and a stream to the contents of the URL
+   * @param $url string of resource to download
+   * @return array dictionary of header information and a stream to the contents of the URL
+   */
+  public static function open_url($url, $additional_options = array()) {
+    if (CAYLNetworkUtils::curl_installed()) {
+      if (($ch = curl_init($url)) === FALSE) {
+        error_log(join(":", array(__FILE__, __METHOD__, $url, "CURL init error")));
+        return FALSE;
+      }
+
+      $tmp_header_file_name = tempnam(sys_get_temp_dir(),'cayl');
+      $tmp_body_file_name = tempnam(sys_get_temp_dir(),'cayl');
+      $tmp_header_file = fopen($tmp_header_file_name ,"wr");
+      $tmp_body_file = fopen($tmp_body_file_name ,"wr");
+
+      try {
+        if (($tmp_header_file === FALSE) || ($tmp_body_file === FALSE)) {
+          throw new RuntimeException(join(":", array(__FILE__, __METHOD__, "Error creating temporary files for CURL download")));
+        }
+
+        $options = array(
+          CURLOPT_FAILONERROR => TRUE,      /* Don't ignore HTTP errors */
+          CURLOPT_FOLLOWLOCATION => TRUE,   /* Follow redirects */
+          CURLOPT_MAXREDIRS => 10,          /* No more than 10 redirects */
+          CURLOPT_CONNECTTIMEOUT => 10,     /* 10 second timeout */
+          CURLOPT_RETURNTRANSFER => 1,      /* Return the output as a string */
+          CURLOPT_HEADER => TRUE,           /* Return header information as part of the file */
+          CURLOPT_FILE => $tmp_body_file,
+          CURLOPT_WRITEHEADER => $tmp_header_file,
+        );
+
+        if (curl_setopt_array($ch, $additional_options + $options) === FALSE) {
+          throw new RuntimeException(join(":", array(__FILE__, __METHOD__, "Error setting CURL options", $url, curl_error($ch))));
+        }
+
+        if (($data = curl_exec($ch)) === FALSE) {
+          //TODO: We probably don't want to clutter up the log every time we try to a access a file or asset that's unavailable. Handle better
+          throw new RuntimeException(join(":", array(__FILE__, __METHOD__, "Error executing CURL request", $url, curl_error($ch))));
+        }
+
+        $response_info = curl_getinfo($ch);
+        curl_close($ch);
+        fclose($tmp_header_file);
+        fclose($tmp_body_file);
+
+      } catch (RuntimeException $e) {
+        error_log($e->getMessage());
+        curl_close($ch);
+        fclose($tmp_header_file);
+        fclose($tmp_body_file);
+        return FALSE;
+      }
+
+      $headers = CAYLNetworkUtils::extract_headers(file_get_contents($tmp_header_file_name));
+
+      // Create new file for the content without the http headers. It would be better to do this as part of saving the file
+      $tmp_body_file_name_stripped = tempnam(sys_get_temp_dir(),'cayl');
+      $tmp_body_file_stripped = fopen($tmp_body_file_name_stripped ,"w");
+      $tmp_body_file = fopen($tmp_body_file_name,"r");
+      fseek($tmp_body_file,$response_info['header_size']);
+      while ($line = fgets($tmp_body_file)) {
+        fputs($tmp_body_file_stripped,$line);
+      }
+      fclose($tmp_body_file_stripped);
+      fclose($tmp_body_file);
+      //TODO: Clean up all temp files
+
+      $body = fopen($tmp_body_file_name_stripped,"r");
+      return array("headers" => $headers, "body" => $body, "info" => $response_info);
+
+    } else {
+      // TODO: If curl is not installed, see if remote file opening is enabled, and fall back to that method
+      error_log(join(":", array(__FILE__, __METHOD__, "CURL not installed")));
+      return FALSE;
+    }
+  }
+
+}
+
 class CAYLRobots {
 
   /**
@@ -334,6 +323,20 @@ class CAYLRobots {
     require_once("robotstxtparser.php");
     $parser = new robotstxtparser($robots);
     return !$parser->isDisallowed($url);
+  }
+
+  /**
+   * Find out if the access to the given URL is permitted by the robots.txt
+   * @param $url
+   * @return bool
+   */
+  public static function robots_allowed($url) {
+    $p = parse_url($url);
+    $p['path'] = "robots.txt";
+    $robots_url = $p['scheme'] . "://" . $p['host'] . ($p['port'] ? ":" . $p['port'] : '') . '/robots.txt';
+    $data = CAYLNetworkUtils::open_url($robots_url, array(CURLOPT_FAILONERROR => FALSE));
+    $body = stream_get_contents($data['body']);
+    return (!$body || CAYLRobots::url_permitted($body, $url));
   }
 
 

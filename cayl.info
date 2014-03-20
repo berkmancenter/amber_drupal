@@ -4,6 +4,7 @@ package = CAYL
 core = 7.x
 files[] = libraries/CAYLStorage.php
 files[] = libraries/CAYLFetcher.php
+files[] = libraries/CAYLChecker.php
 files[] = cayl.test
 files[] = cayl.extract.inc
 files[] = cayl.drush.inc

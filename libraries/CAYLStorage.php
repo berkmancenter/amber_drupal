@@ -36,6 +36,7 @@ interface iCAYLStorage {
   function get($id);
   function get_asset($id, $path);
   function get_metadata($key);
+  function get_id($url);
   function save($url, $root, array $headers, array $assets = array());
   function clear_cache();
 }
@@ -78,13 +79,17 @@ class CAYLStorage implements iCAYLStorage {
    * @param $key string URL or an MD5 hash
    * @return array
    */
-  function get_metadata($key) {
+  public function get_metadata($key) {
     /* Check if it's an ID */
     if (strlen($key) == 32 && ctype_xdigit($key)) {
       return $this->get_cache_metadata($key);
     } else {
       return $this->get_cache_metadata($this->url_hash($key));
     }
+  }
+
+  public function get_id($url) {
+    return $this->url_hash($url);
   }
 
   /**
@@ -101,7 +106,7 @@ class CAYLStorage implements iCAYLStorage {
     $dir = join(DIRECTORY_SEPARATOR, array($this->file_root, $id));
     if (empty($cache_metadata)) {
       if (!file_exists($dir)) {
-        if (!mkdir($dir, 0755, true)) {
+        if (!mkdir($dir, 0775, true)) {
           error_log(join(":", array(__FILE__, __METHOD__, "Could not create directory for saving file", $dir)));
           return false;
         }
@@ -282,14 +287,19 @@ class CAYLStorage implements iCAYLStorage {
         $path_array = explode('/',$url_path);
         $asset_path = join(DIRECTORY_SEPARATOR,array_merge(array($base_asset_path), $path_array));
         if (!file_exists(dirname($asset_path))) {
-          mkdir(dirname($asset_path), 0755, true);
+          mkdir(dirname($asset_path), 0775, true);
         }
         $asset_file = fopen($asset_path,"w");
+        if (!$asset_file) {
+          error_log(join(":", array(__FILE__, __METHOD__, "Could not save asset", $id, $asset_path)));
+          continue;
+        }
         while ($line = fgets($asset['body'])) {
           fputs($asset_file,$line);
         }
         fclose($asset_file);
       } else {
+        //TODO: This could happen if the asset points to the domain root. A problem, true, but this error message is not right in that case
         error_log(join(":", array(__FILE__, __METHOD__, "Could not parse asset URL", $id, $asset['url'])));
       }
     }

@@ -27,7 +27,7 @@ function cayl_get_storage() {
 
 /**
  * Return an initialized CAYLFetcher module
- * @return CAYLFetcher
+ * @return ICAYLFetcher
  */
 function cayl_get_fetcher() {
   $fetcher = &drupal_static(__FUNCTION__);
@@ -35,6 +35,19 @@ function cayl_get_fetcher() {
     $fetcher = new CAYLFetcher(cayl_get_storage());
   }
   return $fetcher;
+}
+
+/**
+ * Return an initialized CAYLChecker module
+ * @return ICAYLChecker
+ */
+function cayl_get_checker() {
+  $checker = &drupal_static(__FUNCTION__);
+  if (!isset($checker)) {
+    $db = Database::getConnection();
+    $checker = new CAYLChecker($db, cayl_get_storage());
+  }
+  return $checker;
 }
 
 /**
@@ -239,13 +252,13 @@ function _cayl_filter_tips($filter, $format, $long = FALSE) {
 }
 
 /**
- * Queue all links in the given node for caching
+ * Queue all links in the given node to be checked (which will lead them to be cached eventually if necessary)
  * @param $node object to scan for links to cache
  */
 function cayl_cache_node($node) {
   module_load_include('inc', 'cayl', 'cayl.extract');
   $links = _cayl_extract_node_links($node);
-  cayl_enqueue_cache_links($links);
+  cayl_enqueue_check_links($links);
 }
 
 /**

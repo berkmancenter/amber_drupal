@@ -28,6 +28,21 @@ function cayl_drush_command() {
     'aliases' => array('ccu'),
   );
 
+  $commands['cayl-check-up'] = array(
+    'description' => 'Check a single URL to see if it is up',
+    'arguments' => array(
+      'url' => 'A URL to check',
+    ),
+    'aliases' => array('cup'),
+  );
+
+  $commands['cayl-check-url'] = array(
+    'description' => 'Run the availability check a single URL',
+    'arguments' => array(
+      'url' => 'A URL to check',
+    ),
+  );
+
   return $commands;
 }
 
@@ -85,6 +100,31 @@ function drush_cayl_cache_url($url) {
     drush_print("URL fetched");
   } else {
     drush_set_error(dt("Specify a URL to cache"));
+    return FALSE;
+  }
+}
+
+function drush_cayl_check_up($url) {
+  if ($url) {
+    $checker = cayl_get_checker();
+    if ($checker->up($url)) {
+      drush_print("Up");
+    } else {
+      drush_print("Down");
+    }
+  } else {
+    drush_set_error(dt("Specify a URL to check"));
+    return FALSE;
+  }
+}
+
+function drush_cayl_check_url($url) {
+  if ($url) {
+    $checker = cayl_get_checker();
+    $checker->update_status($url);
+    drush_print("URL checked");
+  } else {
+    drush_set_error(dt("Specify a URL to check"));
     return FALSE;
   }
 }

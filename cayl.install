@@ -27,26 +27,35 @@ function cayl_uninstall() {
 
 function cayl_schema() {
 
-  $schema['cayl_queue_cache'] = array(
-    'description' => 'Stores a list of URLs to be cached or updated',
+  $schema['cayl_status'] = array(
+    'description' => 'Stores a list of URLs with their current status',
     'fields' => array(
-      'qid' => array(
-        'type' => 'serial',
+      'id' => array(
+        'type' => 'varchar',
+        'length' => 32,
         'not null' => TRUE,
       ),
       'url' => array(
         'type' => 'varchar',
         'not null' => TRUE,
         'length' => 2000,
-        'description' => 'URL to be cached',
+        'description' => 'The full URL'
       ),
+      'status' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'description' => 'Whether the URL is available or not'
+      ),
+      'last_checked' => array(
+        'type' => 'int',
+        'description' => 'The last date the status of the URL was checked',
+      ),
+      'next_check' => array(
+        'type' => 'int',
+        'description' => 'The next date after which the status of the URL can be checked',
+      )
     ),
-    'primary key' => array('qid'),
+    'primary key' => array('id'),
   );
   return $schema;
 }
-
-function cayl_update_7003() {
-  drupal_install_schema('cayl');
-}
-
