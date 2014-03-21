@@ -45,8 +45,7 @@ function cayl_dashboard_detail_form() {
     array('data' => t('Size'), 'field' => 'ca.size' ),
     array('data' => t('Last viewed'), 'field' => 'a.date' ),
     array('data' => t('Number of views'), 'field' => 'a.views' ),
-    array('data' => t(''), ),
-    array('data' => t(''), ),
+    array('data' => t(''),  ),
   );
 
   $query = db_select('cayl_check', 'c');
@@ -72,7 +71,7 @@ function cayl_dashboard_detail_form() {
       'size' => format_size($r['size']),
       'a.date' => isset($r['a_date']) ? format_date($r['a_date']) : "",
       'views' => isset($r['views']) ? $r['views'] : 0,
-
+      'delete' => l('Delete', 'admin/reports/cayl/delete/' . $r['id'], array('query' => array('destination' => current_path()))),
     );
   }
 
@@ -88,8 +87,6 @@ function cayl_dashboard_detail_form() {
     '#weight' => 5,
   );
   return $build;
-
-
 }
 
 function _cayl_cache_size() {
@@ -140,3 +137,12 @@ function _cayl_directory_size($directory) {
   }
   return $size;
 }
+
+function cayl_dashboard_delete_item($id) {
+  if ($id) {
+    cayl_delete_item($id);
+    drupal_set_message("Deleted record with id $id");
+  }
+  drupal_goto(drupal_get_destination());
+}
+

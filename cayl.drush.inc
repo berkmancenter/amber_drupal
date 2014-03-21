@@ -37,9 +37,16 @@ function cayl_drush_command() {
   );
 
   $commands['cayl-check-url'] = array(
-    'description' => 'Run the availability check a single URL',
+    'description' => 'Run the availability check on a single URL',
     'arguments' => array(
       'url' => 'A URL to check',
+    ),
+  );
+
+  $commands['cayl-delete'] = array(
+    'description' => 'Delete an id from the cache',
+    'arguments' => array(
+      'id' => 'ID of URL to delete',
     ),
   );
 
@@ -113,4 +120,13 @@ function drush_cayl_check_url($url) {
   }
 }
 
+function drush_cayl_delete_url($id) {
+  if ($id) {
+    cayl_delete_item($id);
+    drush_print("Item deleted");
+  } else {
+    drush_set_error(dt("Specify an ID to delete"));
+    return FALSE;
+  }
+}
 

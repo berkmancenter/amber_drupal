@@ -14,7 +14,8 @@ interface iCAYLStatus {
   public function save_cache(array $data);
   public function get_urls_to_check();
   public function save_view($id);
-  public function clear_all();
+  public function delete_all();
+  public function delete($id);
 }
 
 class CAYLStatus implements iCAYLStatus {
@@ -164,10 +165,17 @@ class CAYLStatus implements iCAYLStatus {
     $updateQuery->closeCursor();
   }
 
-  public function clear_all() {
+  public function delete_all() {
     $this->db->prepare("TRUNCATE cayl_cache")->execute();
     $this->db->prepare("TRUNCATE cayl_check")->execute();
     $this->db->prepare("TRUNCATE cayl_activity")->execute();
   }
+
+  public function delete($id) {
+    foreach (array('cayl_cache', 'cayl_check', 'cayl_activity') as $table) {
+      $this->db->prepare("DELETE FROM $table WHERE id = :id")->execute(array('id' => $id));
+    }
+  }
+
 
 } 

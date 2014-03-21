@@ -119,6 +119,15 @@ function cayl_menu() {
     'access arguments' => array('access administration pages'),
     'weight' => 2,
   );
+  $items['admin/reports/cayl/delete'] = array(
+    'title' => 'Delete',
+    'description' => 'Delete an item from the cache',
+    'file' => 'cayl.pages.inc',
+    'page callback' => array('cayl_dashboard_delete_item'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_CALLBACK,
+  );
+
   $items['cayl/cache'] = array(
     'title' => 'CAYL Cache',
     'description' => 'Retrieve items from the cache',
@@ -375,13 +384,21 @@ function cayl_clear_cache() {
   $storage = cayl_get_storage();
   $storage->clear_cache();
   $status = cayl_get_status();
-  $status->clear_all();
+  $status->delete_all();
   foreach (array(CAYL_QUEUE_CACHE, CAYL_QUEUE_CHECK_EXISTING, CAYL_QUEUE_CHECK_NEW) as $queue_name) {
     $queue = DrupalQueue::get($queue_name);
     if ($queue) {
       $queue->deleteQueue();
     }
   }
+}
+
+function cayl_delete_item($id) {
+  $storage = cayl_get_storage();
+  $storage->clear_cache_item($id);
+  $status = cayl_get_status();
+  $status->delete($id);
+  //TODO: Delete the item from the queue (if possible)
 }
 
 /**

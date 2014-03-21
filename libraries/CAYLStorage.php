@@ -168,6 +168,16 @@ class CAYLStorage implements iCAYLStorage {
     }
   }
 
+  public function clear_cache_item($id) {
+    $path = $this->get_cache_item_path($id);
+    if ($path) {
+      $dir = dirname($path);
+      if ($this->is_within_cache_directory($dir)) {
+        $this->rrmdir($dir);
+      }
+    }
+  }
+
   /**
    * Return an MD5 hash for a normalized form of the URL to be used as a cached document id
    * @param string $url to be hashed
