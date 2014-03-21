@@ -124,13 +124,6 @@ function cayl_config_form($form, &$form_state) {
      ),
   );
 
-  $form['cayl_delivery']['cayl_permitted_fields'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Permitted fields'),
-    '#default_value' => variable_get('cayl_permitted_fields', 'body'),
-    '#description' => t('Fields for which caching should be enabled'),
-  );
-
   $form['cayl_country'] = array(
     '#type' => 'fieldset',
     '#title' => t('Cache Delivery for a specific country'),
