@@ -62,12 +62,12 @@ function cayl_get_checker() {
  * @return ICAYLStatus
  */
 function cayl_get_status() {
-  $checker = &drupal_static(__FUNCTION__);
-  if (!isset($checker)) {
+  $status = &drupal_static(__FUNCTION__);
+  if (!isset($status)) {
     $db = Database::getConnection();
-    $checker = new CAYLStatus($db);
+    $status = new CAYLStatus($db);
   }
-  return $checker;
+  return $status;
 }
 
 /**
