@@ -7,6 +7,15 @@ define("CAYL_ACTION_CACHE",3);
 define("CAYL_STATUS_UP","up");
 define("CAYL_STATUS_DOWN","down");
 
+define("CAYL_QUEUE_CACHE", "cayl_cache");
+define("CAYL_QUEUE_CHECK_NEW", "cayl_check_new");
+define("CAYL_QUEUE_CHECK_EXISTING","cayl_check_existing");
+
+define("CAYL_VAR_LAST_CHECK_RUN","cayl_last_check_run");
+define("CAYL_VAR_LAST_CACHE_RUN","cayl_last_cache_run");
+
+
+
 module_load_include('inc', 'cayl', 'cayl.batch');
 
 /**
@@ -43,7 +52,20 @@ function cayl_get_checker() {
   $checker = &drupal_static(__FUNCTION__);
   if (!isset($checker)) {
     $db = Database::getConnection();
-    $checker = new CAYLChecker($db, cayl_get_storage());
+    $checker = new CAYLChecker(cayl_get_status());
+  }
+  return $checker;
+}
+
+/**
+ * Return an initialized CAYLStatus module
+ * @return ICAYLStatus
+ */
+function cayl_get_status() {
+  $checker = &drupal_static(__FUNCTION__);
+  if (!isset($checker)) {
+    $db = Database::getConnection();
+    $checker = new CAYLStatus($db);
   }
   return $checker;
 }
@@ -69,6 +91,7 @@ function cayl_menu() {
     'description' => 'Configuration for the Cache As You Link module',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cayl_config_form'),
+    //TODO: Add permissions for CAYL functionality
     'access arguments' => array('access administration pages'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'cayl.admin.inc',
@@ -76,10 +99,25 @@ function cayl_menu() {
   $items['admin/reports/cayl'] = array(
     'title' => 'CAYL Dashboard',
     'description' => 'CAYL Dashboard',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('cayl_dashboard_form'),
+    'file' => 'cayl.pages.inc',
+    'page callback' => array('drupal_get_form'),
+    'page arguments' => array('cayl_dashboard_summary_form'),
     'access arguments' => array('access administration pages'),
     'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/reports/cayl/summary'] = array(
+    'title' => 'Summary',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+  );
+  $items['admin/reports/cayl/detail'] = array(
+    'title' => 'Detail',
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'cayl.pages.inc',
+    'page callback' => array('drupal_get_form'),
+    'page arguments' => array('cayl_dashboard_detail_form'),
+    'access arguments' => array('access administration pages'),
+    'weight' => 2,
   );
   $items['cayl/cache'] = array(
     'title' => 'CAYL Cache',
@@ -108,9 +146,9 @@ function cayl_menu() {
  * @return null|string
  */
 function _cayl_add_behavior($status, $country = NULL) {
-  $result = $status;
+  $result = $status ? "up" : "down";
   if (is_null($country)) {
-    if (CAYL_STATUS_UP == $status) {
+    if (1 == $status) {
       $action = variable_get('cayl_available_action', CAYL_ACTION_NONE);
       switch ($action) {
         case CAYL_ACTION_NONE:
@@ -123,7 +161,7 @@ function _cayl_add_behavior($status, $country = NULL) {
           $result .= " popup";
           break;
         }
-    } else if (CAYL_STATUS_DOWN == $status) {
+    } else if (0 == $status) {
       $action = variable_get('cayl_unavailable_action', CAYL_ACTION_NONE);
       switch ($action) {
         case CAYL_ACTION_NONE:
@@ -147,18 +185,16 @@ function _cayl_add_behavior($status, $country = NULL) {
 
 /**
  * Build the data- attributes to be added to the anchor tag, given saved metadata
- * @param array $storage_metadata array dictionary from the CAYL Storage module
+ * @param array $cache array dictionary from the CAYL Status module
  * @return array attributes to be added to the link
  */
-function _cayl_build_link_attributes($storage_metadata) {
+function _cayl_build_link_attributes($cache) {
   $result = array();
-  if (isset($storage_metadata['cache']['cayl']['location'],$storage_metadata['cache']['cayl']['date'])) {
-    $result['data-cache'] = join(" ",array(base_path() . $storage_metadata['cache']['cayl']['location'],
-                                           $storage_metadata['cache']['cayl']['date']));
+  if (isset($cache['location'],$cache['date'])) {
+    $result['data-cache'] = join(" ",array(base_path() . $cache['location'], $cache['date']));
   }
-  if (isset($storage_metadata['status']['cayl']['default'])) {
-    //TODO: Should this be drawn from the cayl_status table instead?
-    $behavior = _cayl_add_behavior($storage_metadata['status']['cayl']['default']);
+  if (isset($cache['status'])) {
+    $behavior = _cayl_add_behavior($cache['status']);
     if ($behavior) {
       $result['data-cayl-behavior'] = $behavior;
     }
@@ -170,8 +206,8 @@ function _cayl_build_link_attributes($storage_metadata) {
  * Lookup a URL using the CAYLStorage class, while caching for the duration of the page load
  */
 function _cayl_lookup_url($url) {
-  $storage = cayl_get_storage();
-  return _cayl_build_link_attributes($storage->get_metadata($url));
+  $status = cayl_get_status();
+  return _cayl_build_link_attributes($status->get_summary($url));
 }
 
 /**
@@ -336,4 +372,35 @@ function cayl_deliver_cache_item($data) {
 function cayl_clear_cache() {
   $storage = cayl_get_storage();
   $storage->clear_cache();
+  $status = cayl_get_status();
+  $status->clear_all();
+  foreach (array(CAYL_QUEUE_CACHE, CAYL_QUEUE_CHECK_EXISTING, CAYL_QUEUE_CHECK_NEW) as $queue_name) {
+    $queue = DrupalQueue::get($queue_name);
+    if ($queue) {
+      $queue->deleteQueue();
+    }
+  }
+}
+
+/**
+ * Cache all nodes
+ * @return number of nodes queued for caching
+ */
+function cayl_cache_all() {
+  $count = 0;
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+    ->propertyCondition('status', 1);
+  $result = $query->execute();
+  if (!empty($result['node'])) {
+    $nids = array_keys($result['node']);
+    foreach ($nids as $nid) {
+      $node = node_load($nid, NULL, TRUE);
+      if ($node) {
+        cayl_cache_node($node);
+        $count++;
+      }
+    }
+  }
+  return $count;
 }

@@ -1,31 +1,14 @@
 <?php
 
 interface iCAYLChecker {
-  public function get_urls_to_check();
   public function up($url);
-  public function update_status($url);
+  public function check($last_check);
 }
 
 class CAYLChecker implements iCAYLChecker {
 
-  public function __construct(PDO $db, iCAYLStorage $storage) {
-    $this->db = $db;
-    $this->storage = $storage;
-  }
-
-  /**
-   * Get a list of URLs which are due for checking.
-   */
-  public function get_urls_to_check() {
-    $result = array();
-    $query = $this->db->prepare('SELECT url FROM cayl_status WHERE next_check < :time ORDER BY next_check ASC');
-    if ($query->execute(array('time' => time()))) {
-      $result = $query->fetchAll(PDO::FETCH_COLUMN, 0);
-      $query->closeCursor();
-    } else {
-      error_log(join(":", array(__FILE__, __METHOD__, "Error retrieving URLs to check from database")));
-    }
-    return $result;
+  public function __construct(iCAYLStatus $status) {
+    $this->status_service = $status;
   }
 
   /**
@@ -45,61 +28,42 @@ class CAYLChecker implements iCAYLChecker {
   /**
    * Check whether a URL is available, and update the status of the URL in the database
    *
-   * @param $url
-   * @return bool whether the cached copy of the URL should be updated
+   * @param
+   * @return bool updated
    */
-  public function update_status($url) {
-
-    // Get data for $url
-    $query = $this->db->prepare('SELECT * FROM cayl_status WHERE url = :url');
-    $query->execute(array('url' => $url));
-    $result = ($query->rowCount() == 1) ? $query->fetch(PDO::FETCH_ASSOC) : array();
-    $query->closeCursor();
+  public function check($last_check) {
+    $url = $last_check['url'];
 
     /* Make sure we're still scheduled to check the $url */
-    $next_check_timestamp = isset($result['next_check']) ? $result['next_check'] : 0;
+    $next_check_timestamp = isset($last_check['next_check']) ? $last_check['next_check'] : 0;
     if ($next_check_timestamp > time()) {
       return false;
     }
 
-    /* Figure out for when we should schedule the next check */
     $date = new DateTime();
     if (!CAYLRobots::robots_allowed($url)) {
+      /* If blocked by robots.txt, schedule next check for 6 months out */
       $next = $date->add(new DateInterval("P6M"))->getTimestamp();
-      $status = false;
+      $status = isset($last_check['status']) ? $last_check['status'] : NULL;
       error_log(join(":", array(__FILE__, __METHOD__, "Blocked by robots.txt", $url)));
       //TODO: Log this in a user-accessible way (for the dashboard?)
 
     } else {
       $status = $this->up($url);
-      $next = $this->next_check_date(isset($result['status']) ? $result['status'] : NULL,
-                                     $result['last_checked'], $result['next_check'], $status);
+      $next = $this->next_check_date(isset($last_check['status']) ? $last_check['status'] : NULL,
+                                     $last_check['last_checked'], $last_check['next_check'], $status);
     }
 
     $now = new DateTime();
-    $updated = array(
-            'id' => $result['id'],
+    $result = array(
+            'id' => $last_check['id'],
+            'url' => $last_check['url'],
             'last_checked' => $now->getTimestamp(),
             'next_check' => $next,
             'status' => isset($status) ? ($status ? 1 : 0) : NULL,
           );
-    if (isset($result['id'])) {
-      $updateQuery = $this->db->prepare('UPDATE cayl_status ' .
-                                        'SET last_checked = :last_checked, ' .
-                                        'next_check = :next_check, ' .
-                                        'status = :status ' .
-                                        'WHERE id = :id');
-    } else {
-      $updateQuery = $this->db->prepare('INSERT into cayl_status ' .
-                                        '(id, url, status, last_checked, next_check) ' .
-                                        'VALUES(:id, :url, :status, :last_checked, :next_check)');
-      $updated['url'] = $url;
-      $updated['id'] = $this->storage->get_id($url);
-    }
-    $updateQuery->execute($updated);
-    $updateQuery->closeCursor();
 
-    return $status;
+    return $result;
   }
 
   /**

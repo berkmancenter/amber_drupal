@@ -27,7 +27,7 @@ function cayl_uninstall() {
 
 function cayl_schema() {
 
-  $schema['cayl_status'] = array(
+  $schema['cayl_check'] = array(
     'description' => 'Stores a list of URLs with their current status',
     'fields' => array(
       'id' => array(
@@ -54,6 +54,66 @@ function cayl_schema() {
         'type' => 'int',
         'description' => 'The next date after which the status of the URL can be checked',
       )
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['cayl_cache'] = array(
+    'description' => 'Stores a metadata about cache entries',
+    'fields' => array(
+      'id' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'url' => array(
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 2000,
+        'description' => 'The full URL'
+      ),
+      'location' => array(
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 2000,
+        'description' => 'The location of the cached data'
+      ),
+      'date' => array(
+        'type' => 'int',
+        'description' => 'The date the data was cached',
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 200,
+        'description' => 'The mimetype of the cached data'
+      ),
+      'size' => array(
+        'type' => 'int',
+        'description' => 'The size of the cached data, in bytes',
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['cayl_activity'] = array(
+    'description' => 'Stores information about cache viewing activity',
+    'fields' => array(
+      'id' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'date' => array(
+        'type' => 'int',
+        'description' => 'Date last viewed',
+        'not null' => TRUE,
+      ),
+      'views' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The number of page views for the cached item'
+      ),
     ),
     'primary key' => array('id'),
   );

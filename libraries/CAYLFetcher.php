@@ -19,6 +19,7 @@ class CAYLFetcher implements iCAYLFetcher {
   /**
    * Fetch the URL and associated assets and pass it on to the designated Storage service
    * @param $url
+   * @return
    */
   public function fetch($url) {
     $existing_cache = $this->storage->get_metadata($url);
@@ -39,6 +40,8 @@ class CAYLFetcher implements iCAYLFetcher {
       return false;
     }
 
+    $size = $root_item['info']['size_download'];
+
     // Get other assets
     if (($content_type = $root_item['headers']['Content-Type']) &&
         (strpos(strtolower($content_type),"text/html") !== FALSE)) {
@@ -47,6 +50,9 @@ class CAYLFetcher implements iCAYLFetcher {
       $asset_paths = $this->assetHelper->extract_assets($body);
       $assets = $this->assetHelper->expand_asset_references($url, $asset_paths);
       $assets = $this->download_assets($assets);
+      foreach ($assets as $key => $value) {
+        $size += $value['info']['size_download'];
+      }
       $body = $this->assetHelper->rewrite_links($body, $assets);
       $body = $this->assetHelper->insert_banner($body);
       $stream = fopen('php://temp','rw');
@@ -64,7 +70,16 @@ class CAYLFetcher implements iCAYLFetcher {
     if ($root_item) {
       fclose($root_item['body']);
     }
-    return true;
+    $storage_metadata = $this->storage->get_metadata($url);
+    print $size;
+    return array (
+      'id' => $storage_metadata['id'],
+      'url' => $storage_metadata['url'],
+      'type' => $storage_metadata['type'],
+      'date' => strtotime($storage_metadata['cache']['cayl']['date']),
+      'location' => $storage_metadata['cache']['cayl']['location'],
+      'size' => $size
+    );
   }
 
 

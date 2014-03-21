@@ -58,21 +58,7 @@ function drush_cayl_scan($nid = NULL) {
   }
   if ($nid) {
     if ($nid == 'all') {
-      $query = new EntityFieldQuery();
-      $query->entityCondition('entity_type', 'node')
-        ->propertyCondition('status', 1);
-      $result = $query->execute();
-      if (!empty($result['node'])) {
-        $nids = array_keys($result['node']);
-        foreach ($nids as $nid) {
-          $node = node_load($nid, NULL, TRUE);
-          if (!$node) {
-            drush_set_error(dt("Could not load node"));
-            return FALSE;
-          }
-          cayl_cache_node($node);
-        }
-      }
+      cayl_cache_all();
     } else {
       $node = node_load($nid);
       if (!$node) {
@@ -95,8 +81,7 @@ function drush_cayl_clear_cache() {
 
 function drush_cayl_cache_url($url) {
   if ($url) {
-    $fetcher = cayl_get_fetcher();
-    $fetcher->fetch($url);
+    cayl_process_cache_queue($url);
     drush_print("URL fetched");
   } else {
     drush_set_error(dt("Specify a URL to cache"));
@@ -120,8 +105,7 @@ function drush_cayl_check_up($url) {
 
 function drush_cayl_check_url($url) {
   if ($url) {
-    $checker = cayl_get_checker();
-    $checker->update_status($url);
+    cayl_process_check_queue($url);
     drush_print("URL checked");
   } else {
     drush_set_error(dt("Specify a URL to check"));
