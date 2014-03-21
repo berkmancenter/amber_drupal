@@ -18,7 +18,7 @@ class CAYLTestCase extends DrupalUnitTestCase {
   function setUp() {
     drupal_load('module', 'cayl');
     module_load_include('inc', 'cayl', 'cayl.extract');
-    module_load_include('inc','cayl','tests/MockCAYLStorage');
+    module_load_include('inc','cayl','tests/MockCAYLStatus');
     parent::setUp();
   }
 
@@ -107,10 +107,6 @@ class CAYLTestCase extends DrupalUnitTestCase {
     $this->assertFalse(strpos($result,'data-cache'));
   }
 
-  public function testCAYLAddBehaviourBad() {
-    $result = _cayl_add_behavior("bogus");
-    $this->assertEqual($result,"bogus");
-  }
 
   public function testCAYLLinkDetection1() {
     $body = <<<EOT
@@ -216,20 +212,20 @@ class CAYLWebTestCase extends DrupalWebTestCase {
 
   public function testCAYLAddBehaviourUpPopup() {
     variable_set('cayl_available_action', CAYL_ACTION_POPUP);
-    $result = _cayl_add_behavior("up");
+    $result = _cayl_add_behavior(1);
     $this->assertEqual($result,"up popup");
   }
 
   public function testCAYLAddBehaviourUpHover() {
     variable_set('cayl_available_action', CAYL_ACTION_HOVER);
     variable_set('cayl_available_action_hover', 4);
-    $result = _cayl_add_behavior("up");
+    $result = _cayl_add_behavior(1);
     $this->assertEqual($result,"up hover:4");
   }
 
   public function testCAYLAddBehaviourUpNone() {
     variable_set('cayl_available_action', CAYL_ACTION_NONE);
-    $result = _cayl_add_behavior("up");
+    $result = _cayl_add_behavior(1);
     $this->assertNull($result);
   }
 
@@ -237,13 +233,13 @@ class CAYLWebTestCase extends DrupalWebTestCase {
     variable_set('cayl_unavailable_action', CAYL_ACTION_HOVER);
     variable_set('cayl_available_action', CAYL_ACTION_POPUP);
     variable_set('cayl_unavailable_action_hover', 1);
-    $result = _cayl_add_behavior("down");
+    $result = _cayl_add_behavior(0);
     $this->assertEqual($result,"down hover:1");
   }
 
   public function testCAYLAddBehaviourDownCache() {
     variable_set('cayl_unavailable_action', CAYL_ACTION_CACHE);
-    $result = _cayl_add_behavior("down");
+    $result = _cayl_add_behavior(0);
     $this->assertEqual($result,"down cache");
   }
 
