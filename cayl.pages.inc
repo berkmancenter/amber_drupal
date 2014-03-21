@@ -62,8 +62,9 @@ function cayl_dashboard_detail_form() {
 
   $rows = array();
   while ($r = $result->fetchAssoc()) {
+    $host = parse_url($r['url'],PHP_URL_HOST);
     $rows[] = array(
-      'site' => parse_url($r['url'],PHP_URL_HOST),
+      'site' => "$host (" . l('Blacklist', 'admin/reports/cayl/blacklist/' . $host, array('query' => array('destination' => current_path()))) . ")",
       'url' => $r['url'],
       'status' => $r['status'] ? t('Up') : t('Down'),
       'last_checked' => format_date($r['last_checked']),
@@ -138,6 +139,10 @@ function _cayl_directory_size($directory) {
   return $size;
 }
 
+/**
+ * Callback function to delete single item from the cache
+ * @param $id
+ */
 function cayl_dashboard_delete_item($id) {
   if ($id) {
     cayl_delete_item($id);
@@ -146,3 +151,16 @@ function cayl_dashboard_delete_item($id) {
   drupal_goto(drupal_get_destination());
 }
 
+/**
+ * Callback function to add a site to the list of sites not to cache
+ * @param $id
+ */
+function cayl_dashboard_blacklist_site($site) {
+  if ($site) {
+    $list = variable_get('cayl_excluded_sites','');
+    $list .= PHP_EOL . filter_xss($site);
+    variable_set('cayl_excluded_sites',$list);
+    drupal_set_message("Added $site to list of excluded sites");
+  }
+  drupal_goto(drupal_get_destination());
+}

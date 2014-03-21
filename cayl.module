@@ -127,6 +127,14 @@ function cayl_menu() {
     'access arguments' => array('access administration pages'),
     'type' => MENU_CALLBACK,
   );
+  $items['admin/reports/cayl/blacklist'] = array(
+    'title' => 'Exclude',
+    'description' => 'Exclude a site from being cached',
+    'file' => 'cayl.pages.inc',
+    'page callback' => array('cayl_dashboard_blacklist_site'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_CALLBACK,
+  );
 
   $items['cayl/cache'] = array(
     'title' => 'CAYL Cache',
