@@ -7,13 +7,13 @@
  */
 
 interface iCAYLStatus {
-  function get_check($url, $source = 'cayl');
-  function get_cache($url, $source = 'cayl');
-  function get_summary($url);
-  function save_check(array $data);
-  function save_cache(array $data);
-  function get_urls_to_check();
-  function clear_all();
+  public function get_check($url, $source = 'cayl');
+  public function get_cache($url, $source = 'cayl');
+  public function get_summary($url);
+  public function save_check(array $data);
+  public function save_cache(array $data);
+  public function get_urls_to_check();
+  public function clear_all();
 }
 
 class CAYLStatus implements iCAYLStatus {
