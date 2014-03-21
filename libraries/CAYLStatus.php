@@ -13,6 +13,7 @@ interface iCAYLStatus {
   public function save_check(array $data);
   public function save_cache(array $data);
   public function get_urls_to_check();
+  public function save_view($id);
   public function clear_all();
 }
 
@@ -144,10 +145,29 @@ class CAYLStatus implements iCAYLStatus {
     return $result;
   }
 
+  public function save_view($id) {
+    $count_query = $this->db->prepare("SELECT COUNT(id) FROM cayl_activity WHERE id = :id");
+    $count_query->execute(array('id' => $id));
+    $result = $count_query->fetchColumn();
+
+    if ($result) {
+      $updateQuery = $this->db->prepare('UPDATE cayl_activity ' .
+                                        'SET views = views + 1, ' .
+                                        'date = :date ' .
+                                        'WHERE id = :id');
+    } else {
+      $updateQuery = $this->db->prepare('INSERT into cayl_activity ' .
+                                        '(id, views, date) ' .
+                                        'VALUES(:id, 1, :date)');
+    }
+    $updateQuery->execute(array('id' => $id, 'date' => time()));
+    $updateQuery->closeCursor();
+  }
+
   public function clear_all() {
     $this->db->prepare("TRUNCATE cayl_cache")->execute();
     $this->db->prepare("TRUNCATE cayl_check")->execute();
-//    $this->db->prepare("TRUNCATE cayl_activity")->execute();
+    $this->db->prepare("TRUNCATE cayl_activity")->execute();
   }
 
 } 

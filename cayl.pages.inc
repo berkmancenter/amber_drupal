@@ -43,16 +43,18 @@ function cayl_dashboard_detail_form() {
     array('data' => t('Last Checked'), 'field' => 'last_checked', 'sort' => 'desc'),
     array('data' => t('Cache Date'), 'field' => 'ca.date'),
     array('data' => t('Size'), 'field' => 'ca.size' ),
-    array('data' => t('Last viewed'), ),
-    array('data' => t('Number of views'), ),
+    array('data' => t('Last viewed'), 'field' => 'a.date' ),
+    array('data' => t('Number of views'), 'field' => 'a.views' ),
     array('data' => t(''), ),
     array('data' => t(''), ),
   );
 
   $query = db_select('cayl_check', 'c');
   $query->join('cayl_cache', 'ca','ca.id = c.id');
+  $query->leftJoin('cayl_activity', 'a','ca.id = a.id');
   $query = $query->fields('c', array('id', 'url','status','last_checked'));
   $query = $query->fields('ca', array('id', 'date', 'size'));
+  $query = $query->fields('a', array('id', 'views', 'date'));
   $query = $query->extend('PagerDefault');
   $query = $query->extend('TableSort');
   $query = $query->limit(20);
@@ -68,6 +70,9 @@ function cayl_dashboard_detail_form() {
       'last_checked' => format_date($r['last_checked']),
       'date' => format_date($r['date']),
       'size' => format_size($r['size']),
+      'a.date' => isset($r['a_date']) ? format_date($r['a_date']) : "",
+      'views' => isset($r['views']) ? $r['views'] : 0,
+
     );
   }
 

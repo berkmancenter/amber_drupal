@@ -327,6 +327,8 @@ function cayl_retrieve_cache_item($id) {
   $storage = cayl_get_storage();
   $data = $storage->get($id);
   $metadata = $storage->get_metadata($id);
+  $status = cayl_get_status();
+  $status->save_view($id);
   return ($data && $metadata) ? array('data' => $data, 'metadata' => $metadata) : MENU_NOT_FOUND;
 }
 
