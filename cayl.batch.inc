@@ -69,7 +69,7 @@ function cayl_batch_scan_all_setup() {
   $query->entityCondition('entity_type', 'node')->propertyCondition('status', 1);
   $result = $query->execute();
   if (!empty($result['node'])) {
-    $operations = [];
+    $operations = array();
     $nids = array_keys($result['node']);
     foreach ($nids as $nid) {
       $operations[] = array('cayl_batch_scan_process', array($nid));
