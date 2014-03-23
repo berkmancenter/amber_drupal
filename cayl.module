@@ -51,8 +51,7 @@ function cayl_get_fetcher() {
 function cayl_get_checker() {
   $checker = &drupal_static(__FUNCTION__);
   if (!isset($checker)) {
-    $db = Database::getConnection();
-    $checker = new CAYLChecker(cayl_get_status());
+    $checker = new CAYLChecker();
   }
   return $checker;
 }

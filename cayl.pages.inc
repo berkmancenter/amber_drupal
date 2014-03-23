@@ -26,7 +26,12 @@ function cayl_dashboard_summary_form() {
   );
   $build['buttons']['cache'] = array(
     '#type' => 'submit',
-    '#value' => t('Cache all links on the site'),
+    '#value' => t('Scan all nodes for links on the site to cache'),
+    '#submit' => array('cayl_dashboard_summary_form_scan')
+  );
+  $build['buttons']['cache_now'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cache all links which are scheduled for caching now'),
     '#submit' => array('cayl_dashboard_summary_form_cache')
   );
 
@@ -116,9 +121,18 @@ function cayl_dashboard_summary_form_clear($form, &$form_state) {
   drupal_set_message("All cached data has been deleted");
 }
 
+function cayl_dashboard_summary_form_scan($form, &$form_state) {
+  $scan_batch = cayl_batch_scan_all_setup();
+  if ($scan_batch) {
+    batch_set($scan_batch);
+  }
+}
+
 function cayl_dashboard_summary_form_cache($form, &$form_state) {
-  $count = cayl_cache_all();
-  drupal_set_message(t("Queued links from @count nodes to be cached",array('@count' => $count)));
+  $cache_batch = cayl_batch_cache_all_setup();
+  if ($cache_batch) {
+    batch_set($cache_batch);
+  }
 }
 
 /**

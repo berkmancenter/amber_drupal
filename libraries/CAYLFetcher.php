@@ -24,7 +24,7 @@ class CAYLFetcher implements iCAYLFetcher {
   public function fetch($url) {
     $existing_cache = $this->storage->get_metadata($url);
     if (!empty($existing_cache)) {
-      // TODO: Check to see if we should refresh the cache
+      // TODO: Check to see if we should refresh the cache.
     }
 
     // Check the robots.txt
@@ -66,20 +66,19 @@ class CAYLFetcher implements iCAYLFetcher {
     if ($this->storage && $root_item) {
       rewind($root_item['body']);
       $this->storage->save($url, $root_item['body'], $root_item['headers'], isset($assets) ? $assets : array());
-    }
-    if ($root_item) {
       fclose($root_item['body']);
+      $storage_metadata = $this->storage->get_metadata($url);
+      return array (
+        'id' => $storage_metadata['id'],
+        'url' => $storage_metadata['url'],
+        'type' => $storage_metadata['type'],
+        'date' => strtotime($storage_metadata['cache']['cayl']['date']),
+        'location' => $storage_metadata['cache']['cayl']['location'],
+        'size' => $size
+      );
+    } else {
+      return false;
     }
-    $storage_metadata = $this->storage->get_metadata($url);
-    print $size;
-    return array (
-      'id' => $storage_metadata['id'],
-      'url' => $storage_metadata['url'],
-      'type' => $storage_metadata['type'],
-      'date' => strtotime($storage_metadata['cache']['cayl']['date']),
-      'location' => $storage_metadata['cache']['cayl']['location'],
-      'size' => $size
-    );
   }
 
 
@@ -348,13 +347,14 @@ class CAYLRobots {
   public static function robots_allowed($url) {
     $p = parse_url($url);
     $p['path'] = "robots.txt";
-    $robots_url = $p['scheme'] . "://" . $p['host'] . ($p['port'] ? ":" . $p['port'] : '') . '/robots.txt';
+    $robots_url = $p['scheme'] . "://" . $p['host'] . (isset($p['port']) ? ":" . $p['port'] : '') . '/robots.txt';
     $data = CAYLNetworkUtils::open_url($robots_url, array(CURLOPT_FAILONERROR => FALSE));
-    $body = stream_get_contents($data['body']);
-    return (!$body || CAYLRobots::url_permitted($body, $url));
+    if (isset($item['info']['http_code']) && ($item['info']['http_code'] == 200)) {
+      $body = stream_get_contents($data['body']);
+      return (!$body || CAYLRobots::url_permitted($body, $url));
+    } else {
+      return true;
+    }
   }
-
-
-
 
 }

@@ -102,7 +102,7 @@ class CAYLStatus implements iCAYLStatus {
    * @return false on failure
    */
   public function save_cache(array $data) {
-    foreach (array('url', 'location', 'date', 'type', 'size') as $key) {
+    foreach (array('id', 'url', 'location', 'date', 'type', 'size') as $key) {
       if (!array_key_exists($key,$data)) {
         error_log(join(":", array(__FILE__, __METHOD__, "Missing required key when updating cache", $key)));
         return false;

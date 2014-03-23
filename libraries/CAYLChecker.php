@@ -7,10 +7,6 @@ interface iCAYLChecker {
 
 class CAYLChecker implements iCAYLChecker {
 
-  public function __construct(iCAYLStatus $status) {
-    $this->status_service = $status;
-  }
-
   /**
    * Check to see if a given URL is available (if it returns 200 status code)
    * @param $url
@@ -33,6 +29,7 @@ class CAYLChecker implements iCAYLChecker {
    */
   public function check($last_check) {
     $url = $last_check['url'];
+    $id = isset($last_check['id']) ? $last_check['id'] : md5($url); //TODO: Unify ID generation
 
     /* Make sure we're still scheduled to check the $url */
     $next_check_timestamp = isset($last_check['next_check']) ? $last_check['next_check'] : 0;
@@ -51,13 +48,15 @@ class CAYLChecker implements iCAYLChecker {
     } else {
       $status = $this->up($url);
       $next = $this->next_check_date(isset($last_check['status']) ? $last_check['status'] : NULL,
-                                     $last_check['last_checked'], $last_check['next_check'], $status);
+                                     isset($last_check['last_checked']) ? $last_check['last_checked'] : NULL,
+                                     isset($last_check['next_check']) ? $last_check['next_check'] : NULL,
+                                     $status);
     }
 
     $now = new DateTime();
     $result = array(
-            'id' => $last_check['id'],
-            'url' => $last_check['url'],
+            'id' => $id,
+            'url' => $url,
             'last_checked' => $now->getTimestamp(),
             'next_check' => $next,
             'status' => isset($status) ? ($status ? 1 : 0) : NULL,
@@ -77,7 +76,7 @@ class CAYLChecker implements iCAYLChecker {
    */
   private function next_check_date($status, $last_checked_timestamp, $next_check_timestamp, $new_status) {
     $date = new DateTime();
-    if (is_null($status) || ($new_status != (bool)($status))) {
+    if (is_null($status) || ($new_status != (bool)($status)) || is_null($last_checked_timestamp)) {
       $next_timestamp = $date->add(new DateInterval("P1D"))->getTimestamp();
     } else {
       $last = new DateTime();

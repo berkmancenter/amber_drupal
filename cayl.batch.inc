@@ -15,7 +15,7 @@ function cayl_cron() {
 }
 
 /**
- * Add a list of URLs to the queue of items to be cached
+ * Add a list of URLs to the queue of items to be cached.
  * @param $links array of URLs to be cached
  */
 function cayl_enqueue_cache_links($links) {
@@ -42,6 +42,145 @@ function cayl_enqueue_check_links($links, $queue_name = CAYL_QUEUE_CHECK_NEW) {
     }
   }
 }
+
+/**
+ * Implements hook_cron_queue_info
+ */
+function cayl_cron_queue_info() {
+  return array(
+    CAYL_QUEUE_CHECK_NEW  => array(
+      'worker callback' => 'cayl_process_check_queue',
+    ),
+    CAYL_QUEUE_CHECK_EXISTING => array(
+      'worker callback' => 'cayl_process_check_queue',
+    ),
+    CAYL_QUEUE_CACHE => array(
+      'worker callback' => 'cayl_process_cache_queue',
+    ),
+  );
+}
+
+/**
+ * Setup a batch (for use with the Batch API) to scan all nodes on the site for links to cache
+ * @return array|null
+ */
+function cayl_batch_scan_all_setup() {
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')->propertyCondition('status', 1);
+  $result = $query->execute();
+  if (!empty($result['node'])) {
+    $operations = [];
+    $nids = array_keys($result['node']);
+    foreach ($nids as $nid) {
+      $operations[] = array('cayl_batch_scan_process', array($nid));
+    }
+  }
+  if (!empty($operations)) {
+    $batch = array(
+      'operations' => $operations,
+      'finished' => 'cayl_batch_scan_all_finished',
+    );
+    return $batch;
+  } else {
+    return null;
+  }
+}
+
+/**
+ * Scan a node for links to cache (for use with the Batch API)
+ * @param $nid string if of the node to scan
+ * @param $context
+ */
+function cayl_batch_scan_process($nid, $context) {
+  $node = node_load($nid, NULL, TRUE);
+  if ($node) {
+    cayl_cache_node($node);
+    $context['results'][] = $node->nid . ' : ' . check_plain($node->title);
+  }
+  $context['message'] = t('Scanned node "@title"', array('@title' => $node->title));
+}
+
+/**
+ * Final step in batch processing to scan nodes for links to cache
+ * @param $success
+ * @param $results
+ * @param $operations
+ */
+function cayl_batch_scan_all_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message(t('@count nodes scanned', array('@count' => count($results))));
+  } else {
+    $error_operation = reset($operations);
+    drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
+  }
+}
+
+/**
+ * Setup a batch (for use with the Batch API) to cache all links scheduled for caching immediately
+ * @return array|null
+ */
+
+function cayl_batch_cache_all_setup() {
+  foreach (array(CAYL_QUEUE_CHECK_NEW, CAYL_QUEUE_CHECK_EXISTING) as $queue_name) {
+    $queue = DrupalQueue::get($queue_name);
+    $queue->createQueue();
+    while ($item = $queue->claimItem()) {
+      //TODO: What happens if the batch is cancelled? How do we ensure the items can be processed again?
+      $operations[] = array('cayl_batch_cache_process', array($item, $queue));
+    }
+  }
+  if (!empty($operations)) {
+    $batch = array(
+      'operations' => $operations,
+      'finished' => 'cayl_batch_cache_all_finished',
+    );
+    return $batch;
+  } else {
+    return null;
+  }
+}
+
+/**
+ * Take a queue item with a URL, and check AND cache it immediately
+ * @param $item object from a queue with the url to be checked
+ * @param $queue object where the item came from. Required so we can remove the item from the queue once processed
+ * @param $context
+ */
+function cayl_batch_cache_process($item, $queue, $context) {
+  $fetcher = cayl_get_fetcher();
+  $checker = cayl_get_checker();
+  $status_service = cayl_get_status();
+  $url = $item->data;
+  watchdog('cayl', "Checking and caching: @url ", array('@url' => $url), WATCHDOG_DEBUG);
+  $last_check = $status_service->get_check($url);
+  if (($update = $checker->check(empty($last_check) ? array('url' => $url) : $last_check)) !== false) {
+    $status_service->save_check($update);
+      if (($cache_metadata = $fetcher->fetch($url)) !== false) {
+        $status_service->save_cache($cache_metadata);
+    }
+  }
+  $queue->deleteItem($item);
+  $context['message'] = t('Cached URL "@url"', array('@url' => $url));
+}
+
+/**
+ * Final step in batch processing to cache all links
+ * @param $success
+ * @param $results
+ * @param $operations
+ */
+function cayl_batch_cache_all_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message(t('@count URLs cached', array('@count' => count($results))));
+    cache_clear_all('*', 'cache_filter',TRUE);
+    cache_clear_all('*', 'cache_field',TRUE);
+  } else {
+    $error_operation = reset($operations);
+    drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
+  }
+}
+
+
 
 /**
  * Process an item in the queue to be cached
@@ -93,19 +232,3 @@ function cayl_process_check_queue($item) {
 
 }
 
-/**
- * Implements hook_cron_queue_info
- */
-function cayl_cron_queue_info() {
-  return array(
-    CAYL_QUEUE_CHECK_NEW  => array(
-      'worker callback' => 'cayl_process_check_queue',
-    ),
-    CAYL_QUEUE_CHECK_EXISTING => array(
-      'worker callback' => 'cayl_process_check_queue',
-    ),
-    CAYL_QUEUE_CACHE => array(
-      'worker callback' => 'cayl_process_cache_queue',
-    ),
-  );
-}
