@@ -109,10 +109,6 @@ class CAYLStorage implements iCAYLStorage {
         if (!mkdir($dir, 0777, true)) {
           error_log(join(":", array(__FILE__, __METHOD__, "Could not create directory for saving file", $dir)));
           return false;
-        } else {
-          if (!chmod($dir, 0777)) { /* Not a fatal error, but should be noted */
-            error_log(join(":", array(__FILE__, __METHOD__, "Could not set permissions directory for saving file", $dir)));
-          }
         }
       }
       $cache_metadata = array(
@@ -143,10 +139,6 @@ class CAYLStorage implements iCAYLStorage {
       fputs($root_file,$line);
     }
     fclose($root_file);
-    if (!chmod($filename, 0777)) { /* Not a fatal error, but should be noted */
-      error_log(join(":", array(__FILE__, __METHOD__, "Could not set permissions for file", $dir)));
-    }
-
 
     if (!empty($assets)) {
       $this->save_assets($id, $assets);
@@ -310,10 +302,6 @@ class CAYLStorage implements iCAYLStorage {
           if (!mkdir(dirname($asset_path), 0777, true)) {
             error_log(join(":", array(__FILE__, __METHOD__, "Could not create asset directory for asset", $asset_path)));
             continue;
-          } else {
-            if (!chmod(dirname($asset_path), 0777)) { /* Not a fatal error, but should be noted */
-              error_log(join(":", array(__FILE__, __METHOD__, "Could not set permissions for asset directory for asset", $asset_path)));
-            }
           }
         }
         $asset_file = fopen($asset_path,"w");
@@ -325,9 +313,6 @@ class CAYLStorage implements iCAYLStorage {
           fputs($asset_file,$line);
         }
         fclose($asset_file);
-        if (!chmod($asset_path, 0777)) { /* Not a fatal error, but should be noted */
-          error_log(join(":", array(__FILE__, __METHOD__, "Could not set permissions for file", $dir)));
-        }
       } else {
         //TODO: This could happen if the asset points to the domain root. A problem, true, but this error message is not right in that case
         error_log(join(":", array(__FILE__, __METHOD__, "Could not parse asset URL", $id, $asset['url'])));
