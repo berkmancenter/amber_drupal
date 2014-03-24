@@ -93,6 +93,11 @@
   text-decoration: underline !important;
 }
 
+.cayl-interstitial a.cayl-info {
+  margin-top: 50px;
+  margin-right: 10px;
+}
+
 
 /* Hover */
 
@@ -145,13 +150,18 @@
   color: #86b0dc;
 }
 
+.cayl-hover a.cayl-info {
+  margin-top: 8px;
+  margin-right: 10px;
+}
+
 .cayl-hover .cayl-links {
   border-radius: 0 0 4px 4px;
   padding: 8px 0;
   width: 100%;
 }
 
-.cayl-hover a {
+.cayl-hover .cayl-links a {
   color: white !important;
   display: inline-block;
   font-size: 12px;
@@ -160,11 +170,11 @@
   margin-left: 30px;
 }
 
-.cayl-hover a:first-child {
+.cayl-hover .cayl-links a:first-child {
   margin-left: 40px;
 }
 
-.cayl-hover a:hover {
+.cayl-hover .cayl-links a:hover {
   color: white !important;
 }
 
@@ -175,4 +185,23 @@
   text-decoration: none !important;
   background-color: #86b0dc;
   padding: 0 25px;
+}
+
+/* Both */
+
+a.cayl-info {
+  float: right;
+  text-align: center;
+  text-decoration: none;
+  width: 15px;
+  height: 15px;
+  line-height: 15px;
+  color: #34495e;
+  background-color: #86b0dc;
+  border: 0 solid transparent;
+  border-radius: 50%;
+}
+
+a.cayl-info:hover {
+  color: white;
 }

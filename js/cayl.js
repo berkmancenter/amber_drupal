@@ -7,9 +7,9 @@ var cayl = {
     en : {
       interstitial_html : 
       '<div class="cayl-interstitial"><a href="#" class="cayl-close"></a><div class="cayl-body"><div class="cayl-status-text">This page may not be available</div><div class="cayl-cache-text">{{NAME}} has a cache from {{DATE}}</div>' +
-      '<a class="cayl-focus" href="{{CACHE}}">View the cache</a><div class="cayl-iframe-container"><iframe src="{{LINK}}"/></div><a class="cayl-original-link" href="{{LINK}}">Continue to the page</a></div></div>',
-      hover_html_up   : '<div class="cayl-hover cayl-up"><div class="cayl-text"><div class="cayl-status-text">This page should be available</div><div class="cayl-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="cayl-links"><a href="{{CACHE}}">View the cache</a><a href="{{LINK}}" class="cayl-focus">Continue to the page</a></div><div class="cayl-arrow"></div></div>',
-      hover_html_down : '<div class="cayl-hover cayl-down"><div class="cayl-text"><div class="cayl-status-text">This page may not be available</div><div class="cayl-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="cayl-links"><a href="{{CACHE}}" class="cayl-focus">View the cache</a><a href="{{LINK}}">Continue to the page</a></div><div class="cayl-arrow"></div></div>'
+      '<a class="cayl-focus" href="{{CACHE}}">View the cache</a><div class="cayl-iframe-container"><iframe src="{{LINK}}"/></div><a class="cayl-original-link" href="{{LINK}}">Continue to the page</a></div><a class="cayl-info" href="http://brk.mn/robustness" target="_blank">i</a></div>',
+      hover_html_up   : '<div class="cayl-hover cayl-up"><a class="cayl-info" href="http://brk.mn/robustness" target="_blank">i</a><div class="cayl-text"><div class="cayl-status-text">This page should be available</div><div class="cayl-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="cayl-links"><a href="{{CACHE}}">View the cache</a><a href="{{LINK}}" class="cayl-focus">Continue to the page</a></div><div class="cayl-arrow"></div></div>',
+      hover_html_down : '<div class="cayl-hover cayl-down"><a class="cayl-info" href="http://brk.mn/robustness" target="_blank">i</a><div class="cayl-text"><div class="cayl-status-text">This page may not be available</div><div class="cayl-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="cayl-links"><a href="{{CACHE}}" class="cayl-focus">View the cache</a><a href="{{LINK}}">Continue to the page</a></div><div class="cayl-arrow"></div></div>'
     },
     fa : {
         interstitial_html : 
