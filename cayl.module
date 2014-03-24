@@ -207,7 +207,7 @@ function _cayl_add_behavior($status, $country = NULL) {
 function _cayl_build_link_attributes($cache) {
   $result = array();
   if (isset($cache['location'],$cache['date'])) {
-    $result['data-cache'] = join(" ",array(base_path() . $cache['location'], $cache['date']));
+    $result['data-cache'] = join(" ",array(base_path() . $cache['location'], date('c',$cache['date'])));
   }
   if (isset($cache['status'])) {
     $behavior = _cayl_add_behavior($cache['status']);
