@@ -53,12 +53,7 @@ function cayl_dashboard_detail_form() {
     array('data' => t(''),  ),
   );
 
-  $query = db_select('cayl_check', 'c');
-  $query->join('cayl_cache', 'ca','ca.id = c.id');
-  $query->leftJoin('cayl_activity', 'a','ca.id = a.id');
-  $query = $query->fields('c', array('id', 'url','status','last_checked'));
-  $query = $query->fields('ca', array('id', 'date', 'size'));
-  $query = $query->fields('a', array('id', 'views', 'date'));
+  $query = _cayl_dashboard_detail_query();
   $query = $query->extend('PagerDefault');
   $query = $query->extend('TableSort');
   $query = $query->limit(20);
@@ -92,6 +87,13 @@ function cayl_dashboard_detail_form() {
     '#theme' => 'pager',
     '#weight' => 5,
   );
+
+  $build['buttons']['export'] = array(
+    '#type' => 'submit',
+    '#value' => t('Export as CSV'),
+    '#submit' => array('cayl_dashboard_detail_form_export')
+  );
+
   return $build;
 }
 
@@ -133,6 +135,66 @@ function cayl_dashboard_summary_form_cache($form, &$form_state) {
   if ($cache_batch) {
     batch_set($cache_batch);
   }
+}
+
+/**
+ * Export contents of the dashboard detail page as CSV
+ * @param $form
+ * @param $form_state
+ */
+function cayl_dashboard_detail_form_export($form, &$form_state) {
+  $query = _cayl_dashboard_detail_query();
+  $result = $query->execute();
+
+  $header = array(
+    t('Site'),
+    t('URL'),
+    t('Status'),
+    t('Last Checked'),
+    t('Cache Date'),
+    t('Size'),
+    t('Last viewed'),
+    t('Number of views')
+  );
+
+  $rows = array();
+  while ($r = $result->fetchAssoc()) {
+    $host = parse_url($r['url'],PHP_URL_HOST);
+    $rows[] = array(
+      'site' => $host,
+      'url' => $r['url'],
+      'status' => $r['status'] ? t('Up') : t('Down'),
+      'last_checked' => date('c',$r['last_checked']),
+      'date' => date('c',$r['date']),
+      'size' => format_size($r['size']),
+      'a.date' => isset($r['a_date']) ? date('c',$r['a_date']) : "",
+      'views' => isset($r['views']) ? $r['views'] : 0,
+    );
+  }
+
+  drupal_add_http_header('Content-Type', 'text/csv');
+  drupal_add_http_header('Content-Disposition', 'attachment;filename=report.csv');
+
+  $fp = fopen('php://output', 'w');
+  fputcsv($fp, $header);
+  foreach($rows as $line){
+    fputcsv($fp, $line);
+  }
+  fclose($fp);
+  drupal_exit();
+}
+
+/**
+ * Get the base query for returning data for the dashboard detail page
+ */
+function _cayl_dashboard_detail_query() {
+  $query = db_select('cayl_check', 'c');
+  $query->join('cayl_cache', 'ca','ca.id = c.id');
+  $query->leftJoin('cayl_activity', 'a','ca.id = a.id');
+  $query = $query->fields('c', array('id', 'url','status','last_checked'));
+  $query = $query->fields('ca', array('id', 'date', 'size'));
+  $query = $query->fields('a', array('id', 'views', 'date'));
+  return $query;
 }
 
 /**
