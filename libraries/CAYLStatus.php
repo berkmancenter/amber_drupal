@@ -54,7 +54,8 @@ class CAYLStatus implements iCAYLStatus {
     $query->execute(array('url' => $url));
     $result = ($query->rowCount() == 1) ? $query->fetch(PDO::FETCH_ASSOC) : array();
     $query->closeCursor();
-    return $result;
+    //TODO: Add additional keys for checks through proxies for specific countries
+    return array('default' => $result);
   }
 
   /**

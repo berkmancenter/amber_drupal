@@ -213,20 +213,20 @@ class CAYLWebTestCase extends DrupalWebTestCase {
 
   public function testCAYLAddBehaviourUpPopup() {
     variable_set('cayl_available_action', CAYL_ACTION_POPUP);
-    $result = _cayl_add_behavior(1);
+    $result = _cayl_get_behavior(1);
     $this->assertEqual($result,"up popup");
   }
 
   public function testCAYLAddBehaviourUpHover() {
     variable_set('cayl_available_action', CAYL_ACTION_HOVER);
     variable_set('cayl_available_action_hover', 4);
-    $result = _cayl_add_behavior(1);
+    $result = _cayl_get_behavior(1);
     $this->assertEqual($result,"up hover:4");
   }
 
   public function testCAYLAddBehaviourUpNone() {
     variable_set('cayl_available_action', CAYL_ACTION_NONE);
-    $result = _cayl_add_behavior(1);
+    $result = _cayl_get_behavior(1);
     $this->assertNull($result);
   }
 
@@ -234,13 +234,13 @@ class CAYLWebTestCase extends DrupalWebTestCase {
     variable_set('cayl_unavailable_action', CAYL_ACTION_HOVER);
     variable_set('cayl_available_action', CAYL_ACTION_POPUP);
     variable_set('cayl_unavailable_action_hover', 1);
-    $result = _cayl_add_behavior(0);
+    $result = _cayl_get_behavior(0);
     $this->assertEqual($result,"down hover:1");
   }
 
   public function testCAYLAddBehaviourDownCache() {
     variable_set('cayl_unavailable_action', CAYL_ACTION_CACHE);
-    $result = _cayl_add_behavior(0);
+    $result = _cayl_get_behavior(0);
     $this->assertEqual($result,"down cache");
   }
 
@@ -249,6 +249,83 @@ class CAYLWebTestCase extends DrupalWebTestCase {
     $text = "Hi there <a href='http://www.yahoo.com'>node links</a>. Eat my meatloaf!";
     $result = _cayl_filter_process($text,null,null);
     $this->assertFalse(strpos($result,'data-cache'));
+  }
+
+  public function testCAYLAddCountryBehaviourDownCache() {
+    variable_set('cayl_country_unavailable_action', CAYL_ACTION_CACHE);
+    variable_set('cayl_unavailable_action', CAYL_ACTION_POPUP);
+    $result = _cayl_get_behavior(0);
+    $this->assertEqual($result,"down popup");
+    $result = _cayl_get_behavior(0,true);
+    $this->assertEqual($result,"down cache");
+  }
+
+  public function testCAYLAttributeAddingSimple() {
+    $basic = array(
+      'default' => array(
+        'location' => '/cache/here',
+        'date' => 1395590225,
+        'status' => 0)
+    );
+    variable_set('cayl_unavailable_action', CAYL_ACTION_POPUP);
+    $result = _cayl_build_link_attributes($basic);
+    $this->assertEqual($result['data-cayl-behavior'],"down popup");
+  }
+
+  public function testCAYLAttributeAddingCountry() {
+    $basic = array(
+      'default' => array(
+        'location' => '/cache/here',
+        'date' => 1395590225,
+        'status' => 0),
+      'us' => array(
+        'location' => '/cache/here',
+        'date' => 1395590225,
+        'status' => 1)
+    );
+    variable_set('cayl_country_id', 'us');
+    variable_set('cayl_unavailable_action', CAYL_ACTION_POPUP);
+    variable_set('cayl_country_available_action', CAYL_ACTION_HOVER);
+    variable_set('cayl_country_available_action_hover', 2);
+    $result = _cayl_build_link_attributes($basic);
+    $this->assertEqual($result['data-cayl-behavior'],"down popup,us up hover:2");
+  }
+
+  public function testCAYLAttributeAddingCountryPopupCache() {
+    $basic = array(
+      'default' => array(
+        'location' => '/cache/here',
+        'date' => 1395590225,
+        'status' => 0),
+      'us' => array(
+        'location' => '/cache/here',
+        'date' => 1395590225,
+        'status' => 0)
+    );
+    variable_set('cayl_country_id', 'us');
+    variable_set('cayl_unavailable_action', CAYL_ACTION_POPUP);
+    variable_set('cayl_country_unavailable_action', CAYL_ACTION_CACHE);
+    $result = _cayl_build_link_attributes($basic);
+    $this->assertEqual($result['data-cayl-behavior'],"down popup,us down cache");
+  }
+
+
+  public function testCAYLAttributeAddingCountryIgnoreIfSameAsDefault() {
+    $basic = array(
+      'default' => array(
+        'location' => '/cache/here',
+        'date' => 1395590225,
+        'status' => 0),
+      'us' => array(
+        'location' => '/cache/here',
+        'date' => 1395590225,
+        'status' => 0)
+    );
+    variable_set('cayl_country_id', 'us');
+    variable_set('cayl_unavailable_action', CAYL_ACTION_POPUP);
+    variable_set('cayl_country_unavailable_action', CAYL_ACTION_POPUP);
+    $result = _cayl_build_link_attributes($basic);
+    $this->assertEqual($result['data-cayl-behavior'],"down popup");
   }
 
 

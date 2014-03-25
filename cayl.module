@@ -159,43 +159,43 @@ function cayl_menu() {
 
 /**
  * Figure out what behavior to set, based on the status of the page and the configuration settings
- * @param $status
- * @param null $country
+ * @param bool $status true if the site is up, false if the site is down
+ * @param bool $country true if we should be using the country-specific behavior settings
  * @return null|string
  */
-function _cayl_add_behavior($status, $country = NULL) {
+function _cayl_get_behavior($status, $country = false) {
   $result = $status ? "up" : "down";
-  if (is_null($country)) {
-    if (1 == $status) {
-      $action = variable_get('cayl_available_action', CAYL_ACTION_NONE);
-      switch ($action) {
-        case CAYL_ACTION_NONE:
-          $result = NULL;
-          break;
-        case CAYL_ACTION_HOVER:
-          $result .= " hover:" . variable_get('cayl_available_action_hover', 2);
-          break;
-        case CAYL_ACTION_POPUP:
-          $result .= " popup";
-          break;
-        }
-    } else if (0 == $status) {
-      $action = variable_get('cayl_unavailable_action', CAYL_ACTION_NONE);
-      switch ($action) {
-        case CAYL_ACTION_NONE:
-          $result = NULL;
-          break;
-        case CAYL_ACTION_HOVER:
-          $result .= " hover:" . variable_get('cayl_unavailable_action_hover', 2);
-          break;
-        case CAYL_ACTION_POPUP:
-          $result .= " popup";
-          break;
-        case CAYL_ACTION_CACHE:
-          $result .= " cache";
-          break;
-        }
-    }
+
+  $c = $country ? "country_" : "";
+  if ($status) {
+    $action = variable_get("cayl_${c}available_action", CAYL_ACTION_NONE);
+    switch ($action) {
+      case CAYL_ACTION_NONE:
+        $result = NULL;
+        break;
+      case CAYL_ACTION_HOVER:
+        $result .= " hover:" . variable_get("cayl_${c}available_action_hover", 2);
+        break;
+      case CAYL_ACTION_POPUP:
+        $result .= " popup";
+        break;
+      }
+  } else {
+    $action = variable_get("cayl_${c}unavailable_action", CAYL_ACTION_NONE);
+    switch ($action) {
+      case CAYL_ACTION_NONE:
+        $result = NULL;
+        break;
+      case CAYL_ACTION_HOVER:
+        $result .= " hover:" . variable_get("cayl_${c}unavailable_action_hover", 2);
+        break;
+      case CAYL_ACTION_POPUP:
+        $result .= " popup";
+        break;
+      case CAYL_ACTION_CACHE:
+        $result .= " cache";
+        break;
+      }
   }
   return $result;
 }
@@ -203,20 +203,37 @@ function _cayl_add_behavior($status, $country = NULL) {
 
 /**
  * Build the data- attributes to be added to the anchor tag, given saved metadata
- * @param array $cache array dictionary from the CAYL Status module
+ * @param array $summaries array dictionary from the CAYL Status module
  * @return array attributes to be added to the link
  */
-function _cayl_build_link_attributes($cache) {
+function _cayl_build_link_attributes($summaries) {
   $result = array();
-  if (isset($cache['location'],$cache['date'])) {
-    $result['data-cache'] = join(" ",array(base_path() . $cache['location'], date('c',$cache['date'])));
+  // Assume that we only have one cache of the data. This would need to change if we start tracking multiple caches
+  if (isset($summaries['default']['location'],$summaries['default']['date'])) {
+    $result['data-cache'] = join(" ",array(base_path() . $summaries['default']['location'], date('c',$summaries['default']['date'])));
   }
-  if (isset($cache['status'])) {
-    $behavior = _cayl_add_behavior($cache['status']);
+
+  $default_status = isset($summaries['default']['status']) ? $summaries['default']['status'] : null;
+  // Add default behavior
+  if (!is_null($default_status)) {
+    $behavior = _cayl_get_behavior($default_status);
     if ($behavior) {
       $result['data-cayl-behavior'] = $behavior;
     }
   }
+
+  // See if we have country-specific behavior
+  if ($country = variable_get('cayl_country_id','')) {
+    $country_status = isset($summaries[$country]['status']) ? $summaries[$country]['status'] : $default_status;
+    if (!is_null($country_status)) {
+      $country_behavior = _cayl_get_behavior($country_status, true);
+      // Add country-specific behavior only if it is different than the default behavior
+      if ($country_behavior && ($country_behavior != $result['data-cayl-behavior'])) {
+        $result['data-cayl-behavior'] .= ",${country} ${country_behavior}";
+      }
+    }
+  }
+
   return $result;
 }
 

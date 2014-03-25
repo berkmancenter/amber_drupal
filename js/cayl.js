@@ -1,7 +1,8 @@
 var cayl = {
 
   hovering_on_popup : false,    
-  locale : 'en',       
+  locale : 'en',
+  country : '',
   rtl : false,
   translations : {
     en : {
@@ -19,14 +20,36 @@ var cayl = {
         '<div class="cayl-credit">بالاترین از <a href="#"> CAYL </ A></div></div></div>',
         hover_html_up : '<div class="cayl-hover cayl-up"><div class="cayl-text">این سایت باید در دسترس باشد</div><a href="{{LINK}}" class="cayl-live">دیدن لینک زنده</a><a href="{{CACHE}}" class="cayl-cache">دیدن لینک خرید پستی</a><div class="cayl-arrow"></div></div>',
         hover_html_down : '<div class="cayl-hover cayl-down"><div class="cayl-text">این سایت ممکن است در دسترس</div><a href="{{LINK}}" class="cayl-live">دیدن لینک زنده</a><a href="{{CACHE}}" class="cayl-cache">دیدن لینک خرید پستی</a><div class="cayl-credit"> بالاترین از <a href="#"> CAYL </a></div><div class="cayl-arrow"></div></div>',      
-      },      
+      }
     },
     
   set_locale : function(locale) {
     cayl.locale = locale;         
     cayl.rtl = (locale == 'fa');
   },                                 
-  
+
+  country_specific_behavior_exists : function() {
+    return (jQuery("a[data-cache][data-cayl-behavior*=\\,]").length > 0);
+  },
+
+  get_country : function() {
+    try {
+      if (!cayl.country) {
+        cayl.country = localStorage.getItem('country');
+      }
+    } catch (e) { /* Not supported */ }
+    if (!cayl.country) {
+      jQuery.getJSON('http://freegeoip.net/json/?callback=?', function(data) {
+        cayl.country = data.country_code;
+        try {
+          if (cayl.country) {
+            localStorage.setItem('country',cayl.country);
+          }
+        } catch (e) { /* Not supported */ }
+      });
+    }
+  },
+
   get_text : function(key) {    
     return cayl.translations[cayl.locale][key];
   },
@@ -62,11 +85,15 @@ var cayl = {
   parse_behavior : function(s) {
     var result = {};
     /* Split by country */
-    countries = s.split(",");
+    var countries = s.split(",");
     result.default = cayl.parse_country_behavior(countries[0]);
     if (countries.length > 1) {
-      for (i = 0; i < countries.length; i++) {
-        //TODO: Parse country-specific items
+      for (i = 1; i < countries.length; i++) {
+        var x = countries[i].split(' ');
+        var c = x.shift();
+        if (x.length == 2) {
+          result[c] = cayl.parse_country_behavior(x.join(' '));
+        }
       }
     }
     return result;
@@ -97,12 +124,36 @@ var cayl = {
     return result;
   },
 
-  show_interstitial : function (e) {                    
+  execute_action: function (behavior, action) {
+    if (!cayl.country && behavior.default.action == action) {
+      return true;
+    }
+    if (cayl.country && !(cayl.country in behavior) && (behavior.default.action == action)) {
+      return true;
+    }
+    if (cayl.country && (behavior[cayl.country].action == action)) {
+      return true;
+    }
+    return false;
+  },
 
+  show_cache : function(e) {
     var behavior = cayl.parse_behavior(jQuery(this).attr("data-cayl-behavior"));
     var cache = cayl.parse_cache(jQuery(this).attr("data-cache"));
 
-    if (behavior.default.action == "popup" && cache.default) {
+    if (cayl.execute_action(behavior,"cache") && cache.default) {
+      window.location.href = cache.default.cache;
+      return false;
+    } else {
+      return true;
+    }
+  },
+
+  show_interstitial : function (e) {
+    var behavior = cayl.parse_behavior(jQuery(this).attr("data-cayl-behavior"));
+    var cache = cayl.parse_cache(jQuery(this).attr("data-cache"));
+
+    if (cayl.execute_action(behavior,"popup") && cache.default) {
       /* Add the window to the DOM */
       jQuery("body").append('<div class="cayl-overlay"></div>');
 
@@ -151,7 +202,8 @@ var cayl = {
 
   start_link_hover : function (e) {
     var behavior = cayl.parse_behavior(jQuery(this).attr("data-cayl-behavior"));
-    if (behavior.default.action == "hover") {
+
+    if (cayl.execute_action(behavior,"hover")) {
       var cache = cayl.parse_cache(jQuery(this).attr("data-cache"));
       var args = {
         '{{DATE}}' : new Date(cache.default.date).toLocaleDateString(),
@@ -187,8 +239,13 @@ var cayl = {
 };
 
 jQuery(document).ready(function($) {
+    $("a[data-cache][data-cayl-behavior*=cache]").click(cayl.show_cache);
     $("a[data-cache][data-cayl-behavior*=popup]").click(cayl.show_interstitial);
     $("a[data-cache][data-cayl-behavior*=hover]").hover(cayl.start_link_hover, cayl.end_link_hover);
+
+    if (cayl.country_specific_behavior_exists()) {
+      cayl.get_country();
+    }
 
     /* Drupal-specific code */
     cayl.name = Drupal.settings.cayl.name;
