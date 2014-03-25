@@ -70,7 +70,7 @@ class CAYLFetcher implements iCAYLFetcher {
       return array (
         'id' => $storage_metadata['id'],
         'url' => $storage_metadata['url'],
-        'type' => $storage_metadata['type'],
+        'type' => isset($storage_metadata['type']) ? $storage_metadata['type'] : 'application/octet-stream',
         'date' => strtotime($storage_metadata['cache']['cayl']['date']),
         'location' => $storage_metadata['cache']['cayl']['location'],
         'size' => $size
