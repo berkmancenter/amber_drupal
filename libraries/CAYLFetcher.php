@@ -11,9 +11,10 @@ class CAYLFetcher implements iCAYLFetcher {
   /**
    * @param $storage CAYLStorage that will be used to save the item
    */
-  function __construct(iCAYLStorage $storage) {
+  function __construct(iCAYLStorage $storage, array $options) {
     $this->storage = $storage;
     $this->assetHelper = new CAYLAssetHelper();
+    $this->maxFileSize = isset($options['cayl_max_file']) ? $options['cayl_max_file'] : 1000;
   }
 
   /**
@@ -22,11 +23,6 @@ class CAYLFetcher implements iCAYLFetcher {
    * @return
    */
   public function fetch($url) {
-    $existing_cache = $this->storage->get_metadata($url);
-    if (!empty($existing_cache)) {
-      // TODO: Check to see if we should refresh the cache.
-    }
-
     // Check the robots.txt
     if (!CAYLRobots::robots_allowed($url)) {
       return false;
@@ -50,7 +46,7 @@ class CAYLFetcher implements iCAYLFetcher {
       $asset_paths = $this->assetHelper->extract_assets($body);
       $assets = $this->assetHelper->expand_asset_references($url, $asset_paths);
       $assets = $this->download_assets($assets);
-      foreach ($assets as $key => $value) {
+      foreach ($assets as $value) {
         $size += $value['info']['size_download'];
       }
       $body = $this->assetHelper->rewrite_links($body, $assets);
@@ -60,7 +56,10 @@ class CAYLFetcher implements iCAYLFetcher {
       fclose($root_item['body']);
       $root_item['body'] = $stream;
 
-      // TODO: Check total file size of all assets to see if below limit
+      /* Check total size of the file combined with its assets */
+      if ($size > ($this->maxFileSize * 1024)) {
+        return false;
+      }
     }
 
     if ($this->storage && $root_item) {
@@ -81,8 +80,11 @@ class CAYLFetcher implements iCAYLFetcher {
     }
   }
 
-
   private function cacheable_item($data) {
+
+    if ($data['info']['size_download'] > ($this->maxFileSize * 1024)) {
+      return false;
+    }
     // TODO: Add logic to actually test if we should cache it, based on file size, content-type, etc.
     return TRUE;
   }

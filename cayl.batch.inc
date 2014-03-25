@@ -161,6 +161,9 @@ function cayl_batch_cache_process($item, $queue, $context) {
       $status_service->save_check($update);
       if (($cache_metadata = $fetcher->fetch($url)) !== false) {
         $status_service->save_cache($cache_metadata);
+        cayl_disk_space_purge();
+      } else {
+        watchdog('cayl', "Did not cache: @url ", array('@url' => $url), WATCHDOG_DEBUG);
       }
     }
   } else {
@@ -208,6 +211,9 @@ function cayl_process_cache_queue($item) {
         /* TODO: Ideally we would clear the cache only once per cron job */
         cache_clear_all('*', 'cache_filter',TRUE);
         cache_clear_all('*', 'cache_field',TRUE);
+        cayl_disk_space_purge();
+      } else {
+        watchdog('cayl', "Did not cache: @url ", array('@url' => $item), WATCHDOG_DEBUG);
       }
     }
     variable_set(CAYL_VAR_LAST_CACHE_RUN,time());
@@ -230,8 +236,6 @@ function cayl_process_check_queue($item) {
     if (($update = $checker->check(empty($last_check) ? array('url' => $item) : $last_check)) !== false) {
       /* There's an updated check result to save */
       $status->save_check($update);
-
-      //TODO: Check configuration settings that might say we shouldn't update cache for existing items
       cayl_enqueue_cache_links(array($item));
     }
     variable_set(CAYL_VAR_LAST_CHECK_RUN,time());
@@ -239,6 +243,20 @@ function cayl_process_check_queue($item) {
     // If there is an error, log the error, and then continue. Otherwise the bad item will not be removed from the queue
     watchdog('cayl', "Error checking @url : @msg ", array('@url' => $item, '@msg' => $e->getMessage()), WATCHDOG_NOTICE);
   }
-
 }
 
+/**
+ * If the total disk space usage is over the configured limit, delete enough items to bring it under
+ */
+function cayl_disk_space_purge() {
+  $status = cayl_get_status();
+  $purge = $status->get_items_to_purge(variable_get('cayl_max_disk',1000) * 1024 * 1024);
+  if ($purge) {
+    $storage = cayl_get_storage();
+    foreach ($purge as $item) {
+      $storage->clear_cache_item($item['id']);
+      $status->delete($item['id']);
+      watchdog('cayl', "Deleting to stay under disk space limits: @url", array('@url' => $item['url']), WATCHDOG_NOTICE);
+    }
+  }
+}

@@ -10,10 +10,12 @@ interface iCAYLStatus {
   public function get_check($url, $source = 'cayl');
   public function get_cache($url, $source = 'cayl');
   public function get_summary($url);
+  public function get_cache_size();
   public function save_check(array $data);
   public function save_cache(array $data);
   public function get_urls_to_check();
   public function save_view($id);
+  public function get_items_to_purge($max_size);
   public function delete_all();
   public function delete($id);
 }
@@ -165,6 +167,44 @@ class CAYLStatus implements iCAYLStatus {
     $updateQuery->execute(array('id' => $id, 'date' => time()));
     $updateQuery->closeCursor();
   }
+
+  /**
+   * Get total disk space usage of the cache
+   * @return string
+   */
+  public function get_cache_size() {
+    $query = $this->db->prepare('SELECT sum(size) FROM cayl_cache');
+    $query->execute();
+    $result = $query->fetchColumn();
+    $query->closeCursor();
+    return $result;
+  }
+
+  /**
+   * Identify the cached items that must be deleted to keep the total disk usage below the desired maximum
+   * @param $max_size
+   */
+  public function get_items_to_purge($max_disk) {
+    $result = array();
+    $current_size = $this->get_cache_size();
+    if ($current_size > $max_disk) {
+      $query = $this->db->prepare(
+        'SELECT cc.id, cc.url, size FROM cayl_cache cc ' .
+        'LEFT JOIN cayl_activity ca ON cc.id = ca.id ' .
+        'ORDER BY greatest(IFNULL(ca.date,0),cc.date) ASC');
+      $query->execute();
+      $size_needed = $current_size - $max_disk;
+      while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+        $size_needed = $size_needed - $row['size'];
+        $result[] = array('id' => $row['id'], 'url' => $row['url']);
+        if ($size_needed < 0) {
+          break;
+        }
+      }
+    }
+    return $result;
+  }
+
 
   public function delete_all() {
     $this->db->prepare("TRUNCATE cayl_cache")->execute();

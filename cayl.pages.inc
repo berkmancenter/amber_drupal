@@ -112,9 +112,9 @@ function _cayl_last_run($var) {
 }
 
 function _cayl_disk_usage() {
-  $file_path = join(DIRECTORY_SEPARATOR, array(DRUPAL_ROOT, variable_get('cayl_storage_location', 'sites/default/files/cayl')));
+  $status = cayl_get_status();
   $max = format_size(variable_get('cayl_max_disk', '1000') * 1024 * 1024);
-  $current = format_size(_cayl_directory_size($file_path));
+  $current = format_size($status->get_cache_size());
   return t('@current (of @max)', array('@current' => $current, '@max' => $max));
 }
 
@@ -195,24 +195,6 @@ function _cayl_dashboard_detail_query() {
   $query = $query->fields('ca', array('id', 'date', 'size'));
   $query = $query->fields('a', array('id', 'views', 'date'));
   return $query;
-}
-
-/**
- * Get the directory size
- * From : http://stackoverflow.com/a/18288029
- * @param directory $directory
- * @return integer
- */
-function _cayl_directory_size($directory) {
-  $size = 0;
-  if (file_exists($directory)) {
-    foreach(new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory)) as $file){
-      if ($file->getType() != 'dir') {
-        $size += $file->getSize();
-      }
-    }
-  }
-  return $size;
 }
 
 /**

@@ -14,8 +14,6 @@ define("CAYL_QUEUE_CHECK_EXISTING","cayl_check_existing");
 define("CAYL_VAR_LAST_CHECK_RUN","cayl_last_check_run");
 define("CAYL_VAR_LAST_CACHE_RUN","cayl_last_cache_run");
 
-
-
 module_load_include('inc', 'cayl', 'cayl.batch');
 
 /**
@@ -39,7 +37,7 @@ function cayl_get_storage() {
 function cayl_get_fetcher() {
   $fetcher = &drupal_static(__FUNCTION__);
   if (!isset($fetcher)) {
-    $fetcher = new CAYLFetcher(cayl_get_storage());
+    $fetcher = new CAYLFetcher(cayl_get_storage(), array('cayl_max_file' => variable_get('cayl_max_file',1000)));
   }
   return $fetcher;
 }
