@@ -157,9 +157,7 @@ function cayl_batch_cache_process($item, $queue, $context) {
   $last_check = $status_service->get_check($url);
   if (($update = $checker->check(empty($last_check) ? array('url' => $url) : $last_check)) !== false) {
     $status_service->save_check($update);
-      if (($cache_metadata = $fetcher->fetch($url)) !== false) {
-        $status_service->save_cache($cache_metadata);
-    }
+    $fetcher->fetch($url);
   }
   $queue->deleteItem($item);
   $context['message'] = t('Cached URL "@url"', array('@url' => $url));
@@ -195,7 +193,6 @@ function cayl_process_cache_queue($item) {
     $status_service = cayl_get_status();
     $cache_metadata = $fetcher->fetch($item);
     if ($cache_metadata !== false) {
-      $status_service->save_cache($cache_metadata);
       /* Clear caches that could contain HTML with versions of the links that don't contain data- attributes */
       /* TODO: Ideally we would clear the cache only once per cron job */
       cache_clear_all('*', 'cache_filter',TRUE);
