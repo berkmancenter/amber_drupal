@@ -2,7 +2,7 @@
 
 class CAYLTestCase extends DrupalUnitTestCase {
 
-  var $MOCK_METADATA = "/CAYL/cache/0a137b375cc3881a70e186ce2172c8d1 2014-03-23T11:57:05-04:00";
+  var $MOCK_METADATA = "/CAYL/cache/0a137b375cc3881a70e186ce2172c8d1 2014-03-23T15:57:05+00:00";
 
   public static function getInfo() {
     return array(
@@ -16,6 +16,7 @@ class CAYLTestCase extends DrupalUnitTestCase {
    * Set up the test environment, and load our mock CAYLStorage module
    */
   function setUp() {
+    date_default_timezone_set('UTC');
     drupal_load('module', 'cayl');
     module_load_include('inc', 'cayl', 'cayl.extract');
     module_load_include('inc','cayl','tests/MockCAYLStatus');
