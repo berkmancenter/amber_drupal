@@ -153,13 +153,18 @@ function cayl_batch_cache_process($item, $queue, $context) {
   $checker = cayl_get_checker();
   $status_service = cayl_get_status();
   $url = $item->data;
-  watchdog('cayl', "Checking and caching: @url ", array('@url' => $url), WATCHDOG_DEBUG);
-  $last_check = $status_service->get_check($url);
-  if (($update = $checker->check(empty($last_check) ? array('url' => $url) : $last_check)) !== false) {
-    $status_service->save_check($update);
+  $existing_cache = $status_service->get_cache($url);
+  if (!variable_get('cayl_update_strategy',0) || !$existing_cache) {
+    watchdog('cayl', "Checking and caching: @url ", array('@url' => $url), WATCHDOG_DEBUG);
+    $last_check = $status_service->get_check($url);
+    if (($update = $checker->check(empty($last_check) ? array('url' => $url) : $last_check)) !== false) {
+      $status_service->save_check($update);
       if (($cache_metadata = $fetcher->fetch($url)) !== false) {
         $status_service->save_cache($cache_metadata);
+      }
     }
+  } else {
+    watchdog('cayl', "Updating of cached items disabled, did not cache: @url ", array('@url' => $url), WATCHDOG_DEBUG);
   }
   $queue->deleteItem($item);
   $context['message'] = t('Cached URL "@url"', array('@url' => $url));
@@ -193,15 +198,18 @@ function cayl_process_cache_queue($item) {
   try {
     $fetcher = cayl_get_fetcher();
     $status_service = cayl_get_status();
-    $cache_metadata = $fetcher->fetch($item);
-    if ($cache_metadata !== false) {
-      $status_service->save_cache($cache_metadata);
-      /* Clear caches that could contain HTML with versions of the links that don't contain data- attributes */
-      /* TODO: Ideally we would clear the cache only once per cron job */
-      cache_clear_all('*', 'cache_filter',TRUE);
-      cache_clear_all('*', 'cache_field',TRUE);
+    $existing_cache = $status_service->get_cache($item);
+    /* Make sure that the item either doesn't already exist, or that we are allowed to update existing cached items */
+    if (!variable_get('cayl_update_strategy',0) || !$existing_cache) {
+      $cache_metadata = $fetcher->fetch($item);
+      if ($cache_metadata !== false) {
+        $status_service->save_cache($cache_metadata);
+        /* Clear caches that could contain HTML with versions of the links that don't contain data- attributes */
+        /* TODO: Ideally we would clear the cache only once per cron job */
+        cache_clear_all('*', 'cache_filter',TRUE);
+        cache_clear_all('*', 'cache_field',TRUE);
+      }
     }
-
     variable_set(CAYL_VAR_LAST_CACHE_RUN,time());
   } catch (Exception $e) {
     // If there is an error, log the error, and then continue. Otherwise the bad item will not be removed from the queue
