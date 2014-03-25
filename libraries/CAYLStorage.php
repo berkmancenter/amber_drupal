@@ -144,9 +144,6 @@ class CAYLStorage implements iCAYLStorage {
       $this->save_assets($id, $assets);
     }
 
-    // TODO: Check files sizes against maximum files size permitted
-    // TODO: Check for overall file size, and purge old files if necessary
-
     return true;
   }
 
@@ -298,7 +295,6 @@ class CAYLStorage implements iCAYLStorage {
         $path_array = explode('/',$url_path);
         $asset_path = join(DIRECTORY_SEPARATOR,array_merge(array($base_asset_path), $path_array));
         if (!file_exists(dirname($asset_path))) {
-          // TODO: Fix permission handling so that clearing the cache through the UI works
           if (!mkdir(dirname($asset_path), 0777, true)) {
             error_log(join(":", array(__FILE__, __METHOD__, "Could not create asset directory for asset", $asset_path)));
             continue;

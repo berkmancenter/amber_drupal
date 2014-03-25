@@ -85,7 +85,7 @@ class CAYLFetcher implements iCAYLFetcher {
     if ($data['info']['size_download'] > ($this->maxFileSize * 1024)) {
       return false;
     }
-    // TODO: Add logic to actually test if we should cache it, based on file size, content-type, etc.
+    // TODO: Check for excluded content-type
     return TRUE;
   }
 
@@ -328,7 +328,6 @@ class CAYLNetworkUtils {
 }
 
 class CAYLRobots {
-
   /**
    * Is the URL allowed by the robots.txt file.
    * @param $robots
