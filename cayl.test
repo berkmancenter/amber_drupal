@@ -244,5 +244,13 @@ class CAYLWebTestCase extends DrupalWebTestCase {
     $this->assertEqual($result,"down cache");
   }
 
+  public function testCAYLFilterDisabled() {
+    variable_set('cayl_enabled', 0);
+    $text = "Hi there <a href='http://www.yahoo.com'>node links</a>. Eat my meatloaf!";
+    $result = _cayl_filter_process($text,null,null);
+    $this->assertFalse(strpos($result,'data-cache'));
+  }
+
+
 
 }

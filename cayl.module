@@ -73,10 +73,12 @@ function cayl_get_status() {
  * Implements hook_init()
  */
 function cayl_init() {
-  drupal_add_js(array(
-    'cayl' => array(
-      'name' => variable_get('site_name',t('This site')),
-    )), 'setting');
+  if (variable_get('cayl_enabled', 1)) {
+    drupal_add_js(array(
+      'cayl' => array(
+        'name' => variable_get('site_name',t('This site')),
+      )), 'setting');
+  }
 }
 
 
@@ -233,7 +235,7 @@ function _cayl_lookup_url($url) {
  */
 function cayl_preprocess_link(&$variables) {
   /* If it is an external link, check if cache exists, and add data-* attributes as necessary. */
-  if (url_is_external($variables['path'])) {
+  if (variable_get('cayl_enabled', 1) && url_is_external($variables['path'])) {
     $attributes = _cayl_lookup_url($variables['path']);
     if (!empty($attributes)) {
       if (!isset($variables['options'])) {
@@ -282,8 +284,10 @@ function _cayl_filter_callback($matches) {
  * Note: This treats all absolute URLs as external links.
  */
 function _cayl_filter_process($text, $filter, $format) {
-  $re = '/href=["\'](http[^\v()<>{}\[\]]+)[\'"]/';
-  $text = preg_replace_callback($re, '_cayl_filter_callback', $text);
+  if (variable_get('cayl_enabled', 1)) {
+    $re = '/href=["\'](http[^\v()<>{}\[\]]+)[\'"]/';
+    $text = preg_replace_callback($re, '_cayl_filter_callback', $text);
+  }
   return $text;
 }
 

@@ -7,10 +7,12 @@
  * Implements hook_cron
  */
 function cayl_cron() {
-  $status_service = cayl_get_status();
-  $urls = $status_service->get_urls_to_check();
-  if ($urls) {
-    cayl_enqueue_check_links($urls, CAYL_QUEUE_CHECK_EXISTING);
+  if (variable_get('cayl_enabled', 1)) {
+    $status_service = cayl_get_status();
+    $urls = $status_service->get_urls_to_check();
+    if ($urls) {
+      cayl_enqueue_check_links($urls, CAYL_QUEUE_CHECK_EXISTING);
+    }
   }
 }
 

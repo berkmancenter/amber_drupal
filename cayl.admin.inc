@@ -6,8 +6,7 @@ function cayl_config_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Enable Cache As You Link'),
     '#default_value' => variable_get('cayl_enabled', 1),
-    '#description' => t('Enable all functionality (front-end widgets, caching, and link checking).'),
-    '#required' => TRUE,
+    '#description' => t('Enable all functionality (front-end widgets, caching, and link checking). Disabling this will not remove existing cached data.'),
   );
   $form['cayl_cache'] = array(
     '#type' => 'fieldset',
