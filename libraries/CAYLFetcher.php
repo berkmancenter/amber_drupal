@@ -204,7 +204,11 @@ EOD;
     $attributes = array();
     foreach ($dom->getElementsByTagName($tag) as $t) {
       if ($t->hasAttribute($attribute)) {
-        $attributes[] = $t->getAttribute($attribute);
+        $a = $t->getAttribute($attribute);
+        /* Ignore data: URIs */
+        if (strpos($a,'data:') !== 0) {
+          $attributes[] = $a;
+        }
       }
     }
     return $attributes;
