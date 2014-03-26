@@ -45,7 +45,7 @@ class CAYLFetcher implements iCAYLFetcher {
       $body = stream_get_contents($root_item['body']);
       $asset_paths = $this->assetHelper->extract_assets($body);
       $assets = $this->assetHelper->expand_asset_references($url, $asset_paths);
-      $assets = $this->download_assets($assets);
+      $assets = $this->download_assets($assets, $url);
       foreach ($assets as $value) {
         $size += $value['info']['size_download'];
       }
@@ -91,15 +91,15 @@ class CAYLFetcher implements iCAYLFetcher {
 
   /**
    * Download a list of assets (img,css,js) that are used by a page
-   * @param $url string path to the page from which the assets are referenced
    * @param $assets array of strings of relative paths of assets
+   * @param $url string path to the page from which the assets are referenced
    * @return array where keys are asset paths, and values are body/header dictionaries returned from open_url, along with
    *         another key containing the absolute path to the asset
    */
-  private function download_assets($assets) {
+  private function download_assets($assets, $url = '') {
     $result = array();
     foreach ($assets as $key => $asset) {
-      $f = CAYLNetworkUtils::open_url($asset['url']);
+      $f = CAYLNetworkUtils::open_url($asset['url'], array(CURLOPT_REFERER => $url));
       if ($f) {
         $result[$key] = array_merge($f,$asset);
       }
