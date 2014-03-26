@@ -279,7 +279,8 @@ class CAYLNetworkUtils {
           CURLOPT_FAILONERROR => TRUE,      /* Don't ignore HTTP errors */
           CURLOPT_FOLLOWLOCATION => TRUE,   /* Follow redirects */
           CURLOPT_MAXREDIRS => 10,          /* No more than 10 redirects */
-          CURLOPT_CONNECTTIMEOUT => 10,     /* 10 second timeout */
+          CURLOPT_CONNECTTIMEOUT => 10,     /* 10 second connection timeout */
+          CURLOPT_TIMEOUT => 30,            /* 30 second timeout for any CURL function */
           CURLOPT_RETURNTRANSFER => 1,      /* Return the output as a string */
           CURLOPT_HEADER => TRUE,           /* Return header information as part of the file */
           CURLOPT_FILE => $tmp_body_file,
