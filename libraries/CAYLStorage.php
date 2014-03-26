@@ -37,7 +37,7 @@ interface iCAYLStorage {
   function get_asset($id, $path);
   function get_metadata($key);
   function get_id($url);
-  function save($url, $root, array $headers, array $assets = array());
+  function save($url, $root, array $headers = array(), array $assets = array());
   function clear_cache();
 }
 
@@ -100,7 +100,7 @@ class CAYLStorage implements iCAYLStorage {
    * @param array $assets any additional assets that should be saved (e.g. CSS, javascript)
    * @return bool success or failure
    */
-  function save($url, $root, array $headers = array('Content-Type' => 'text/html'), array $assets = array()) {
+  function save($url, $root, array $headers = array(), array $assets = array()) {
     $id = $this->url_hash($url);
     $cache_metadata = $this->get_cache_metadata($id);
     $dir = join(DIRECTORY_SEPARATOR, array($this->file_root, $id));
@@ -114,7 +114,7 @@ class CAYLStorage implements iCAYLStorage {
       $cache_metadata = array(
         'id' => $id,
         'url' => $url,
-        'type' => $headers['Content-Type'],
+        'type' => isset($headers['Content-Type']) ? $headers['Content-Type'] : 'application/octet-stream',
         'cache' => array (
           $this->name => array()
         )
