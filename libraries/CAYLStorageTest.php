@@ -93,6 +93,75 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue(empty($metadata));
   }
 
+  /**
+   * @dataProvider provider
+   */
+  public function testSaveNoAssets(iCAYLStorage $storage, $file) {
+    $storage->save("www.example.com", $file, array(), array());
+    $metadata = $storage->get_metadata("www.example.com");
+    $this->assertTrue(isset($metadata['cache']['cayl']['location']) && $metadata['cache']['cayl']['location']);
+    $path = join(DIRECTORY_SEPARATOR,array($this->get_storage_path(),$metadata['id']));
+    $this->assertTrue(file_exists($this->get_storage_path()));
+    $this->assertTrue(file_exists($path));
+  }
+
+  /**
+   * @dataProvider provider
+   */
+  public function testSaveOneAsset(iCAYLStorage $storage, $file) {
+    $file = tmpfile();
+    fwrite($file,"I am a temporary file");
+    rewind($file);
+    $assets = array(array('url' => 'http://www.example.com/man/is/free.jpg', 'body' => $file));
+
+    $storage->save("www.example.com", $file, array(), $assets);
+    $metadata = $storage->get_metadata("www.example.com");
+    $this->assertTrue(isset($metadata['cache']['cayl']['location']) && $metadata['cache']['cayl']['location']);
+    $path = join(DIRECTORY_SEPARATOR,array($this->get_storage_path(),$metadata['id']));
+    $this->assertTrue(file_exists($path));
+    $this->assertTrue(file_exists(join(DIRECTORY_SEPARATOR,array($path,'assets','man','is','free.jpg'))));
+
+  }
+
+  /**
+   * @dataProvider provider
+   */
+  public function testSaveOneAssetQueryStringName(iCAYLStorage $storage, $file) {
+    $file = tmpfile();
+    fwrite($file,"I am a temporary file");
+    rewind($file);
+    $assets = array(array('url' => 'http://www.example.com/man/is/free/?t=js&amp;bv=&amp;os=&amp;tz=&amp;lg=&amp;rv=&amp;rsv=&amp;pw=%2F&amp;cb=1438832272', 'body' => $file));
+
+    $storage->save("www.example.com", $file, array(), $assets);
+    $metadata = $storage->get_metadata("www.example.com");
+    $this->assertTrue(isset($metadata['cache']['cayl']['location']) && $metadata['cache']['cayl']['location']);
+    $path = join(DIRECTORY_SEPARATOR,array($this->get_storage_path(),$metadata['id']));
+    $this->assertTrue(file_exists($path));
+    $this->assertTrue(file_exists(join(DIRECTORY_SEPARATOR,array($path,'assets','man','is','free','?t=js&amp;bv=&amp;os=&amp;tz=&amp;lg=&amp;rv=&amp;rsv=&amp;pw=%2F&amp;cb=1438832272'))));
+
+  }
+
+
+  /**
+   * @dataProvider provider
+   */
+  public function testSaveOneAssetQueryStringNameTwo(iCAYLStorage $storage, $file) {
+    $file = tmpfile();
+    fwrite($file,"I am a temporary file");
+    rewind($file);
+    $assets = array(array('url' => 'http://www.example.com/traffic/?t=px&bv=JavaScript+Disabled&os=&tz=default&lg=&rv=&rsv=&pw=%2F&cb=1382655937', 'body' => $file));
+
+    $storage->save("www.example.com", $file, array(), $assets);
+    $metadata = $storage->get_metadata("www.example.com");
+    $this->assertTrue(isset($metadata['cache']['cayl']['location']) && $metadata['cache']['cayl']['location']);
+    $path = join(DIRECTORY_SEPARATOR,array($this->get_storage_path(),$metadata['id']));
+    $this->assertTrue(file_exists($path));
+    $this->assertTrue(file_exists(join(DIRECTORY_SEPARATOR,array($path,'assets','traffic','?t=px&bv=JavaScript+Disabled&os=&tz=default&lg=&rv=&rsv=&pw=%2F&cb=1382655937'))));
+
+  }
+
+
+
   private function get_storage_path() {
     return join(DIRECTORY_SEPARATOR,array(realpath(sys_get_temp_dir()),"cayl"));
   }

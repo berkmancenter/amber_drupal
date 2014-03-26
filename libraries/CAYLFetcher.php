@@ -155,6 +155,9 @@ class CAYLAssetHelper {
         if ($asset_url) {
           if ((isset($asset_url['host']) && ($asset_url['host'] == $p['host'])) || !isset($asset_url['host'])) {
             $asset_copy = preg_replace("/^\\//","", $asset_url['path']); /* Remove leading '/' */
+            if (isset($asset_url['query'])) {
+              $asset_copy = join('?',array($asset_copy,$asset_url['query']));
+            }
             $asset_path = join('/',array($base, $asset_copy));
             $result[$asset]['url'] = $asset_path;
           }

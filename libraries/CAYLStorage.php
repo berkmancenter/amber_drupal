@@ -290,6 +290,10 @@ class CAYLStorage implements iCAYLStorage {
     }
     foreach ($assets as $asset) {
       $url_path = parse_url($asset['url'], PHP_URL_PATH);
+      $query = parse_url($asset['url'], PHP_URL_QUERY);
+      if ($query) {
+        $url_path = join ('?', array($url_path,$query));
+      }
       $url_path = preg_replace("/^\\//","",$url_path); /* Remove leading '/' */
       if ($url_path) {
         $path_array = explode('/',$url_path);
