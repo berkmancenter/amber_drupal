@@ -111,18 +111,16 @@ class CAYLStatus implements iCAYLStatus {
         return false;
       }
     }
-
     $count_query = $this->db->prepare("SELECT COUNT(id) FROM cayl_cache WHERE id = :id");
     $count_query->execute(array('id' => $data['id']));
     $result = $count_query->fetchColumn();
-
     if ($result) {
       $updateQuery = $this->db->prepare('UPDATE cayl_cache ' .
                                         'SET url = :url, ' .
-                                        'location = :location ' .
-                                        'date = :date ' .
-                                        'type = :type ' .
-                                        'size = :size' .
+                                        'location = :location, ' .
+                                        'date = :date, ' .
+                                        'type = :type, ' .
+                                        'size = :size ' .
                                         'WHERE id = :id');
     } else {
       $updateQuery = $this->db->prepare('INSERT into cayl_cache ' .
@@ -131,6 +129,7 @@ class CAYLStatus implements iCAYLStatus {
     }
     $updateQuery->execute($data);
     $updateQuery->closeCursor();
+
     return true;
   }
 
