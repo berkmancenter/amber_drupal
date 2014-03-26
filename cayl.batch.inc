@@ -234,13 +234,13 @@ function cayl_process_cache_queue($item) {
  * Process and item in the queue to be checked
  * @param $item string url of the item to be checked
  */
-function cayl_process_check_queue($item) {
+function cayl_process_check_queue($item, $force = false) {
   watchdog('cayl', "Checking: @url ", array('@url' => $item), WATCHDOG_DEBUG);
   try {
     $checker = cayl_get_checker();
     $status = cayl_get_status();
     $last_check = $status->get_check($item);
-    if (($update = $checker->check(empty($last_check) ? array('url' => $item) : $last_check)) !== false) {
+    if (($update = $checker->check(empty($last_check) ? array('url' => $item) : $last_check, $force)) !== false) {
       /* There's an updated check result to save */
       $status->save_check($update);
       cayl_enqueue_cache_links(array($item));

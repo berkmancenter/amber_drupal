@@ -112,7 +112,7 @@ function drush_cayl_check_up($url) {
 
 function drush_cayl_check_url($url) {
   if ($url) {
-    cayl_process_check_queue($url);
+    cayl_process_check_queue($url, true);
     drush_print("URL checked");
   } else {
     drush_set_error(dt("Specify a URL to check"));

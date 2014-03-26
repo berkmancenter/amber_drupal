@@ -2,7 +2,7 @@
 
 interface iCAYLChecker {
   public function up($url);
-  public function check($last_check);
+  public function check($last_check, $force = false);
 }
 
 class CAYLChecker implements iCAYLChecker {
@@ -23,17 +23,17 @@ class CAYLChecker implements iCAYLChecker {
 
   /**
    * Check whether a URL is available, and update the status of the URL in the database
-   *
-   * @param
-   * @return bool updated
+   * @param $last_check array of the data from the last check for the URL
+   * @param bool $force true if the check should be forced to happen, even if it's not yet scheduled
+   * @return array|bool
    */
-  public function check($last_check) {
+  public function check($last_check, $force = false) {
     $url = $last_check['url'];
     $id = isset($last_check['id']) ? $last_check['id'] : md5($url); //TODO: Unify ID generation
 
     /* Make sure we're still scheduled to check the $url */
     $next_check_timestamp = isset($last_check['next_check']) ? $last_check['next_check'] : 0;
-    if ($next_check_timestamp > time()) {
+    if (!$force && $next_check_timestamp > time()) {
       return false;
     }
 
