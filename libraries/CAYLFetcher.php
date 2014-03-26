@@ -25,7 +25,7 @@ class CAYLFetcher implements iCAYLFetcher {
   public function fetch($url) {
     // Check the robots.txt
     if (!CAYLRobots::robots_allowed($url)) {
-      return false;
+      throw new RuntimeException("Fetching ${url} blocked by robots.txt");
     }
 
     // Send a GET request
@@ -33,7 +33,7 @@ class CAYLFetcher implements iCAYLFetcher {
 
     // Decide whether the item should be cached
     if (!$this->cacheable_item($root_item)) {
-      return false;
+      throw new RuntimeException("Fetching ${url} halted due to file size or content-type");
     }
 
     $size = $root_item['info']['size_download'];
@@ -58,7 +58,7 @@ class CAYLFetcher implements iCAYLFetcher {
 
       /* Check total size of the file combined with its assets */
       if ($size > ($this->maxFileSize * 1024)) {
-        return false;
+        throw new RuntimeException("Fetching ${url} halted due to file size of document + assets");
       }
     }
 
@@ -76,7 +76,7 @@ class CAYLFetcher implements iCAYLFetcher {
         'size' => $size
       );
     } else {
-      return false;
+      throw new RuntimeException("Saving ${url} halted due to empty content");
     }
   }
 

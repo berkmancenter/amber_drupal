@@ -31,7 +31,7 @@ function cayl_dashboard_summary_form() {
   );
   $build['buttons']['cache_now'] = array(
     '#type' => 'submit',
-    '#value' => t('Cache all links which are scheduled for caching now'),
+    '#value' => t('Cache all links which are scheduled to be cached'),
     '#submit' => array('cayl_dashboard_summary_form_cache')
   );
 

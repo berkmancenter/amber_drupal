@@ -126,7 +126,7 @@ function cayl_batch_cache_all_setup() {
   foreach (array(CAYL_QUEUE_CHECK_NEW, CAYL_QUEUE_CHECK_EXISTING) as $queue_name) {
     $queue = DrupalQueue::get($queue_name);
     $queue->createQueue();
-    while ($item = $queue->claimItem()) {
+    while ($item = $queue->claimItem(60)) {
       //TODO: What happens if the batch is cancelled? How do we ensure the items can be processed again?
       $operations[] = array('cayl_batch_cache_process', array($item, $queue));
     }
@@ -159,11 +159,15 @@ function cayl_batch_cache_process($item, $queue, $context) {
     $last_check = $status_service->get_check($url);
     if (($update = $checker->check(empty($last_check) ? array('url' => $url) : $last_check)) !== false) {
       $status_service->save_check($update);
-      if (($cache_metadata = $fetcher->fetch($url)) !== false) {
+      $cache_metadata = array();
+      try {
+        $cache_metadata = $fetcher->fetch($url);
+      } catch (RuntimeException $re) {
+        watchdog('cayl', "Did not cache: @url. @message", array('@url' => $url, '@message' => $re->getMessage()), WATCHDOG_DEBUG);
+      }
+      if ($cache_metadata) {
         $status_service->save_cache($cache_metadata);
         cayl_disk_space_purge();
-      } else {
-        watchdog('cayl', "Did not cache: @url ", array('@url' => $url), WATCHDOG_DEBUG);
       }
     }
   } else {
@@ -204,16 +208,19 @@ function cayl_process_cache_queue($item) {
     $existing_cache = $status_service->get_cache($item);
     /* Make sure that the item either doesn't already exist, or that we are allowed to update existing cached items */
     if (!variable_get('cayl_update_strategy',0) || !$existing_cache) {
-      $cache_metadata = $fetcher->fetch($item);
-      if ($cache_metadata !== false) {
+      $cache_metadata = array();
+      try {
+        $cache_metadata = $fetcher->fetch($item);
+      } catch (RuntimeException $re) {
+        watchdog('cayl', "Did not cache: @url. @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_DEBUG);
+      }
+      if ($cache_metadata) {
         $status_service->save_cache($cache_metadata);
         /* Clear caches that could contain HTML with versions of the links that don't contain data- attributes */
         /* TODO: Ideally we would clear the cache only once per cron job */
         cache_clear_all('*', 'cache_filter',TRUE);
         cache_clear_all('*', 'cache_field',TRUE);
         cayl_disk_space_purge();
-      } else {
-        watchdog('cayl', "Did not cache: @url ", array('@url' => $item), WATCHDOG_DEBUG);
       }
     }
     variable_set(CAYL_VAR_LAST_CACHE_RUN,time());
