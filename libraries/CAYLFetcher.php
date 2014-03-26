@@ -204,7 +204,7 @@ EOD;
     $attributes = array();
     foreach ($dom->getElementsByTagName($tag) as $t) {
       if ($t->hasAttribute($attribute)) {
-        $a = $t->getAttribute($attribute);
+        $a = trim($t->getAttribute($attribute));
         /* Ignore data: URIs */
         if (strpos($a,'data:') !== 0) {
           $attributes[] = $a;
@@ -218,7 +218,7 @@ EOD;
     $attributes = array();
     foreach ($dom->getElementsByTagName('link') as $t) {
       if ($t->hasAttribute('rel') && ($t->getAttribute('rel') == 'stylesheet')) {
-        $attributes[] = $t->getAttribute('href');
+        $attributes[] = trim($t->getAttribute('href'));
       }
     }
     return $attributes;
