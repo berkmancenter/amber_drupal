@@ -118,7 +118,7 @@ var cayl = {
     result.default = cayl.parse_cache_source(sources[0]);
     if (sources.length > 1) {
       for (i = 0; i < sources.length; i++) {
-        //TODO: Parse source-specific items
+        // Logic for additional cache sources will go here
       }
     }
     return result;
