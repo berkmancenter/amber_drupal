@@ -163,7 +163,7 @@ function cayl_batch_cache_process($item, $queue, $context) {
       try {
         $cache_metadata = $fetcher->fetch($url);
       } catch (RuntimeException $re) {
-        watchdog('cayl', "Did not cache: @url. @message", array('@url' => $url, '@message' => $re->getMessage()), WATCHDOG_DEBUG);
+        watchdog('cayl', "Did not cache: @url. @message", array('@url' => $url, '@message' => $re->getMessage()), WATCHDOG_NOTICE);
       }
       if ($cache_metadata) {
         $status_service->save_cache($cache_metadata);
@@ -212,7 +212,7 @@ function cayl_process_cache_queue($item) {
       try {
         $cache_metadata = $fetcher->fetch($item);
       } catch (RuntimeException $re) {
-        watchdog('cayl', "Did not cache: @url. @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_DEBUG);
+        watchdog('cayl', "Did not cache: @url. @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_NOTICE);
       }
       if ($cache_metadata) {
         $status_service->save_cache($cache_metadata);
