@@ -204,15 +204,20 @@ class CAYLStatus implements iCAYLStatus {
     return $result;
   }
 
-
+  /**
+   * Delete all status information. Do NOT delete activity data.
+   */
   public function delete_all() {
     $this->db->prepare("TRUNCATE cayl_cache")->execute();
     $this->db->prepare("TRUNCATE cayl_check")->execute();
-    $this->db->prepare("TRUNCATE cayl_activity")->execute();
   }
 
+  /**
+   * Delete an item from the cache and check tables. Do NOT delete activity data.
+   * @param $id
+   */
   public function delete($id) {
-    foreach (array('cayl_cache', 'cayl_check', 'cayl_activity') as $table) {
+    foreach (array('cayl_cache', 'cayl_check') as $table) {
       $this->db->prepare("DELETE FROM $table WHERE id = :id")->execute(array('id' => $id));
     }
   }
