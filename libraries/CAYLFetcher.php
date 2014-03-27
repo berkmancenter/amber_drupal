@@ -39,7 +39,8 @@ class CAYLFetcher implements iCAYLFetcher {
     $size = $root_item['info']['size_download'];
 
     // Get other assets
-    if (($content_type = $root_item['headers']['Content-Type']) &&
+    if (isset($root_item['headers']['Content-Type']) &&
+        ($content_type = $root_item['headers']['Content-Type']) &&
         (strpos(strtolower($content_type),"text/html") !== FALSE)) {
 
       $body = stream_get_contents($root_item['body']);
