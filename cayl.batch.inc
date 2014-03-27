@@ -119,6 +119,7 @@ function cayl_batch_scan_all_finished($success, $results, $operations) {
 
 /**
  * Setup a batch (for use with the Batch API) to cache all links scheduled for caching immediately
+ * Rather than adding URLs to the batch, we add items containing the name of a queue which holds an item to be cached,
  * @return array|null
  */
 
@@ -126,9 +127,9 @@ function cayl_batch_cache_all_setup() {
   foreach (array(CAYL_QUEUE_CHECK_NEW, CAYL_QUEUE_CHECK_EXISTING) as $queue_name) {
     $queue = DrupalQueue::get($queue_name);
     $queue->createQueue();
-    while ($item = $queue->claimItem(60)) {
-      //TODO: What happens if the batch is cancelled? How do we ensure the items can be processed again?
-      $operations[] = array('cayl_batch_cache_process', array($item, $queue));
+    $queue_size = $queue->numberOfItems();
+    for ($i = 0; $i < $queue_size; $i++) {
+      $operations[] = array('cayl_batch_cache_process', array($queue_name));
     }
   }
   if (!empty($operations)) {
@@ -143,15 +144,17 @@ function cayl_batch_cache_all_setup() {
 }
 
 /**
- * Take a queue item with a URL, and check AND cache it immediately
- * @param $item object from a queue with the url to be checked
- * @param $queue object where the item came from. Required so we can remove the item from the queue once processed
+ * Take an item with a queue name from the batch, and retrieve the next item from that queue
+ * @param $item name of the queue from which to pull an object to be checked
  * @param $context
  */
-function cayl_batch_cache_process($item, $queue, $context) {
+function cayl_batch_cache_process($queue_name, $context) {
   $fetcher = cayl_get_fetcher();
   $checker = cayl_get_checker();
   $status_service = cayl_get_status();
+  $queue = DrupalQueue::get($queue_name);
+  $queue->createQueue();
+  $item = $queue->claimItem(60);
   $url = $item->data;
   $existing_cache = $status_service->get_cache($url);
   if (!variable_get('cayl_update_strategy',0) || !$existing_cache) {
@@ -190,11 +193,9 @@ function cayl_batch_cache_all_finished($success, $results, $operations) {
     cache_clear_all('*', 'cache_field',TRUE);
   } else {
     $error_operation = reset($operations);
-    drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
+    drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation, TRUE))));
   }
 }
-
-
 
 /**
  * Process an item in the queue to be cached
