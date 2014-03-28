@@ -23,6 +23,7 @@ class CAYLFetcher implements iCAYLFetcher {
    * @param $url
    * @return
    */
+  //TODO: Find a cleaner way of dealing with temporary files in this function.
   public function fetch($url) {
     // Check the robots.txt
     if (!CAYLRobots::robots_allowed($url)) {
@@ -48,15 +49,25 @@ class CAYLFetcher implements iCAYLFetcher {
       $asset_paths = $this->assetHelper->extract_assets($body);
       $assets = $this->assetHelper->expand_asset_references($url, $asset_paths);
       $assets = $this->download_assets($assets, $url);
-      foreach ($assets as $value) {
+
+      $all_css_assets = array();
+      foreach ($assets as &$value) {
         $size += $value['info']['size_download'];
+        /* For CSS assets, parse the CSS file to find and download any referenced images, and rewrite the CSS file to use them */
+        if (isset($value['headers']['Content-Type']) && ('text/css' == $value['headers']['Content-Type'])) {
+          $css_body = stream_get_contents($value['body']);
+          $css_asset_paths = $this->assetHelper->extract_css_assets($css_body);
+          $css_assets = $this->assetHelper->expand_asset_references($value['url'], $css_asset_paths);
+          $css_assets = $this->download_assets($css_assets, $url);
+          $all_css_assets = array_merge($all_css_assets, $css_assets);
+          $css_body = $this->assetHelper->rewrite_links($css_body, $css_assets, $value['url']);
+          $this->rewrite_file($value['body'], $css_body);
+        }
       }
+      $assets = array_merge($assets, $all_css_assets);
       $body = $this->assetHelper->rewrite_links($body, $assets);
       $body = $this->assetHelper->insert_banner($body, $this->headerText);
-      $stream = fopen('php://temp','rw');
-      fwrite($stream, $body);
-      fclose($root_item['body']);
-      $root_item['body'] = $stream;
+      $this->rewrite_file($root_item['body'],$body);
 
       /* Check total size of the file combined with its assets */
       if ($size > ($this->maxFileSize * 1024)) {
@@ -80,6 +91,20 @@ class CAYLFetcher implements iCAYLFetcher {
     } else {
       throw new RuntimeException("Saving ${url} halted due to empty content");
     }
+  }
+
+  /**
+   * Change a file resource to have new contents. Current implementation creates a new temp file, and points the
+   * resource at that
+   * @param $resource resource to change contents of
+   * @param $text new contents
+   */
+  private function rewrite_file(&$resource, $text) {
+    $stream = fopen('php://temp','rw');
+    fwrite($stream, $text);
+    fclose($resource);
+    $resource = $stream;
+    rewind($resource);
   }
 
   private function cacheable_item($data) {
@@ -127,13 +152,26 @@ class CAYLAssetHelper {
 
       $refs = $this->extract_dom_tag_attributes($dom, 'img', 'src');
       $refs = array_merge($refs,$this->extract_dom_tag_attributes($dom, 'script', 'src'));
+      $refs = array_merge($refs,$this->extract_dom_tag_attributes($dom, 'input', 'src'));
       $refs = array_merge($refs,$this->extract_dom_link_references($dom));
       $refs = array_merge($refs,$this->extract_dom_style_references($dom));
+      $refs = array_merge($refs,$this->extract_css_assets($body));
       return $refs;
     } else {
       return array();
     }
   }
+
+  public function extract_css_assets($body) {
+    if ($body) {
+      $re = '/url\(\s*["\']?([^\v()<>{}\[\]"\']+)[\'"]?\s*\)/';
+      $count = preg_match_all($re, $body, $matches);
+      return $count ? array_unique($matches[1]) : array();
+    } else {
+      return array();
+    }
+  }
+
   /**
    * Given a base URL and a list of assets referenced from that page, return an array list of absolute URIs
    * to each of the assets keyed by the path used to reference it
@@ -146,7 +184,8 @@ class CAYLAssetHelper {
     if ($p) {
       $path_array = explode('/',isset($p['path']) ? $p['path'] : "");
       array_pop($path_array);
-      $base = $p['scheme'] . "://" . $p['host'] . (isset($p['port']) ? ":" . $p['port'] : '') . join('/',$path_array);
+      $server = $p['scheme'] . "://" . $p['host'] . (isset($p['port']) ? ":" . $p['port'] : '');
+      $base = $server . join('/',$path_array);
       foreach ($assets as $asset) {
         $asset_copy = $asset;
         if (version_compare(phpversion(), '5.4.7', '<') && (strpos($asset,"//") === 0)) {
@@ -157,23 +196,40 @@ class CAYLAssetHelper {
         if ($asset_url) {
           if ((isset($asset_url['host']) && ($asset_url['host'] == $p['host'])) || !isset($asset_url['host'])) {
             $asset_copy = CAYLNetworkUtils::full_relative_path($asset_copy);
-            $asset_copy = preg_replace("/^\\//","", $asset_copy); /* Remove leading '/' */
-            $asset_path = join('/',array($base, $asset_copy));
+            if ($asset_copy[0] == '/') {
+              /* Absolute path */
+              $asset_copy = preg_replace("/^\\//","", $asset_copy); /* Remove leading '/' */
+              $asset_path = join('/',array($server, $asset_copy));
+            } else {
+              /* Relative path */
+              $asset_path = join('/',array($base, $asset_copy));
+            }
             $result[$asset]['url'] = $asset_path;
           }
         }
       }
     }
-
     return $result;
   }
 
-  public function rewrite_links($body, array $assets) {
+  /**
+   * Rewrite all asset links in an HTML document to point to relative paths underneath the asset directory
+   * @param $body string HTML document
+   * @param array $assets keyed by the url as it appears in the document, with the absolute URL as the value
+   * @param $relative_to string the URL from which the asset's relative path is in relation to
+   * @return mixed
+   */
+  public function rewrite_links($body, array $assets, $relative_to = '') {
     $result = $body;
     if ($body && !empty($assets)) {
+      $base = "assets";
+      if ($relative_to) {
+        $relative_path = CAYLNetworkUtils::full_relative_path($relative_to);
+        $base = str_repeat('../',substr_count($relative_path,'/')) . $base;
+      }
       foreach ($assets as $key => $asset) {
         $url = CAYLNetworkUtils::full_relative_path($asset['url']);
-        $p = "assets" . $url;
+        $p = $base . $url;
         $result = str_replace($key,$p,$result);
       }
     }

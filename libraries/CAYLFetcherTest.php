@@ -163,11 +163,11 @@ EOF;
     $assets = array("banana.jpg", 'scripts/ban.js', 'http://example.com/example.jpg', 'http://othersite.org/frank/james.css', '//example.com/funky.jpg', '/abs.css');
     $result = $a->expand_asset_references($url,$assets);
     $this->assertEquals(count($result),5);
-    $this->assertEquals($result['banana.jpg']['url'],'http://example.com/banana.jpg');
-    $this->assertEquals($result['scripts/ban.js']['url'],'http://example.com/scripts/ban.js');
-    $this->assertEquals($result['http://example.com/example.jpg']['url'],'http://example.com/example.jpg');
-    $this->assertEquals($result['//example.com/funky.jpg']['url'],'http://example.com/funky.jpg');
-    $this->assertEquals($result['/abs.css']['url'],'http://example.com/abs.css');
+    $this->assertEquals('http://example.com/banana.jpg',$result['banana.jpg']['url']);
+    $this->assertEquals('http://example.com/scripts/ban.js',$result['scripts/ban.js']['url']);
+    $this->assertEquals('http://example.com/example.jpg', $result['http://example.com/example.jpg']['url']);
+    $this->assertEquals('http://example.com/funky.jpg', $result['//example.com/funky.jpg']['url']);
+    $this->assertEquals('http://example.com/abs.css', $result['/abs.css']['url']);
   }
 
   /**
@@ -181,6 +181,22 @@ EOF;
     $this->assertEquals(count($result),5);
     $this->assertEquals($result['banana.jpg']['url'],'http://example.com/banana.jpg');
     $this->assertEquals($result['scripts/?h=x']['url'],'http://example.com/scripts/?h=x');
+    $this->assertEquals($result['http://example.com/data/?q=fruit']['url'],'http://example.com/data/?q=fruit');
+    $this->assertEquals($result['//example.com/funky.jpg']['url'],'http://example.com/funky.jpg');
+    $this->assertEquals($result['/abs.css']['url'],'http://example.com/abs.css');
+  }
+
+  /**
+   * @dataProvider provider
+   */
+  public function testExpandReferencesWithAbsolutePaths(CAYLAssetHelper $a)
+  {
+    $url = "http://example.com/fruit/cake";
+    $assets = array("banana.jpg", 'scripts/?h=x', 'http://example.com/data/?q=fruit', 'http://othersite.org/frank/james.css', '//example.com/funky.jpg', '/abs.css');
+    $result = $a->expand_asset_references($url,$assets);
+    $this->assertEquals(count($result),5);
+    $this->assertEquals($result['banana.jpg']['url'],'http://example.com/fruit/banana.jpg');
+    $this->assertEquals($result['scripts/?h=x']['url'],'http://example.com/fruit/scripts/?h=x');
     $this->assertEquals($result['http://example.com/data/?q=fruit']['url'],'http://example.com/data/?q=fruit');
     $this->assertEquals($result['//example.com/funky.jpg']['url'],'http://example.com/funky.jpg');
     $this->assertEquals($result['/abs.css']['url'],'http://example.com/abs.css');
@@ -238,9 +254,43 @@ EOF;
     $this->assertEquals($result[2],"http://band.com/band.jpg");
   }
 
+  /**
+   * @dataProvider provider
+   */
+  public function testCSSAssets(CAYLAssetHelper $a) {
+    $s = <<<EOF
+div.indentation {
+    width: 20px;
+    height: 1.7em;
+    margin: -0.4em 0.2em -0.4em -0.4em;
+    padding: 0.42em 0 0.42em 0.6em;
+    float: left;
+}
 
+div.tree-child {
+    background: url(/misc/tree.png) no-repeat 11px center;
+}
 
+div.tree-child-last {
+    background: url('/misc/tree1-bottom.png') no-repeat 11px center;
+}
 
+div.tree-child-horizontal {
+    background: url("/misc/tree1-one.png") no-repeat -11px center;
+}
+div.tree-child-vertical{
+    background: url(  "/misc/tree2-one.png" ) no-repeat -11px center;
+}
+EOF;
+
+    $result = $a->extract_css_assets($s);
+    $this->assertEquals(4,count($result));
+    sort($result);
+    $this->assertEquals("/misc/tree.png", $result[0]);
+    $this->assertEquals("/misc/tree1-bottom.png", $result[1]);
+    $this->assertEquals("/misc/tree1-one.png", $result[2]);
+    $this->assertEquals("/misc/tree2-one.png", $result[3]);
+  }
 
   /**
    * @dataProvider provider
