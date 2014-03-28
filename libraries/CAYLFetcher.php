@@ -156,16 +156,15 @@ class CAYLAssetHelper {
         $asset_url = parse_url($asset_copy);
         if ($asset_url) {
           if ((isset($asset_url['host']) && ($asset_url['host'] == $p['host'])) || !isset($asset_url['host'])) {
-            $asset_copy = preg_replace("/^\\//","", $asset_url['path']); /* Remove leading '/' */
-            if (isset($asset_url['query'])) {
-              $asset_copy = join('?',array($asset_copy,$asset_url['query']));
-            }
+            $asset_copy = CAYLNetworkUtils::full_relative_path($asset_copy);
+            $asset_copy = preg_replace("/^\\//","", $asset_copy); /* Remove leading '/' */
             $asset_path = join('/',array($base, $asset_copy));
             $result[$asset]['url'] = $asset_path;
           }
         }
       }
     }
+
     return $result;
   }
 
@@ -173,10 +172,7 @@ class CAYLAssetHelper {
     $result = $body;
     if ($body && !empty($assets)) {
       foreach ($assets as $key => $asset) {
-        $url = parse_url($asset['url'],PHP_URL_PATH);
-        if (parse_url($asset['url'],PHP_URL_QUERY)) {
-          $url = join('?',array($url, parse_url($asset['url'],PHP_URL_QUERY)));
-        }
+        $url = CAYLNetworkUtils::full_relative_path($asset['url']);
         $p = "assets" . $url;
         $result = str_replace($key,$p,$result);
       }
@@ -237,6 +233,13 @@ class CAYLNetworkUtils {
 
   private static function curl_installed() {
     return in_array("curl", get_loaded_extensions());
+  }
+
+  public static function full_relative_path($url) {
+    $dict = parse_url($url);
+    $result = isset($dict['path']) ? $dict['path'] : '';
+    $result .= isset($dict['query']) ? '?' . $dict['query'] : '';
+    return $result;
   }
 
   /**
