@@ -379,7 +379,7 @@ function cayl_retrieve_cache_asset() {
   $args = func_get_args();
   $id = array_shift($args);
   $storage = cayl_get_storage();
-  $d = $storage->get_asset($id, join('/',$args));
+  $d = $storage->get_asset($id, join('/',$args) . ($_SERVER['QUERY_STRING'] ? '?' . $_SERVER['QUERY_STRING'] : ''));
   if ($d) {
     $data['data'] = $d;
     // Set the mime-type correctly if this is a CSS file.
