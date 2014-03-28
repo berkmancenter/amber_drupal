@@ -181,7 +181,7 @@ class CAYLAssetHelper {
 
   public function insert_banner($body) {
     $banner = <<<EOD
-<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:999;background-color:rgba(0,0,0,0.5);;color:white;text-align:center;line-height:30px;">
+<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:999;background-color:rgba(0,0,0,0.75);color:white;text-align:center;font:bold 18px/30px sans-serif !important;">
 This is a cached page</div>
 EOD;
     //TODO: Translation
