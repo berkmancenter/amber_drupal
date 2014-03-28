@@ -51,6 +51,7 @@ function cayl_dashboard_detail_form() {
     array('data' => t('Last viewed'), 'field' => 'a.date' ),
     array('data' => t('Number of views'), 'field' => 'a.views' ),
     array('data' => t(''),  ),
+    array('data' => t(''),  ),
   );
 
   $query = _cayl_dashboard_detail_query();
@@ -72,6 +73,7 @@ function cayl_dashboard_detail_form() {
       'size' => format_size($r['size']),
       'a.date' => isset($r['a_date']) ? format_date($r['a_date']) : "",
       'views' => isset($r['views']) ? $r['views'] : 0,
+      'view' => l('View', $r['location']),
       'delete' => l('Delete', 'admin/reports/cayl/delete/' . $r['id'], array('query' => array('destination' => current_path()))),
     );
   }
@@ -192,7 +194,7 @@ function _cayl_dashboard_detail_query() {
   $query->join('cayl_cache', 'ca','ca.id = c.id');
   $query->leftJoin('cayl_activity', 'a','ca.id = a.id');
   $query = $query->fields('c', array('id', 'url','status','last_checked'));
-  $query = $query->fields('ca', array('id', 'date', 'size'));
+  $query = $query->fields('ca', array('id', 'date', 'size', 'location'));
   $query = $query->fields('a', array('id', 'views', 'date'));
   return $query;
 }
