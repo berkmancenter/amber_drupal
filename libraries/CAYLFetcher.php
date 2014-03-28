@@ -15,6 +15,7 @@ class CAYLFetcher implements iCAYLFetcher {
     $this->storage = $storage;
     $this->assetHelper = new CAYLAssetHelper();
     $this->maxFileSize = isset($options['cayl_max_file']) ? $options['cayl_max_file'] : 1000;
+    $this->headerText = isset($options['header_text']) ? $options['header_text'] : "This is a cached page";
   }
 
   /**
@@ -51,7 +52,7 @@ class CAYLFetcher implements iCAYLFetcher {
         $size += $value['info']['size_download'];
       }
       $body = $this->assetHelper->rewrite_links($body, $assets);
-      $body = $this->assetHelper->insert_banner($body);
+      $body = $this->assetHelper->insert_banner($body, $this->headerText);
       $stream = fopen('php://temp','rw');
       fwrite($stream, $body);
       fclose($root_item['body']);
@@ -172,19 +173,21 @@ class CAYLAssetHelper {
     $result = $body;
     if ($body && !empty($assets)) {
       foreach ($assets as $key => $asset) {
-        $p = "assets" . parse_url($asset['url'],PHP_URL_PATH);
+        $url = parse_url($asset['url'],PHP_URL_PATH);
+        if (parse_url($asset['url'],PHP_URL_QUERY)) {
+          $url = join('?',array($url, parse_url($asset['url'],PHP_URL_QUERY)));
+        }
+        $p = "assets" . $url;
         $result = str_replace($key,$p,$result);
       }
     }
     return $result;
   }
 
-  public function insert_banner($body) {
+  public function insert_banner($body, $text) {
     $banner = <<<EOD
-<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:999;background-color:rgba(0,0,0,0.75);color:white;text-align:center;font:bold 18px/30px sans-serif !important;">
-This is a cached page</div>
+<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:999;background-color:rgba(0,0,0,0.75);color:white;text-align:center;font:bold 18px/30px sans-serif !important;">${text}</div>
 EOD;
-    //TODO: Translation
     $result = str_ireplace("</body>","${banner}</body>",$body);
     return $result;
   }

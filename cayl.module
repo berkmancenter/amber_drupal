@@ -37,7 +37,10 @@ function cayl_get_storage() {
 function cayl_get_fetcher() {
   $fetcher = &drupal_static(__FUNCTION__);
   if (!isset($fetcher)) {
-    $fetcher = new CAYLFetcher(cayl_get_storage(), array('cayl_max_file' => variable_get('cayl_max_file',1000)));
+    $fetcher = new CAYLFetcher(cayl_get_storage(), array(
+      'cayl_max_file' => variable_get('cayl_max_file',1000),
+      'header_text' => t("This is a cached page"),
+    ));
   }
   return $fetcher;
 }
