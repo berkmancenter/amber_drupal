@@ -100,7 +100,8 @@ function cayl_dashboard_detail_form() {
 }
 
 function _cayl_cache_size() {
-  return db_query("SELECT COUNT(*) FROM cayl_cache")->fetchCol()[0];
+  $result = db_query("SELECT COUNT(*) FROM cayl_cache")->fetchCol();
+  return $result[0];
 }
 
 function _cayl_queue_size($q) {
