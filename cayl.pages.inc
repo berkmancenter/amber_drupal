@@ -118,7 +118,7 @@ function _cayl_disk_usage() {
   $status = cayl_get_status();
   $max = format_size(variable_get('cayl_max_disk', '1000') * 1024 * 1024);
   $current = format_size($status->get_cache_size());
-  return t('@current (of @max)', array('@current' => $current, '@max' => $max));
+  return t('@current (of @max)', array('@current' => $current ? $current : 0, '@max' => $max));
 }
 
 function cayl_dashboard_summary_form_clear($form, &$form_state) {
