@@ -30,7 +30,7 @@ function cayl_config_form($form, &$form_state) {
   $form['cayl_cache']['cayl_storage_location'] = array(
     '#type' => 'textfield',
     '#title' => t('Storage location'),
-    '#default_value' => variable_get('cayl_storage_location', 'sites/default/cayl'),
+    '#default_value' => variable_get('cayl_storage_location', 'sites/default/files/cayl'),
     '#description' => t('Path to the location where sites are stored on disk, relative to the Drupal root'),
   );
 
