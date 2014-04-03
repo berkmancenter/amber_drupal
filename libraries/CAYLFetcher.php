@@ -25,6 +25,11 @@ class CAYLFetcher implements iCAYLFetcher {
    */
   //TODO: Find a cleaner way of dealing with temporary files in this function.
   public function fetch($url) {
+
+    if (!$url) {
+      throw new RuntimeException("Empty URL");
+    }
+
     // Check the robots.txt
     if (!CAYLRobots::robots_allowed($url)) {
       throw new RuntimeException("Fetching ${url} blocked by robots.txt");
