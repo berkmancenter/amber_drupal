@@ -196,7 +196,7 @@ class CAYLAssetHelper {
         if ($asset_url) {
           if ((isset($asset_url['host']) && ($asset_url['host'] == $p['host'])) || !isset($asset_url['host'])) {
             $asset_copy = CAYLNetworkUtils::full_relative_path($asset_copy);
-            if ($asset_copy[0] == '/') {
+            if ($asset_copy && $asset_copy[0] == '/') {
               /* Absolute path */
               $asset_copy = preg_replace("/^\\//","", $asset_copy); /* Remove leading '/' */
               $asset_path = join('/',array($server, $asset_copy));
