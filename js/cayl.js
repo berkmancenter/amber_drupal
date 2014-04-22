@@ -257,7 +257,7 @@ var cayl = {
         cayl.util_addEventListener(hover, 'mouseover', cayl.start_popup_hover);
         cayl.util_addEventListener(hover, 'mouseout', cayl.end_popup_hover_function(hover));
       }, delay * 1000);
-      this.getAttribute("cayl-timer",timer);
+      this.setAttribute("cayl-timer",timer);
     }
   },
 
