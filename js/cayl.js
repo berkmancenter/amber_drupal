@@ -128,6 +128,11 @@ var cayl = {
     return result;
   },
 
+  format_date_from_string : function(s) {
+      var a = s.split(/[^0-9]/);
+      return new Date (a[0],a[1]-1,a[2],a[3],a[4],a[5]).toLocaleDateString();
+  },
+
   execute_action: function (behavior, action) {
     if (!cayl.country && behavior.default.action == action) {
       return true;
@@ -162,7 +167,7 @@ var cayl = {
 
       /* Substitute dynamic text */
       var replacements = {
-        '{{DATE}}' : new Date(cache.default.date).toLocaleDateString(),
+        '{{DATE}}' : cayl.format_date_from_string(cache.default.date),
         '{{NAME}}' : (cayl.name == undefined) ? "This site" : cayl.name,
         '{{CACHE}}' : cache.default.cache,
         '{{LINK}}' : this.getAttribute("href")
@@ -237,7 +242,7 @@ var cayl = {
     if (cayl.execute_action(behavior,"hover")) {
       var cache = cayl.parse_cache(this.getAttribute("data-cache"));
       var args = {
-        '{{DATE}}' : new Date(cache.default.date).toLocaleDateString(),
+        '{{DATE}}' : cayl.format_date_from_string(cache.default.date),
         '{{NAME}}' : (cayl.name == undefined) ? "This site" : cayl.name,
         '{{CACHE}}' : cache.default.cache,
         '{{LINK}}' : this.getAttribute("href")
@@ -344,4 +349,3 @@ cayl.util_ready(function($) {
       cayl.name = Drupal.settings.cayl.name;
     }
 });
-
