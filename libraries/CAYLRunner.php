@@ -12,15 +12,18 @@ date_default_timezone_set('UTC');
 function main($argc, $argv) {
   global $db, $cache_location;
   $options = getopt("",array("action::", "db::", "cache::", "url::", "help"));
-  if ($options["db"]) {
+  if (isset($options["db"])) {
     $db = $options["db"];
   }
-  if ($options["cache"]) {
+  if (isset($options["cache"])) {
     $cache_location = $options["cache"];
   }
   if (isset($options["help"])) {
     usage();
     return;
+  }
+  if (!isset($options["action"])) {
+    $options["action"] = "dequeue";
   }
   switch ($options["action"]) {
     case false:
