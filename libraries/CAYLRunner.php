@@ -5,31 +5,44 @@ require_once 'CAYLFetcher.php';
 require_once 'CAYLStorage.php';
 require_once 'CAYLStatus.php';
 
-// TODO: Get these from the command-line or configuration file
-$db = "/Users/jlicht/Documents/pod/Development/cayl/nginx/robustness_nginx/cayl.db";
+$db = "/var/lib/cayl/cayl.db";
 $cache_location = "/usr/local/nginx/html/cayl/cache";
 date_default_timezone_set('UTC');
 
-
 function main($argc, $argv) {
-  if ($argc < 2) {
-    print "Error: No command provided. Valid commands are: cache\n";
+  global $db, $cache_location;
+  $options = getopt("",array("action::", "db::", "cache::", "url::", "help"));
+  if ($options["db"]) {
+    $db = $options["db"];
+  }
+  if ($options["cache"]) {
+    $cache_location = $options["cache"];
+  }
+  if (isset($options["help"])) {
+    usage();
     return;
   }
-  switch ($argv[1]) {
-    case "cache":
-      if ($argc < 3) {
-        print "Error: Provide URL to cache";
-        return;
-      }
-      cache($argv[2]);
-      break;
+  switch ($options["action"]) {
+    case false:
     case "dequeue":
       dequeue();
       break;
+    case "cache":
+      if ($options["url"]) {
+        cache($options["url"]);
+      } else {
+        print "Error: Provide URL to cache";
+      }
+      break;
+    case "help":
     default:
-      print "No command given";
+      usage();
+      break;
   }
+}
+
+function usage() {
+  print "Usage: $argc [--action=dequeue|cache|help] [--db=path_to_database] [--cache=path_to_cache] [--url=url_to_cache]\n";
 }
 
 /* Download a single URL and save it to the cache */
@@ -110,7 +123,6 @@ function get_status() {
 }
 
 main($argc,$argv);
-print "\n";
 
 
 ?>
