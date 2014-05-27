@@ -49,7 +49,7 @@ class CAYLStorage implements iCAYLStorage {
 
   function __construct($file_root = '/private/tmp/cayl/cache') {
     $this->file_root = $file_root;
-    $this->url_prefix = 'cayl';
+    $this->url_prefix = 'CAYL';
     $this->name = 'cayl'; // Used to identify the metadata that belongs to this implementation of iCAYLStorage
   }
 
