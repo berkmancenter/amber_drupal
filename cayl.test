@@ -265,6 +265,7 @@ class CAYLWebTestCase extends DrupalWebTestCase {
       'default' => array(
         'location' => '/cache/here',
         'date' => 1395590225,
+        'size' => 3453,
         'status' => 0)
     );
     variable_set('cayl_unavailable_action', CAYL_ACTION_POPUP);
@@ -272,15 +273,30 @@ class CAYLWebTestCase extends DrupalWebTestCase {
     $this->assertEqual($result['data-cayl-behavior'],"down popup");
   }
 
+  public function testCAYLAttributeAddingZeroSize() {
+    $basic = array(
+      'default' => array(
+        'location' => '/cache/here',
+        'date' => 1395590225,
+        'size' => 0,
+        'status' => 0)
+    );
+    variable_set('cayl_unavailable_action', CAYL_ACTION_POPUP);
+    $result = _cayl_build_link_attributes($basic);
+    $this->assertTrue(empty($result));
+  }
+
   public function testCAYLAttributeAddingCountry() {
     $basic = array(
       'default' => array(
         'location' => '/cache/here',
         'date' => 1395590225,
+        'size' => 3453,
         'status' => 0),
       'us' => array(
         'location' => '/cache/here',
         'date' => 1395590225,
+        'size' => 3453,
         'status' => 1)
     );
     variable_set('cayl_country_id', 'us');
@@ -296,10 +312,12 @@ class CAYLWebTestCase extends DrupalWebTestCase {
       'default' => array(
         'location' => '/cache/here',
         'date' => 1395590225,
+        'size' => 3453,
         'status' => 0),
       'us' => array(
         'location' => '/cache/here',
         'date' => 1395590225,
+        'size' => 3453,
         'status' => 0)
     );
     variable_set('cayl_country_id', 'us');
@@ -315,10 +333,12 @@ class CAYLWebTestCase extends DrupalWebTestCase {
       'default' => array(
         'location' => '/cache/here',
         'date' => 1395590225,
+        'size' => 3453,
         'status' => 0),
       'us' => array(
         'location' => '/cache/here',
         'date' => 1395590225,
+        'size' => 3453,
         'status' => 0)
     );
     variable_set('cayl_country_id', 'us');
@@ -327,7 +347,5 @@ class CAYLWebTestCase extends DrupalWebTestCase {
     $result = _cayl_build_link_attributes($basic);
     $this->assertEqual($result['data-cayl-behavior'],"down popup");
   }
-
-
 
 }
