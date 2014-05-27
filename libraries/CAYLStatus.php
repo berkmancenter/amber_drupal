@@ -50,7 +50,7 @@ class CAYLStatus implements iCAYLStatus {
 
   public function get_summary($url) {
     $query = $this->db->prepare(
-      ' SELECT ca.location, ca.date, ch.status ' .
+      ' SELECT ca.location, ca.date, ch.status, ca.size ' .
       ' FROM cayl_cache ca, cayl_check ch ' .
       ' WHERE ca.url = :url AND ca.id = ch.id');
     $query->execute(array('url' => $url));

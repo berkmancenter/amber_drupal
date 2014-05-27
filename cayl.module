@@ -210,8 +210,11 @@ function _cayl_get_behavior($status, $country = false) {
 function _cayl_build_link_attributes($summaries) {
   $result = array();
   // Assume that we only have one cache of the data. This would need to change if we start tracking multiple caches
-  if (isset($summaries['default']['location'],$summaries['default']['date'])) {
+  if (isset($summaries['default']['location'],$summaries['default']['date'],$summaries['default']['size']) &&
+      ($summaries['default']['size'] > 0)) {
     $result['data-cache'] = join(" ",array(base_path() . $summaries['default']['location'], date('c',$summaries['default']['date'])));
+  } else {
+    return $result;
   }
 
   $default_status = isset($summaries['default']['status']) ? $summaries['default']['status'] : null;
