@@ -85,6 +85,8 @@ class CAYLFetcher implements iCAYLFetcher {
       $this->storage->save($url, $root_item['body'], $root_item['headers'], isset($assets) ? $assets : array());
       fclose($root_item['body']);
       $storage_metadata = $this->storage->get_metadata($url);
+      //TODO: If cannot retrieve storage metadata, or id/url/cache not populated (perhaps due to permissions errors
+      //      in saving the cache), fail more gracefully instead of with errors because the keys are not set
       return array (
         'id' => $storage_metadata['id'],
         'url' => $storage_metadata['url'],
@@ -193,13 +195,14 @@ class CAYLAssetHelper {
       $base = $server . join('/',$path_array);
       foreach ($assets as $asset) {
         $asset_copy = $asset;
-        if (version_compare(phpversion(), '5.4.7', '<') && (strpos($asset,"//") === 0)) {
+        if (strpos($asset,"//") === 0) {
+          /* Ensure that every URL has a scheme. Must be done before running parse_url due to bug in PHP < 5.4.7 */
           /* Workaround for bug in parse_url: http://us2.php.net/parse_url#refsect1-function.parse-url-changelog */
           $asset_copy = "${p['scheme']}:${asset_copy}";
         }
         $asset_url = parse_url($asset_copy);
         if ($asset_url) {
-          if ((isset($asset_url['host']) && ($asset_url['host'] == $p['host'])) || !isset($asset_url['host'])) {
+          if (!isset($asset_url['host'])) {
             $asset_copy = CAYLNetworkUtils::full_relative_path($asset_copy);
             if ($asset_copy && $asset_copy[0] == '/') {
               /* Absolute path */
@@ -210,6 +213,8 @@ class CAYLAssetHelper {
               $asset_path = join('/',array($base, $asset_copy));
             }
             $result[$asset]['url'] = $asset_path;
+          } else {
+            $result[$asset]['url'] = $asset_copy;
           }
         }
       }
@@ -298,7 +303,8 @@ class CAYLNetworkUtils {
 
   public static function full_relative_path($url) {
     $dict = parse_url($url);
-    $result = isset($dict['path']) ? $dict['path'] : '';
+    $result = isset($dict['host']) ? "/" . $dict['host'] : '';
+    $result .= isset($dict['path']) ? $dict['path'] : '';
     $result .= isset($dict['query']) ? '?' . $dict['query'] : '';
     return $result;
   }

@@ -119,7 +119,7 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue(isset($metadata['cache']['cayl']['location']) && $metadata['cache']['cayl']['location']);
     $path = join(DIRECTORY_SEPARATOR,array($this->get_storage_path(),$metadata['id']));
     $this->assertTrue(file_exists($path));
-    $this->assertTrue(file_exists(join(DIRECTORY_SEPARATOR,array($path,'assets','man','is','free.jpg'))));
+    $this->assertTrue(file_exists(join(DIRECTORY_SEPARATOR,array($path,'assets','www.example.com','man','is','free.jpg'))));
 
   }
 
@@ -137,7 +137,7 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue(isset($metadata['cache']['cayl']['location']) && $metadata['cache']['cayl']['location']);
     $path = join(DIRECTORY_SEPARATOR,array($this->get_storage_path(),$metadata['id']));
     $this->assertTrue(file_exists($path));
-    $this->assertTrue(file_exists(join(DIRECTORY_SEPARATOR,array($path,'assets','man','is','free','?t=js&amp;bv=&amp;os=&amp;tz=&amp;lg=&amp;rv=&amp;rsv=&amp;pw=%2F&amp;cb=1438832272'))));
+    $this->assertTrue(file_exists(join(DIRECTORY_SEPARATOR,array($path,'assets','www.example.com','man','is','free','?t=js&amp;bv=&amp;os=&amp;tz=&amp;lg=&amp;rv=&amp;rsv=&amp;pw=%2F&amp;cb=1438832272'))));
 
   }
 
@@ -156,7 +156,7 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
     $this->assertTrue(isset($metadata['cache']['cayl']['location']) && $metadata['cache']['cayl']['location']);
     $path = join(DIRECTORY_SEPARATOR,array($this->get_storage_path(),$metadata['id']));
     $this->assertTrue(file_exists($path));
-    $this->assertTrue(file_exists(join(DIRECTORY_SEPARATOR,array($path,'assets','traffic','?t=px&bv=JavaScript+Disabled&os=&tz=default&lg=&rv=&rsv=&pw=%2F&cb=1382655937'))));
+    $this->assertTrue(file_exists(join(DIRECTORY_SEPARATOR,array($path,'assets','www.example.com','traffic','?t=px&bv=JavaScript+Disabled&os=&tz=default&lg=&rv=&rsv=&pw=%2F&cb=1382655937'))));
 
   }
 

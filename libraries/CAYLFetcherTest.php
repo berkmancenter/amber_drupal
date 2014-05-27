@@ -157,17 +157,32 @@ EOF;
   /**
    * @dataProvider provider
    */
+  public function testExpandReferencesExternal(CAYLAssetHelper $a)
+  {
+    $url = "http://example.com";
+    $assets = array("banana.jpg", 'scripts/ban.js', 'http://bananas.com/fruit');
+    $result = $a->expand_asset_references($url,$assets);
+    $this->assertEquals($result['banana.jpg']['url'],'http://example.com/banana.jpg');
+    $this->assertEquals($result['scripts/ban.js']['url'],'http://example.com/scripts/ban.js');
+    $this->assertEquals($result['http://bananas.com/fruit']['url'],'http://bananas.com/fruit');
+  }
+
+
+  /**
+   * @dataProvider provider
+   */
   public function testExpandReferencesMix(CAYLAssetHelper $a)
   {
     $url = "http://example.com";
     $assets = array("banana.jpg", 'scripts/ban.js', 'http://example.com/example.jpg', 'http://othersite.org/frank/james.css', '//example.com/funky.jpg', '/abs.css');
     $result = $a->expand_asset_references($url,$assets);
-    $this->assertEquals(count($result),5);
+    $this->assertEquals(count($result),6);
     $this->assertEquals('http://example.com/banana.jpg',$result['banana.jpg']['url']);
     $this->assertEquals('http://example.com/scripts/ban.js',$result['scripts/ban.js']['url']);
     $this->assertEquals('http://example.com/example.jpg', $result['http://example.com/example.jpg']['url']);
     $this->assertEquals('http://example.com/funky.jpg', $result['//example.com/funky.jpg']['url']);
     $this->assertEquals('http://example.com/abs.css', $result['/abs.css']['url']);
+    $this->assertEquals('http://othersite.org/frank/james.css', $result['http://othersite.org/frank/james.css']['url']);
   }
 
   /**
@@ -178,12 +193,13 @@ EOF;
     $url = "http://example.com";
     $assets = array("banana.jpg", 'scripts/?h=x', 'http://example.com/data/?q=fruit', 'http://othersite.org/frank/james.css', '//example.com/funky.jpg', '/abs.css');
     $result = $a->expand_asset_references($url,$assets);
-    $this->assertEquals(count($result),5);
+    $this->assertEquals(count($result),6);
     $this->assertEquals($result['banana.jpg']['url'],'http://example.com/banana.jpg');
     $this->assertEquals($result['scripts/?h=x']['url'],'http://example.com/scripts/?h=x');
     $this->assertEquals($result['http://example.com/data/?q=fruit']['url'],'http://example.com/data/?q=fruit');
     $this->assertEquals($result['//example.com/funky.jpg']['url'],'http://example.com/funky.jpg');
     $this->assertEquals($result['/abs.css']['url'],'http://example.com/abs.css');
+    $this->assertEquals($result['http://othersite.org/frank/james.css']['url'],'http://othersite.org/frank/james.css');
   }
 
   /**
@@ -194,12 +210,13 @@ EOF;
     $url = "http://example.com/fruit/cake";
     $assets = array("banana.jpg", 'scripts/?h=x', 'http://example.com/data/?q=fruit', 'http://othersite.org/frank/james.css', '//example.com/funky.jpg', '/abs.css');
     $result = $a->expand_asset_references($url,$assets);
-    $this->assertEquals(count($result),5);
+    $this->assertEquals(count($result),6);
     $this->assertEquals($result['banana.jpg']['url'],'http://example.com/fruit/banana.jpg');
     $this->assertEquals($result['scripts/?h=x']['url'],'http://example.com/fruit/scripts/?h=x');
     $this->assertEquals($result['http://example.com/data/?q=fruit']['url'],'http://example.com/data/?q=fruit');
     $this->assertEquals($result['//example.com/funky.jpg']['url'],'http://example.com/funky.jpg');
     $this->assertEquals($result['/abs.css']['url'],'http://example.com/abs.css');
+    $this->assertEquals($result['http://othersite.org/frank/james.css']['url'],'http://othersite.org/frank/james.css');
   }
 
   /**
