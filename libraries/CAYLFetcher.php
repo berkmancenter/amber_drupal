@@ -59,7 +59,7 @@ class CAYLFetcher implements iCAYLFetcher {
       foreach ($assets as &$value) {
         $size += $value['info']['size_download'];
         /* For CSS assets, parse the CSS file to find and download any referenced images, and rewrite the CSS file to use them */
-        if (isset($value['headers']['Content-Type']) && ('text/css' == $value['headers']['Content-Type'])) {
+        if (isset($value['headers']['Content-Type']) && (strpos($value['headers']['Content-Type'],'text/css') !== FALSE)) {
           $css_body = stream_get_contents($value['body']);
           $css_asset_paths = $this->assetHelper->extract_css_assets($css_body);
           $css_assets = $this->assetHelper->expand_asset_references($value['url'], $css_asset_paths);
