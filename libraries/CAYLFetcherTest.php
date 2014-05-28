@@ -63,6 +63,24 @@ class CAYLAssetHelperTest extends \PHPUnit_Framework_TestCase {
   /**
    * @dataProvider provider
    */
+  public function testBaseRewrite(CAYLAssetHelper $a)
+  {
+    $result = $a->rewrite_base_tag('<head><base href="http://tinyurl.com"/></head><body><img src="../peacock.png">And the band played on....</body>');
+    $this->assertEquals($result,'<head></head><body><img src="../peacock.png">And the band played on....</body>');
+  }
+
+  /**
+   * @dataProvider provider
+   */
+  public function testBaseRewrite2(CAYLAssetHelper $a)
+  {
+    $result = $a->rewrite_base_tag('<head><base    href=\'http://tinyurl.com\'></head><body><img src="../peacock.png">And the band played on....</body>');
+    $this->assertEquals($result,'<head></head><body><img src="../peacock.png">And the band played on....</body>');
+  }
+
+  /**
+   * @dataProvider provider
+   */
   public function testOneImage(CAYLAssetHelper $a)
   {
     $s = <<<EOF

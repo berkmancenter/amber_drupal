@@ -243,9 +243,20 @@ class CAYLAssetHelper {
         $result = str_replace($key,$p,$result);
       }
     }
+    $result = $this->rewrite_base_tag($result);
     return $result;
   }
 
+  /** 
+   * Rewrite the "<base href='foo'/>" tag in the header if it exists. This tag sets the base URL from which 
+   * relative URLs are relative to, which gives us problems if it refers back to the original site.
+   **/ 
+  public function rewrite_base_tag($body) {
+    $body = preg_replace('/<base\s+href=[\'"]\S+[\'"]\/?>/','',$body,1);
+    return $body;
+  }
+
+/* <script type="text/javascript">window.onbeforeunload = function(e) { return "This page is trying to beat it"; }; window.onload = function() { window.onbeforeunload=null; }</script>  */
   public function insert_banner($body, $text) {
     $banner = <<<EOD
 <div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:999;background-color:rgba(0,0,0,0.75);color:white;text-align:center;font:bold 18px/30px sans-serif !important;">${text}</div>

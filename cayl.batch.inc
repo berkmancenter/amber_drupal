@@ -154,7 +154,13 @@ function cayl_batch_cache_process($queue_name, $context) {
   $status_service = cayl_get_status();
   $queue = DrupalQueue::get($queue_name);
   $queue->createQueue();
+  if ($queue->numberOfItems() == 0) {
+    return;
+  }
   $item = $queue->claimItem(60);
+  if (!$item) {
+    return;
+  }
   $url = $item->data;
   $existing_cache = $status_service->get_cache($url);
   if (!variable_get('cayl_update_strategy',0) || !$existing_cache) {
