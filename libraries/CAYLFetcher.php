@@ -370,6 +370,10 @@ class CAYLNetworkUtils {
           CURLOPT_HEADER => TRUE,           /* Return header information as part of the file */
           CURLOPT_FILE => $tmp_body_file,
           CURLOPT_WRITEHEADER => $tmp_header_file,
+          CURLOPT_USERAGENT => "CAYL/0.1",
+          // CURLOPT_VERBOSE => true,
+          // CURLOPT_PROXY => 'localhost:8889',
+          // CURLOPT_PROXYTYPE => CURLPROXY_SOCKS5,
         );
 
         if (curl_setopt_array($ch, $additional_options + $options) === FALSE) {
@@ -385,7 +389,6 @@ class CAYLNetworkUtils {
         curl_close($ch);
         fclose($tmp_header_file);
         fclose($tmp_body_file);
-
       } catch (RuntimeException $e) {
         error_log($e->getMessage());
         curl_close($ch);
