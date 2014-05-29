@@ -261,7 +261,10 @@ class CAYLAssetHelper {
     $banner = <<<EOD
 <div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:999;background-color:rgba(0,0,0,0.75);color:white;text-align:center;font:bold 18px/30px sans-serif !important;">${text}</div>
 EOD;
-    $result = str_ireplace("</body>","${banner}</body>",$body);
+    $result = str_ireplace("</body>","${banner}</body>",$body,$count);
+    if ($count == 0) {
+      $result = $body . $banner;
+    }
     return $result;
   }
 
