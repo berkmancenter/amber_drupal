@@ -259,7 +259,7 @@ class CAYLAssetHelper {
 /* <script type="text/javascript">window.onbeforeunload = function(e) { return "This page is trying to beat it"; }; window.onload = function() { window.onbeforeunload=null; }</script>  */
   public function insert_banner($body, $text) {
     $banner = <<<EOD
-<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:9999;background-color:rgba(0,0,0,0.75);color:white;text-align:center;font:bold 18px/30px sans-serif !important;">${text}</div>
+<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:999999;background-color:rgba(0,0,0,0.75);color:white;text-align:center;font:bold 18px/30px sans-serif !important;">${text}</div>
 EOD;
     $result = str_ireplace("</body>","${banner}</body>",$body,$count);
     if ($count == 0) {
