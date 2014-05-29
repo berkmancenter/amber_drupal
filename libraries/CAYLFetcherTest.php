@@ -36,6 +36,48 @@ EOD
 
 }
 
+class NetworkUtilsTest extends \PHPUnit_Framework_TestCase {
+
+  public function testHeadersParse()
+  {
+    $raw = <<<EOD
+HTTP/1.1 200 OK
+Content-Type: text/plain
+Accept-Ranges: bytes
+ETag: "1805770918"
+Last-Modified: Tue, 20 Nov 2012 02:11:45 GMT
+Content-Length: 611
+nnCoection: close
+Date: Thu, 29 May 2014 20:53:13 GMT
+Connection: Keep-alive
+
+EOD
+;
+    $headers = CAYLNetworkUtils::extract_headers($raw);
+    $this->assertEquals($headers["Content-Type"],"text/plain");
+  }
+
+  public function testHeadersParseCaseSensitive()
+  {
+    $raw = <<<EOD
+HTTP/1.1 200 OK
+Content-type: text/html
+Accept-Ranges: bytes
+ETag: "1805770918"
+Last-Modified: Tue, 20 Nov 2012 02:11:45 GMT
+Content-Length: 611
+nnCoection: close
+Date: Thu, 29 May 2014 20:53:13 GMT
+Connection: Keep-alive
+
+EOD
+;
+    $headers = CAYLNetworkUtils::extract_headers($raw);
+    $this->assertEquals($headers["Content-Type"],"text/html");
+  }
+}
+
+
 class CAYLAssetHelperTest extends \PHPUnit_Framework_TestCase {
 
   public function provider() {

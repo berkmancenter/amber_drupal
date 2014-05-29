@@ -328,12 +328,15 @@ class CAYLNetworkUtils {
    * @param $raw_headers string of headers from the HTTP response header
    * @return array
    */
-  private static function extract_headers($raw_headers) {
+  public static function extract_headers($raw_headers) {
     $headers = array();
       if ($raw_headers) {
       foreach (explode(PHP_EOL,$raw_headers) as $line) {
         $header = explode(":",$line);
         if (count($header) == 2) {
+          if (strtolower($header[0]) == "content-type") {
+            $header[0] = "Content-Type"; /* Fix up case if necessary */
+          }
           $headers[$header[0]] = trim($header[1]);
         }
       }
