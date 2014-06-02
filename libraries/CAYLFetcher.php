@@ -82,9 +82,15 @@ class CAYLFetcher implements iCAYLFetcher {
 
     if ($this->storage && $root_item) {
       rewind($root_item['body']);
-      $this->storage->save($url, $root_item['body'], $root_item['headers'], isset($assets) ? $assets : array());
+      $result = $this->storage->save($url, $root_item['body'], $root_item['headers'], isset($assets) ? $assets : array());
       fclose($root_item['body']);
+      if (!$result) {
+        throw new RuntimeException("Error while saving ${url}");  
+      }
       $storage_metadata = $this->storage->get_metadata($url);
+      if (!$storage_metadata || empty($storage_metadata)) {
+        throw new RuntimeException("Error while retrieving metadata for ${url}");   
+      }
       //TODO: If cannot retrieve storage metadata, or id/url/cache not populated (perhaps due to permissions errors
       //      in saving the cache), fail more gracefully instead of with errors because the keys are not set
       return array (
