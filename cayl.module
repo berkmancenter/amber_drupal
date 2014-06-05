@@ -155,6 +155,15 @@ function cayl_menu() {
     'delivery callback' => 'cayl_deliver_cache_item',
     'type' => MENU_CALLBACK,
   );
+  $items['node/%/cache'] = array(
+    'title' => 'Cache links now',
+    'page callback' => 'cayl_cache_node_now',
+    'page arguments' => array(1),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 20,
+  );
+
   return $items;
 }
 
@@ -328,13 +337,49 @@ function _cayl_filter_tips($filter, $format, $long = FALSE) {
 }
 
 /**
- * Queue all links in the given node to be checked (which will lead them to be cached eventually if necessary)
+ * Menu callback hook for caching a page immediately
+ */
+function cayl_cache_node_now($nid) {
+  $node = node_load($nid);
+  cayl_cache_node($node,true);
+  drupal_goto('node/' . $nid);
+}
+
+/**
+ * Queue all links in the given node to be checked (which will lead them to be cached eventually if necessary),
+ * or cache them immediately
  * @param $node object to scan for links to cache
  */
-function cayl_cache_node($node) {
+function cayl_cache_node($node, $immediately = false) {
   module_load_include('inc', 'cayl', 'cayl.extract');
   $links = _cayl_extract_node_links($node);
-  cayl_enqueue_check_links($links);
+  if ($immediately) {
+    /* TODO: This is duplicate code with cayl_batch_cache_process(). Consolidate. */
+    $fetcher = cayl_get_fetcher();
+    $checker = cayl_get_checker();
+    $status_service = cayl_get_status();
+    foreach ($links as $url) {
+      try {
+        $last_check = $status_service->get_check($url);
+        if (($update = $checker->check(empty($last_check) ? array('url' => $url) : $last_check)) !== false) {
+          $status_service->save_check($update);
+        }
+        $cache_metadata = $fetcher->fetch($url);
+      } catch (RuntimeException $re) {
+        drupal_set_message(t("Did not cache: @url. @message", array('@url' => $url, '@message' => $re->getMessage())), 'warning');
+      }
+      if ($cache_metadata) {
+        $status_service->save_cache($cache_metadata);
+        drupal_set_message(t("Sucessfully cached: @url.", array('@url' => $url)), 'status');
+
+      }      
+    }
+    cayl_disk_space_purge();
+    cache_clear_all('*', 'cache_filter',TRUE);
+    cache_clear_all('*', 'cache_field',TRUE);    
+  } else {
+    cayl_enqueue_check_links($links);
+  }
 }
 
 /**
