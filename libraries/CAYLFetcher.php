@@ -243,7 +243,8 @@ class CAYLAssetHelper {
   }
 
   /**
-   * Rewrite all asset links in an HTML document to point to relative paths underneath the asset directory
+   * Rewrite all asset links in an HTML document to point to a file in the asset directory, with a hash of the URL
+   * as the filename, with the extension added
    * @param $body string HTML document
    * @param array $assets keyed by the url as it appears in the document, with the absolute URL as the value
    * @param $relative_to string the URL from which the asset's relative path is in relation to
@@ -254,11 +255,15 @@ class CAYLAssetHelper {
     if ($body && !empty($assets)) {
       $base = "assets";
       if ($relative_to) {
-        $relative_path = CAYLNetworkUtils::full_relative_path($relative_to);
-        $base = str_repeat('../',substr_count($relative_path,'/')) . $base;
+          $base = '../' . $base;
       }
       foreach ($assets as $key => $asset) {
-        $url = CAYLNetworkUtils::full_relative_path($asset['url']);
+        // TODO: Pull this out into a common function to avoid duplication with CAYLStorage::save_assetes
+        $url = '/' . md5($asset['url']);
+        $extension = substr($asset['url'], strrpos($asset['url'], '.'));
+        /* Heuristic to see if this is really an extension that the browser needs to parse the html */
+        if ((strlen($extension) < 5) && (substr($extension,-1,1) != "/"))
+          $url .= substr($asset['url'], strrpos($asset['url'], '.'));
         $p = $base . $url;
         $result = str_replace($key,$p,$result);
       }
@@ -383,6 +388,7 @@ class CAYLNetworkUtils {
           CURLOPT_RETURNTRANSFER => 1,      /* Return the output as a string */
           CURLOPT_HEADER => TRUE,           /* Return header information as part of the file */
           CURLOPT_USERAGENT => "CAYL/0.1",
+          CURLOPT_ENCODING => "gzip",        /* Handle gzipped data */
           // CURLOPT_VERBOSE => true,
           // CURLOPT_PROXY => 'localhost:8889',
           // CURLOPT_PROXYTYPE => CURLPROXY_SOCKS5,
