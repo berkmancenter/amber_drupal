@@ -165,6 +165,7 @@ function cayl_batch_cache_process($queue_name, $context) {
   $existing_cache = $status_service->get_cache($url);
   if (!variable_get('cayl_update_strategy',0) || !$existing_cache) {
     watchdog('cayl', "Checking and caching: @url ", array('@url' => $url), WATCHDOG_DEBUG);
+    $start = time();
     $last_check = $status_service->get_check($url);
     if (($update = $checker->check(empty($last_check) ? array('url' => $url) : $last_check)) !== false) {
       $status_service->save_check($update);
@@ -179,6 +180,7 @@ function cayl_batch_cache_process($queue_name, $context) {
         cayl_disk_space_purge();
       }
     }
+    watchdog('cayl', "Cached: @url in @seconds seconds", array('@url' => $url, '@seconds' => time() - $start), WATCHDOG_DEBUG);
   } else {
     watchdog('cayl', "Updating of cached items disabled, did not cache: @url ", array('@url' => $url), WATCHDOG_DEBUG);
   }
