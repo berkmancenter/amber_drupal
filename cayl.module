@@ -82,6 +82,17 @@ function cayl_init() {
   }
 }
 
+/**
+ *  Implements hook_permission()
+**/
+function cayl_permission()
+{
+  return array('administer cayl' => array(
+      'title' => t('Administer CAYL'),
+      'description' => t('Adminster CAYL cache and display of cached links'),
+    )
+  );
+}
 
 /**
  * Implements hook_menu().
@@ -93,8 +104,7 @@ function cayl_menu() {
     'description' => 'Configuration for the Cache As You Link module',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cayl_config_form'),
-    //TODO: Add permissions for CAYL functionality
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer cayl'),
     'type' => MENU_NORMAL_ITEM,
     'file' => 'cayl.admin.inc',
   );
@@ -104,7 +114,7 @@ function cayl_menu() {
     'file' => 'cayl.pages.inc',
     'page callback' => array('drupal_get_form'),
     'page arguments' => array('cayl_dashboard_summary_form'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer cayl'),
     'type' => MENU_NORMAL_ITEM,
   );
   $items['admin/reports/cayl/summary'] = array(
@@ -118,7 +128,7 @@ function cayl_menu() {
     'file' => 'cayl.pages.inc',
     'page callback' => array('drupal_get_form'),
     'page arguments' => array('cayl_dashboard_detail_form'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer cayl'),
     'weight' => 2,
   );
   $items['admin/reports/cayl/delete'] = array(
@@ -126,7 +136,7 @@ function cayl_menu() {
     'description' => 'Delete an item from the cache',
     'file' => 'cayl.pages.inc',
     'page callback' => array('cayl_dashboard_delete_item'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer cayl'),
     'type' => MENU_CALLBACK,
   );
   $items['admin/reports/cayl/blacklist'] = array(
@@ -134,7 +144,7 @@ function cayl_menu() {
     'description' => 'Exclude a site from being cached',
     'file' => 'cayl.pages.inc',
     'page callback' => array('cayl_dashboard_blacklist_site'),
-    'access arguments' => array('access administration pages'),
+    'access arguments' => array('administer cayl'),
     'type' => MENU_CALLBACK,
   );
 
@@ -159,8 +169,8 @@ function cayl_menu() {
     'title' => 'Cache links now',
     'page callback' => 'cayl_cache_node_now',
     'page arguments' => array(1),
-    'access arguments' => array('access administration pages'),
     'type' => MENU_LOCAL_TASK,
+    'access arguments' => array('administer cayl'),
     'weight' => 20,
   );
 
