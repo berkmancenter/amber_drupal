@@ -176,6 +176,7 @@ class CAYLAssetHelper {
       $refs = $this->extract_dom_tag_attributes($dom, 'img', 'src');
       $refs = array_merge($refs,$this->extract_dom_tag_attributes($dom, 'script', 'src'));
       $refs = array_merge($refs,$this->extract_dom_tag_attributes($dom, 'input', 'src'));
+      $refs = array_merge($refs,$this->extract_dom_tag_attributes($dom, 'embed', 'src'));
       $refs = array_merge($refs,$this->extract_dom_link_references($dom));
       $refs = array_merge($refs,$this->extract_dom_style_references($dom));
       $refs = array_merge($refs,$this->extract_css_assets($body));
