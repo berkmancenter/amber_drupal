@@ -102,7 +102,7 @@ class CAYLFetcher implements iCAYLFetcher {
         'size' => $size
       );
     } else {
-      throw new RuntimeException("Saving ${url} halted due to empty content");
+      throw new RuntimeException("Saving ${url} halted due to empty content - problem with fetching the content or saving to disk");
     }
   }
 
@@ -138,11 +138,22 @@ class CAYLFetcher implements iCAYLFetcher {
    */
   private function download_assets($assets, $url = '') {
     $result = array();
+    /* Commented out code is the one-asset-at-a-time version */
+    // foreach ($assets as $key => $asset) {
+    //   $f = CAYLNetworkUtils::open_url($asset['url'], array(CURLOPT_REFERER => $url));
+    //   if ($f) {
+    //     $result[$key] = array_merge($f,$asset);
+    //   }
+    // }
+    $urls = array();
+    $keys = array();
     foreach ($assets as $key => $asset) {
-      $f = CAYLNetworkUtils::open_url($asset['url'], array(CURLOPT_REFERER => $url));
-      if ($f) {
-        $result[$key] = array_merge($f,$asset);
-      }
+      $urls[] = $asset['url'];
+      $keys[$asset['url']] = $key;
+    }
+    $response = CAYLNetworkUtils::open_multi_url($urls, array(CURLOPT_REFERER => $url));
+    foreach ($assets as $key => $asset) {
+      $result[$key] = array_merge($response[$asset['url']],$asset);
     }
     return $result;
   }
@@ -350,6 +361,94 @@ class CAYLNetworkUtils {
     return $headers;
   }
 
+
+  /**
+   * Open one or more URL, and return an array of arrays with dictionary of header information and a stream to the contents of the URL
+   * @param $urls array of strings of resource to download
+   * @return array of dictionaries of header information and a stream to the contents of the URL
+   */
+  public static function open_multi_url($urls, $additional_options = array()) {
+    if (CAYLNetworkUtils::curl_installed()) {
+      $result = array();
+      try {
+        $options = array(
+          CURLOPT_FAILONERROR => TRUE,      /* Don't ignore HTTP errors */
+          CURLOPT_FOLLOWLOCATION => TRUE,   /* Follow redirects */
+          CURLOPT_MAXREDIRS => 10,          /* No more than 10 redirects */
+          CURLOPT_CONNECTTIMEOUT => 10,     /* 10 second connection timeout */
+          CURLOPT_TIMEOUT => 30,            /* 30 second timeout for any CURL function */
+          CURLOPT_RETURNTRANSFER => 1,      /* Return the output as a string */
+          CURLOPT_HEADER => TRUE,           /* Return header information as part of the file */
+          CURLOPT_USERAGENT => "CAYL/0.1",
+          // CURLOPT_VERBOSE => true,
+          // CURLOPT_PROXY => 'localhost:8889',
+          // CURLOPT_PROXYTYPE => CURLPROXY_SOCKS5,
+        );
+
+        $multi = curl_multi_init();
+        $channels = array();
+
+        foreach ($urls as $url) {
+          if (($ch = curl_init($url)) === FALSE) {
+            error_log(join(":", array(__FILE__, __METHOD__, $url, "CURL init error")));
+            return FALSE;
+          }
+          if (curl_setopt_array($ch, $additional_options + $options) === FALSE) {
+            throw new RuntimeException(join(":", array(__FILE__, __METHOD__, "Error setting CURL options", $url, curl_error($ch))));
+          }
+          curl_multi_add_handle($multi, $ch);
+          $channels[$url] = $ch;
+        }
+
+        /* While we're still active, execute curl over all the channels */
+        $active = null;
+        do {
+          $mrc = curl_multi_exec($multi, $active);
+        } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+
+        while ($active && $mrc == CURLM_OK) {
+            curl_multi_select($multi);
+            do {
+                $mrc = curl_multi_exec($multi, $active);
+            } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+        }
+
+        /* Now we should have all of the data */
+        foreach ($channels as $url => $channel) {
+
+          /* Get the CURL result */
+          $data = curl_multi_getcontent($channel);
+          $response_info = curl_getinfo($channel);
+
+          /* Split into header and body */
+          $header_size = $response_info['header_size'];
+          $header = substr($data, 0, $header_size-1);
+          $body = substr($data, $header_size);
+
+          /* Create temp file with the body, and array with the headers */
+          $tmp_body_file_name = tempnam(sys_get_temp_dir(),'cayl');
+          file_put_contents($tmp_body_file_name, $body);
+          $body_file = fopen($tmp_body_file_name,"r");
+          $headers = CAYLNetworkUtils::extract_headers($header);
+
+          $result[$url] = array("headers" => $headers, "body" => $body_file, "info" => $response_info);
+          curl_multi_remove_handle($multi, $channel); 
+        }
+        curl_multi_close($multi);
+        return $result;
+      } catch (RuntimeException $e) {
+        error_log($e->getMessage());
+        curl_multi_close($multi);
+        return FALSE;
+      }
+
+    } else {
+      // TODO: If curl is not installed, see if remote file opening is enabled, and fall back to that method
+      error_log(join(":", array(__FILE__, __METHOD__, "CURL not installed")));
+      return FALSE;
+    }
+  }
+
   /**
    * Open a URL, and return an array with dictionary of header information and a stream to the contents of the URL
    * @param $url string of resource to download
@@ -432,7 +531,6 @@ class CAYLNetworkUtils {
       return FALSE;
     }
   }
-
 }
 
 class CAYLRobots {
