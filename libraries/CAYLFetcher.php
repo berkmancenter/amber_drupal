@@ -23,7 +23,6 @@ class CAYLFetcher implements iCAYLFetcher {
    * @param $url
    * @return
    */
-  //TODO: Find a cleaner way of dealing with temporary files in this function.
   public function fetch($url) {
 
     if (!$url) {
@@ -60,19 +59,19 @@ class CAYLFetcher implements iCAYLFetcher {
         $size += $value['info']['size_download'];
         /* For CSS assets, parse the CSS file to find and download any referenced images, and rewrite the CSS file to use them */
         if (isset($value['headers']['Content-Type']) && (strpos($value['headers']['Content-Type'],'text/css') !== FALSE)) {
-          $css_body = stream_get_contents($value['body']);
+          $css_body = $value['body'];
           $css_asset_paths = $this->assetHelper->extract_css_assets($css_body);
           $css_assets = $this->assetHelper->expand_asset_references($value['url'], $css_asset_paths);
           $css_assets = $this->download_assets($css_assets, $url);
           $all_css_assets = array_merge($all_css_assets, $css_assets);
           $css_body = $this->assetHelper->rewrite_links($css_body, $css_assets, $value['url']);
-          $this->rewrite_file($value['body'], $css_body);
+          $value['body'] = $css_body;
         }
       }
       $assets = array_merge($assets, $all_css_assets);
       $body = $this->assetHelper->rewrite_links($body, $assets);
       $body = $this->assetHelper->insert_banner($body, $this->headerText);
-      $this->rewrite_file($root_item['body'],$body);
+      $root_item['body'] = $body;
 
       /* Check total size of the file combined with its assets */
       if ($size > ($this->maxFileSize * 1024)) {
@@ -81,9 +80,7 @@ class CAYLFetcher implements iCAYLFetcher {
     }
 
     if ($this->storage && $root_item) {
-      rewind($root_item['body']);
       $result = $this->storage->save($url, $root_item['body'], $root_item['headers'], isset($assets) ? $assets : array());
-      fclose($root_item['body']);
       if (!$result) {
         throw new RuntimeException("Error while saving ${url}");  
       }
@@ -153,7 +150,9 @@ class CAYLFetcher implements iCAYLFetcher {
     }
     $response = CAYLNetworkUtils::open_multi_url($urls, array(CURLOPT_REFERER => $url));
     foreach ($assets as $key => $asset) {
-      $result[$key] = array_merge($response[$asset['url']],$asset);
+      if (is_array($response[$asset['url']])) {
+        $result[$key] = array_merge($response[$asset['url']],$asset);        
+      }
     }
     return $result;
   }
@@ -379,8 +378,8 @@ class CAYLNetworkUtils {
           CURLOPT_FAILONERROR => TRUE,      /* Don't ignore HTTP errors */
           CURLOPT_FOLLOWLOCATION => TRUE,   /* Follow redirects */
           CURLOPT_MAXREDIRS => 10,          /* No more than 10 redirects */
-          CURLOPT_CONNECTTIMEOUT => 10,     /* 10 second connection timeout */
-          CURLOPT_TIMEOUT => 30,            /* 30 second timeout for any CURL function */
+          CURLOPT_CONNECTTIMEOUT => 5,     /* 10 second connection timeout */
+          CURLOPT_TIMEOUT => 10,            /* 30 second timeout for any CURL function */
           CURLOPT_RETURNTRANSFER => 1,      /* Return the output as a string */
           CURLOPT_HEADER => TRUE,           /* Return header information as part of the file */
           CURLOPT_USERAGENT => "CAYL/0.1",
@@ -428,14 +427,8 @@ class CAYLNetworkUtils {
           $header_size = $response_info['header_size'];
           $header = substr($data, 0, $header_size-1);
           $body = substr($data, $header_size);
-
-          /* Create temp file with the body, and array with the headers */
-          $tmp_body_file_name = tempnam(sys_get_temp_dir(),'cayl');
-          file_put_contents($tmp_body_file_name, $body);
-          $body_file = fopen($tmp_body_file_name,"r");
           $headers = CAYLNetworkUtils::extract_headers($header);
-
-          $result[$url] = array("headers" => $headers, "body" => $body_file, "info" => $response_info);
+          $result[$url] = array("headers" => $headers, "body" => $body, "info" => $response_info);
           curl_multi_remove_handle($multi, $channel); 
         }
         curl_multi_close($multi);
@@ -479,8 +472,8 @@ class CAYLNetworkUtils {
           CURLOPT_FAILONERROR => TRUE,      /* Don't ignore HTTP errors */
           CURLOPT_FOLLOWLOCATION => TRUE,   /* Follow redirects */
           CURLOPT_MAXREDIRS => 10,          /* No more than 10 redirects */
-          CURLOPT_CONNECTTIMEOUT => 10,     /* 10 second connection timeout */
-          CURLOPT_TIMEOUT => 30,            /* 30 second timeout for any CURL function */
+          CURLOPT_CONNECTTIMEOUT => 5,     /* 10 second connection timeout */
+          CURLOPT_TIMEOUT => 10,            /* 30 second timeout for any CURL function */
           CURLOPT_RETURNTRANSFER => 1,      /* Return the output as a string */
           CURLOPT_HEADER => TRUE,           /* Return header information as part of the file */
           CURLOPT_FILE => $tmp_body_file,

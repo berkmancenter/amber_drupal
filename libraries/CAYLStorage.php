@@ -130,15 +130,10 @@ class CAYLStorage implements iCAYLStorage {
 
     // Save root file
     $filename = join(DIRECTORY_SEPARATOR,array($dir,$id));
-    $root_file = fopen($filename,'w');
-    if (!$root_file) {
+    if (file_put_contents($filename, $root) === FALSE) {
       error_log(join(":", array(__FILE__, __METHOD__, "Could not save cache file", $dir)));
       return false;
     }
-    while ($line = fgets($root)) {
-      fputs($root_file,$line);
-    }
-    fclose($root_file);
 
     if (!empty($assets)) {
       $this->save_assets($id, $assets);
@@ -300,15 +295,11 @@ class CAYLStorage implements iCAYLStorage {
             continue;
           }
         }
-        $asset_file = fopen($asset_path,"w");
-        if (!$asset_file) {
+        if (empty($asset['body']) || (file_put_contents($asset_path, $asset['body']) === FALSE)) {
           error_log(join(":", array(__FILE__, __METHOD__, "Could not save asset", $id, $asset_path)));
           continue;
         }
-        while ($line = fgets($asset['body'])) {
-          fputs($asset_file,$line);
-        }
-        fclose($asset_file);
+        
       } else {
         //TODO: This could happen if the asset points to the domain root. A problem, true, but this error message is not right in that case
         error_log(join(":", array(__FILE__, __METHOD__, "Could not parse asset URL", $id, $asset['url'])));
