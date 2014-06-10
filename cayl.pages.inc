@@ -123,6 +123,8 @@ function _cayl_disk_usage() {
 
 function cayl_dashboard_summary_form_clear($form, &$form_state) {
   cayl_clear_cache();
+  cache_clear_all('*', 'cache_filter',TRUE);
+  cache_clear_all('*', 'cache_field',TRUE);
   drupal_set_message("All cached data has been deleted");
 }
 
