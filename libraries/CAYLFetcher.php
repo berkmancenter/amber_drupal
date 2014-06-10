@@ -217,6 +217,10 @@ class CAYLAssetHelper {
           /* Workaround for bug in parse_url: http://us2.php.net/parse_url#refsect1-function.parse-url-changelog */
           $asset_copy = "${p['scheme']}:${asset_copy}";
         }
+        /* Skip data assets that don't reference external resources */
+        if (strpos($asset,";base64") !== FALSE) {
+          continue;
+        }
         $asset_url = parse_url($asset_copy);
         if ($asset_url) {
           if (!isset($asset_url['host'])) {
