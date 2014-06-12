@@ -5,12 +5,8 @@ function cayl_dashboard_summary_form() {
   $header = array(t("Global Statistics"),"");
   $rows = array();
   $rows[] = array(t('Number of items in the cache'), _cayl_cache_size());
-  $rows[] = array(t('Number of items queued to be cached or updated'),_cayl_queue_size(CAYL_QUEUE_CACHE));
-  $rows[] = array(
-    t('Number of items queued to be checked for availability'),
-    _cayl_queue_size(CAYL_QUEUE_CHECK_NEW) + _cayl_queue_size(CAYL_QUEUE_CHECK_EXISTING));
-  $rows[] = array(t('Last time the caching process ran'), _cayl_last_run(CAYL_VAR_LAST_CACHE_RUN));
-  $rows[] = array(t('Last time the website checking process ran'), _cayl_last_run(CAYL_VAR_LAST_CHECK_RUN));
+  $rows[] = array(t('Number of links to be cached or updated'), _cayl_queue_size(CAYL_QUEUE_CHECK_NEW) + _cayl_queue_size(CAYL_QUEUE_CHECK_EXISTING));
+  $rows[] = array(t('Last time items were checked'), _cayl_last_run(CAYL_VAR_LAST_CHECK_RUN));
   $rows[] = array(t('Disk space used'), _cayl_disk_usage());
 
   $build['cayl_summary_table'] = array(
@@ -26,12 +22,12 @@ function cayl_dashboard_summary_form() {
   );
   $build['buttons']['cache'] = array(
     '#type' => 'submit',
-    '#value' => t('Scan all nodes for links on the site to cache'),
+    '#value' => t('Scan content for links to cache'),
     '#submit' => array('cayl_dashboard_summary_form_scan')
   );
   $build['buttons']['cache_now'] = array(
     '#type' => 'submit',
-    '#value' => t('Cache all links which are scheduled to be cached'),
+    '#value' => t('Cache all links now'),
     '#submit' => array('cayl_dashboard_summary_form_cache')
   );
 
@@ -116,9 +112,10 @@ function _cayl_last_run($var) {
 
 function _cayl_disk_usage() {
   $status = cayl_get_status();
-  $max = format_size(variable_get('cayl_max_disk', '1000') * 1024 * 1024);
-  $current = format_size($status->get_cache_size());
-  return t('@current (of @max)', array('@current' => $current ? $current : 0, '@max' => $max));
+  $formatted_max = format_size(variable_get('cayl_max_disk', '1000') * 1024 * 1024);
+  $current_size = $status->get_cache_size();
+  $formatted_current_size = $current_size ? format_size($current_size) : t('None');
+  return t('@current (of @max)', array('@current' => $formatted_current_size, '@max' => $formatted_max));
 }
 
 function cayl_dashboard_summary_form_clear($form, &$form_state) {
