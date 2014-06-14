@@ -73,6 +73,9 @@ class CAYLStatus implements iCAYLStatus {
         return false;
       }
     }
+    if (!isset($data['message'])) {
+      $data['message'] = "";
+    }
 
     if (!isset($data['id'])) {
       $data['id'] = md5($data['url']);
@@ -87,12 +90,13 @@ class CAYLStatus implements iCAYLStatus {
                                         'SET last_checked = :last_checked, ' .
                                         'next_check = :next_check, ' .
                                         'status = :status, ' .
-                                        'url = :url ' .
+                                        'url = :url, ' .
+                                        'message = :message ' .
                                         'WHERE id = :id');
     } else {
       $updateQuery = $this->db->prepare('INSERT into cayl_check ' .
-                                        '(id, url, status, last_checked, next_check) ' .
-                                        'VALUES(:id, :url, :status, :last_checked, :next_check)');
+                                        '(id, url, status, last_checked, next_check, message) ' .
+                                        'VALUES(:id, :url, :status, :last_checked, :next_check, :message)');
     }
     $updateQuery->execute($data);
     $updateQuery->closeCursor();

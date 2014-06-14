@@ -43,8 +43,7 @@ class CAYLChecker implements iCAYLChecker {
       $next = $date->add(new DateInterval("P6M"))->getTimestamp();
       $status = isset($last_check['status']) ? $last_check['status'] : NULL;
       error_log(join(":", array(__FILE__, __METHOD__, "Blocked by robots.txt", $url)));
-      //TODO: Log this in a user-accessible way (for the dashboard?)
-
+      $message = "Blocked by robots.txt";
     } else {
       $status = $this->up($url);
       $next = $this->next_check_date(isset($last_check['status']) ? $last_check['status'] : NULL,
@@ -60,6 +59,7 @@ class CAYLChecker implements iCAYLChecker {
             'last_checked' => $now->getTimestamp(),
             'next_check' => $next,
             'status' => isset($status) ? ($status ? 1 : 0) : NULL,
+            'message' => isset($message) ? $message : NULL,
           );
 
     return $result;

@@ -367,6 +367,8 @@ function cayl_cache_node($node, $immediately = false) {
     foreach ($links as $url) {
       if (cayl_cache_link($url, $immediately)) {
         drupal_set_message(t("Sucessfully cached: @url.", array('@url' => $url)), 'status');
+      } else {
+        drupal_set_message(t("Could not cache: @url.", array('@url' => $url)), 'warning');
       }
     }      
   } else {

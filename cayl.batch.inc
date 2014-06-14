@@ -215,7 +215,9 @@ function cayl_cache_link($item, $force = false) {
       try {
         $cache_metadata = $fetcher->fetch($item);
       } catch (RuntimeException $re) {
-        watchdog('cayl', "Did not cache: @url. @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_NOTICE);
+        watchdog('cayl', "Did not cache: @url: @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_NOTICE);
+        $update['message'] = $re->getMessage();
+        $status->save_check($update);        
         return false;
       }
       if ($cache_metadata) {

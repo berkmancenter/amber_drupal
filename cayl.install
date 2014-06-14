@@ -53,7 +53,13 @@ function cayl_schema() {
       'next_check' => array(
         'type' => 'int',
         'description' => 'The next date after which the status of the URL can be checked',
-      )
+      ),
+      'message' => array(
+        'type' => 'varchar',
+        'length' => 2000,
+        'description' => 'More details about the check or cache results'
+      ),
+
     ),
     'primary key' => array('id'),
   );
@@ -118,4 +124,17 @@ function cayl_schema() {
     'primary key' => array('id'),
   );
   return $schema;
+}
+
+/**
+ * Add "message" column to cayl_check table
+ */
+function cayl_update_7100()
+{
+  $spec = array(
+        'type' => 'varchar',
+        'length' => 2000,
+        'description' => 'More details about the check or cache results'
+      );
+  db_add_field('cayl_check','message',$spec);
 }

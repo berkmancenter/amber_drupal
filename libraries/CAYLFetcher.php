@@ -31,7 +31,7 @@ class CAYLFetcher implements iCAYLFetcher {
 
     // Check the robots.txt
     if (!CAYLRobots::robots_allowed($url)) {
-      throw new RuntimeException("Fetching ${url} blocked by robots.txt");
+      throw new RuntimeException("Blocked by robots.txt");
     }
 
     // Send a GET request
@@ -39,7 +39,7 @@ class CAYLFetcher implements iCAYLFetcher {
 
     // Decide whether the item should be cached
     if (!$this->cacheable_item($root_item)) {
-      throw new RuntimeException("Fetching ${url} halted due to file size or content-type");
+      throw new RuntimeException("File size too large");
     }
 
     $size = $root_item['info']['size_download'];
@@ -75,18 +75,18 @@ class CAYLFetcher implements iCAYLFetcher {
 
       /* Check total size of the file combined with its assets */
       if ($size > ($this->maxFileSize * 1024)) {
-        throw new RuntimeException("Fetching ${url} halted due to file size of document + assets");
+        throw new RuntimeException("File size of document + assets too large");
       }
     }
 
     if ($this->storage && $root_item) {
       $result = $this->storage->save($url, $root_item['body'], $root_item['headers'], isset($assets) ? $assets : array());
       if (!$result) {
-        throw new RuntimeException("Error while saving ${url}");  
+        throw new RuntimeException("Could not save cache");  
       }
       $storage_metadata = $this->storage->get_metadata($url);
       if (!$storage_metadata || empty($storage_metadata)) {
-        throw new RuntimeException("Error while retrieving metadata for ${url}");   
+        throw new RuntimeException("Could not retrieve metadata");   
       }
       //TODO: If cannot retrieve storage metadata, or id/url/cache not populated (perhaps due to permissions errors
       //      in saving the cache), fail more gracefully instead of with errors because the keys are not set
@@ -96,10 +96,10 @@ class CAYLFetcher implements iCAYLFetcher {
         'type' => isset($storage_metadata['type']) ? $storage_metadata['type'] : 'application/octet-stream',
         'date' => strtotime($storage_metadata['cache']['cayl']['date']),
         'location' => $storage_metadata['cache']['cayl']['location'],
-        'size' => $size
+        'size' => $size,
       );
     } else {
-      throw new RuntimeException("Saving ${url} halted due to empty content - problem with fetching the content or saving to disk");
+      throw new RuntimeException("Content empty or could not save to disk");
     }
   }
 

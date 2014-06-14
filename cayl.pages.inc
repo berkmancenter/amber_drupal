@@ -65,7 +65,7 @@ function cayl_dashboard_detail_form() {
       'url' => l($r['url'], $r['url']),
       'status' => $r['status'] ? t('Up') : t('Down'),
       'last_checked' => isset($r['last_checked']) ? format_date($r['last_checked']) : "",
-      'date' => isset($r['date']) ? format_date($r['date']) : "",
+      'date' => isset($r['date']) ? format_date($r['date']) : (isset($r['message']) ? $r['message'] : ""),
       'size' => isset($r['size']) ? format_size($r['size']) : "",
       'a.date' => isset($r['a_date']) ? format_date($r['a_date']) : "",
       'views' => isset($r['views']) ? $r['views'] : "",
@@ -156,7 +156,8 @@ function cayl_dashboard_detail_form_export($form, &$form_state) {
     t('Cache Date'),
     t('Size'),
     t('Last viewed'),
-    t('Number of views')
+    t('Number of views'),
+    t('Notes')
   );
 
   $rows = array();
@@ -168,9 +169,10 @@ function cayl_dashboard_detail_form_export($form, &$form_state) {
       'status' => $r['status'] ? t('Up') : t('Down'),
       'last_checked' => isset($r['last_checked']) ? date('c',$r['last_checked']) : "",
       'date' => isset($r['date']) ? date('c',$r['date']) : "",
-      'size' => format_size($r['size']),
+      'size' => $r['size'],
       'a.date' => isset($r['a_date']) ? date('c',$r['a_date']) : "",
       'views' => isset($r['views']) ? $r['views'] : 0,
+      'message' => isset($r['message']) ? $r['message'] : ""
     );
   }
 
@@ -193,7 +195,7 @@ function _cayl_dashboard_detail_query() {
   $query = db_select('cayl_check', 'c');
   $query->leftjoin('cayl_cache', 'ca','ca.id = c.id');
   $query->leftJoin('cayl_activity', 'a','ca.id = a.id');
-  $query = $query->fields('c', array('id', 'url','status','last_checked'));
+  $query = $query->fields('c', array('id', 'url','status','last_checked', 'message'));
   $query = $query->fields('ca', array('id', 'date', 'size', 'location'));
   $query = $query->fields('a', array('id', 'views', 'date'));
   return $query;
