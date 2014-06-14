@@ -62,15 +62,15 @@ function cayl_dashboard_detail_form() {
     $host = parse_url($r['url'],PHP_URL_HOST);
     $rows[] = array(
       'site' => "$host (" . l('Blacklist', 'admin/reports/cayl/blacklist/' . $host, array('query' => array('destination' => current_path()))) . ")",
-      'url' => $r['url'],
+      'url' => l($r['url'], $r['url']),
       'status' => $r['status'] ? t('Up') : t('Down'),
-      'last_checked' => format_date($r['last_checked']),
-      'date' => format_date($r['date']),
-      'size' => format_size($r['size']),
+      'last_checked' => isset($r['last_checked']) ? format_date($r['last_checked']) : "",
+      'date' => isset($r['date']) ? format_date($r['date']) : "",
+      'size' => isset($r['size']) ? format_size($r['size']) : "",
       'a.date' => isset($r['a_date']) ? format_date($r['a_date']) : "",
-      'views' => isset($r['views']) ? $r['views'] : 0,
-      'view' => l('View', $r['location']),
-      'delete' => l('Delete', 'admin/reports/cayl/delete/' . $r['id'], array('query' => array('destination' => current_path()))),
+      'views' => isset($r['views']) ? $r['views'] : "",
+      'view' => isset($r['size']) ? l('View', $r['location']) : "",
+      'delete' => isset($r['size']) ? l('Delete', 'admin/reports/cayl/delete/' . $r['id'], array('query' => array('destination' => current_path()))) : "",
     );
   }
 
@@ -166,8 +166,8 @@ function cayl_dashboard_detail_form_export($form, &$form_state) {
       'site' => $host,
       'url' => $r['url'],
       'status' => $r['status'] ? t('Up') : t('Down'),
-      'last_checked' => date('c',$r['last_checked']),
-      'date' => date('c',$r['date']),
+      'last_checked' => isset($r['last_checked']) ? date('c',$r['last_checked']) : "",
+      'date' => isset($r['date']) ? date('c',$r['date']) : "",
       'size' => format_size($r['size']),
       'a.date' => isset($r['a_date']) ? date('c',$r['a_date']) : "",
       'views' => isset($r['views']) ? $r['views'] : 0,
@@ -191,7 +191,7 @@ function cayl_dashboard_detail_form_export($form, &$form_state) {
  */
 function _cayl_dashboard_detail_query() {
   $query = db_select('cayl_check', 'c');
-  $query->join('cayl_cache', 'ca','ca.id = c.id');
+  $query->leftjoin('cayl_cache', 'ca','ca.id = c.id');
   $query->leftJoin('cayl_activity', 'a','ca.id = a.id');
   $query = $query->fields('c', array('id', 'url','status','last_checked'));
   $query = $query->fields('ca', array('id', 'date', 'size', 'location'));

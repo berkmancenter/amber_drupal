@@ -91,7 +91,7 @@ function cayl_permission()
       'title' => t('Administer CAYL'),
       'description' => t('Adminster CAYL cache and display of cached links'),
     )
-  );
+  );  
 }
 
 /**
@@ -364,29 +364,11 @@ function cayl_cache_node($node, $immediately = false) {
   module_load_include('inc', 'cayl', 'cayl.extract');
   $links = _cayl_extract_node_links($node);
   if ($immediately) {
-    /* TODO: This is duplicate code with cayl_batch_cache_process(). Consolidate. */
-    $fetcher = cayl_get_fetcher();
-    $checker = cayl_get_checker();
-    $status_service = cayl_get_status();
     foreach ($links as $url) {
-      try {
-        $last_check = $status_service->get_check($url);
-        if (($update = $checker->check(empty($last_check) ? array('url' => $url) : $last_check)) !== false) {
-          $status_service->save_check($update);
-        }
-        $cache_metadata = $fetcher->fetch($url);
-      } catch (RuntimeException $re) {
-        drupal_set_message(t("Did not cache: @url. @message", array('@url' => $url, '@message' => $re->getMessage())), 'warning');
-      }
-      if ($cache_metadata) {
-        $status_service->save_cache($cache_metadata);
+      if (cayl_cache_link($url, $immediately)) {
         drupal_set_message(t("Sucessfully cached: @url.", array('@url' => $url)), 'status');
-
-      }      
-    }
-    cayl_disk_space_purge();
-    cache_clear_all('*', 'cache_filter',TRUE);
-    cache_clear_all('*', 'cache_field',TRUE);    
+      }
+    }      
   } else {
     cayl_enqueue_check_links($links);
   }

@@ -144,9 +144,6 @@ function cayl_batch_cache_all_setup() {
  * @param $context
  */
 function cayl_batch_cache_process($queue_name, $context) {
-  $fetcher = cayl_get_fetcher();
-  $checker = cayl_get_checker();
-  $status_service = cayl_get_status();
   $queue = DrupalQueue::get($queue_name);
   $queue->createQueue();
   if ($queue->numberOfItems() == 0) {
@@ -157,7 +154,7 @@ function cayl_batch_cache_process($queue_name, $context) {
     return;
   }
   $url = $item->data;
-  cayl_process_check_queue($url,true);
+  cayl_process_check_queue($url, true);
   $queue->deleteItem($item);
   $context['message'] = t('Cached URL "@url"', array('@url' => $url));
 }
@@ -184,44 +181,58 @@ function cayl_batch_cache_all_finished($success, $results, $operations) {
  * @param $item string url of the item to be checked
  */
 function cayl_process_check_queue($item, $force = false) {
-  watchdog('cayl', "Checking and caching: @url ", array('@url' => $item), WATCHDOG_DEBUG);
-  $start = time();
   try {
-    $checker = cayl_get_checker();
-    $status = cayl_get_status();
-    $fetcher = cayl_get_fetcher();
-
-    $last_check = $status->get_check($item);
-    if (($update = $checker->check(empty($last_check) ? array('url' => $item) : $last_check, $force)) !== false) {
-      /* There's an updated check result to save */
-      $status->save_check($update);
-
-      /* Now cache the item if we should */
-      $existing_cache = $status->get_cache($item);
-      if ($update['status'] && (!variable_get('cayl_update_strategy',0) || !$existing_cache)) {
-        $cache_metadata = array();
-        try {
-          $cache_metadata = $fetcher->fetch($item);
-        } catch (RuntimeException $re) {
-          watchdog('cayl', "Did not cache: @url. @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_NOTICE);
-        }
-        if ($cache_metadata) {
-          $status->save_cache($cache_metadata);
-          /* Clear caches that could contain HTML with versions of the links that don't contain data- attributes */
-          /* TODO: Ideally we would clear the cache only once per cron job */
-          cache_clear_all('*', 'cache_filter',TRUE);
-          cache_clear_all('*', 'cache_field',TRUE);
-          cayl_disk_space_purge();
-          watchdog('cayl', "Cached: @url in @seconds seconds", array('@url' => $item, '@seconds' => time() - $start), WATCHDOG_DEBUG);
-        }
-      }
-      // cayl_enqueue_cache_links(array($item));
-    }
+    cayl_cache_link($item,true);
     variable_set(CAYL_VAR_LAST_CHECK_RUN,time());
   } catch (Exception $e) {
     // If there is an error, log the error, and then continue. Otherwise the bad item will not be removed from the queue
     watchdog('cayl', "Error checking @url : @msg ", array('@url' => $item, '@msg' => $e->getMessage()), WATCHDOG_NOTICE);
   }
+}
+
+/**
+ * Check and cache a link
+ **/
+function cayl_cache_link($item, $force = false) {
+  $start = time();
+  watchdog('cayl', "Checking and caching: @url ", array('@url' => $item), WATCHDOG_DEBUG);
+
+  $checker = cayl_get_checker();
+  $status = cayl_get_status();
+  $fetcher = cayl_get_fetcher();
+
+  /* Check whether the site is up */
+  $last_check = $status->get_check($item);
+  if (($update = $checker->check(empty($last_check) ? array('url' => $item) : $last_check, $force)) !== false) {
+    
+    /* There's an updated check result to save */
+    $status->save_check($update);
+
+    /* Now cache the item if we should */
+    $existing_cache = $status->get_cache($item);
+    if ($update['status'] && (!variable_get('cayl_update_strategy',0) || !$existing_cache)) {
+      $cache_metadata = array();
+      try {
+        $cache_metadata = $fetcher->fetch($item);
+      } catch (RuntimeException $re) {
+        watchdog('cayl', "Did not cache: @url. @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_NOTICE);
+        return false;
+      }
+      if ($cache_metadata) {
+        $status->save_cache($cache_metadata);
+        /* Clear caches that could contain HTML with versions of the links that don't contain data- attributes */
+        /* TODO: Ideally we would clear the cache only once per cron job */
+        cache_clear_all('*', 'cache_filter',TRUE);
+        cache_clear_all('*', 'cache_field',TRUE);
+        cayl_disk_space_purge();
+        watchdog('cayl', "Cached: @url in @seconds seconds", array('@url' => $item, '@seconds' => time() - $start), WATCHDOG_DEBUG);
+        return true;
+      }
+    }
+  } else {
+    return false;
+  }
+
 }
 
 /**
