@@ -333,7 +333,7 @@ EOD;
   private function extract_dom_link_references($dom) {
     $attributes = array();
     foreach ($dom->getElementsByTagName('link') as $t) {
-      if ($t->hasAttribute('rel') && ($t->getAttribute('rel') == 'stylesheet')) {
+      if ($t->hasAttribute('rel') && (strtolower($t->getAttribute('rel')) == 'stylesheet')) {
         $attributes[] = trim($t->getAttribute('href'));
       }
     }
