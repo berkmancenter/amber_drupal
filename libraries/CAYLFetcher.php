@@ -262,9 +262,14 @@ class CAYLAssetHelper {
       if ($relative_to) {
           $base = '../' . $base;
       }
-      foreach ($assets as $key => $asset) {
+      foreach ($assets as $key => $asset) {        
         $p = join("/",array($base, $this->storage->build_asset_path($asset)));
-        $result = str_replace($key,$p,$result);
+        $result = str_replace($key,$p,$result,$count);
+        if ($count == 0) {
+          /* Try again if there were no matches, since the $key made have had its HTML
+             special characters decode when extracted by parsing the DOM */
+          $result = str_replace(htmlspecialchars($key),$p,$result,$count);
+        }
       }
     }
     $result = $this->rewrite_base_tag($result);

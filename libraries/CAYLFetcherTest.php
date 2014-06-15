@@ -179,6 +179,22 @@ EOF;
   /**
    * @dataProvider provider
    */
+  public function testStylesheetMixedCase(CAYLAssetHelper $a)
+  {
+    $s = <<<EOF
+<head><link href="banana.css" rel="Stylesheet" type="text.css"></head>
+<body>And the band played on....And the BAND said to the
+<a href="leader.html">leader</a>.</body>
+EOF;
+
+    $result = $a->extract_assets($s);
+    $this->assertTrue(count($result) == 1);
+    $this->assertTrue($result[0] == "banana.css");
+  }
+
+  /**
+   * @dataProvider provider
+   */
   public function testJavascript(CAYLAssetHelper $a)
   {
     $s = <<<EOF
@@ -190,6 +206,24 @@ EOF;
     $result = $a->extract_assets($s);
     $this->assertTrue(count($result) == 1);
     $this->assertTrue($result[0] == "banana.js");
+  }
+
+  /**
+   * @dataProvider provider
+   *
+   */
+  public function testJavascriptInBody(CAYLAssetHelper $a)
+  {
+    $s = <<<EOF
+<body>
+<script src="/ScriptResource.axd?d=AYP1ocISkwrIb0vXvAfvYbki5H-fzUh4bOWz3-sTZaJ96EB3jl_ZhEsh0s6EQJgauvkZeuKp9yVuc1Q47t3srJNgYCHQB7-vIS8A-wvNqnarUNjJbCiThM06cNjdOqghx7Caf4pRKLTDKWeKPGNVAmms_hc1&t=ffffffffdb0d1ac2" type="text/javascript"></script>
+And the band played on....And the BAND said to the
+<a href="leader.html">leader</a>.</body>
+EOF;
+
+    $result = $a->extract_assets($s);
+    $this->assertTrue(count($result) == 1);
+    $this->assertEquals($result[0],"/ScriptResource.axd?d=AYP1ocISkwrIb0vXvAfvYbki5H-fzUh4bOWz3-sTZaJ96EB3jl_ZhEsh0s6EQJgauvkZeuKp9yVuc1Q47t3srJNgYCHQB7-vIS8A-wvNqnarUNjJbCiThM06cNjdOqghx7Caf4pRKLTDKWeKPGNVAmms_hc1&t=ffffffffdb0d1ac2");
   }
 
   /**
