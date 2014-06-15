@@ -13,7 +13,7 @@ class CAYLFetcher implements iCAYLFetcher {
    */
   function __construct(iCAYLStorage $storage, array $options) {
     $this->storage = $storage;
-    $this->assetHelper = new CAYLAssetHelper();
+    $this->assetHelper = new CAYLAssetHelper($storage);
     $this->maxFileSize = isset($options['cayl_max_file']) ? $options['cayl_max_file'] : 1000;
     $this->headerText = isset($options['header_text']) ? $options['header_text'] : "This is a cached page";
   }
@@ -161,6 +161,10 @@ class CAYLFetcher implements iCAYLFetcher {
 
 class CAYLAssetHelper {
 
+  function __construct(iCAYLStorage $storage) {
+    $this->storage = $storage;
+  }
+
   /**
    * Extract a list of assets to be downloaded to go along with an HTML file
    * @param $file
@@ -259,17 +263,12 @@ class CAYLAssetHelper {
           $base = '../' . $base;
       }
       foreach ($assets as $key => $asset) {
-        // TODO: Pull this out into a common function to avoid duplication with CAYLStorage::save_assetes
-        $url = '/' . md5($asset['url']);
-        $extension = substr($asset['url'], strrpos($asset['url'], '.'));
-        /* Heuristic to see if this is really an extension that the browser needs to parse the html */
-        if ((strlen($extension) < 5) && (substr($extension,-1,1) != "/"))
-          $url .= substr($asset['url'], strrpos($asset['url'], '.'));
-        $p = $base . $url;
+        $p = join("/",array($base, $this->storage->build_asset_path($asset)));
         $result = str_replace($key,$p,$result);
       }
     }
     $result = $this->rewrite_base_tag($result);
+    $result = $this->insert_breakout_buster($result);
     return $result;
   }
 
@@ -282,7 +281,15 @@ class CAYLAssetHelper {
     return $body;
   }
 
-/* <script type="text/javascript">window.onbeforeunload = function(e) { return "This page is trying to beat it"; }; window.onload = function() { window.onbeforeunload=null; }</script>  */
+  public function insert_breakout_buster($body)
+  {
+    $script = <<<EOD
+<script type="text/javascript">window.onbeforeunload = function(e) { return "This page is trying to beat it"; }; window.onload = function() { window.onbeforeunload=null; }</script>
+EOD;
+    $result = str_ireplace("</head>", "</head>$script", $body);
+    return $result;
+  }
+
   public function insert_banner($body, $text) {
     $banner = <<<EOD
 <div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:999999;background-color:rgba(0,0,0,0.75);color:white;text-align:center;font:bold 18px/30px sans-serif !important;">${text}</div>

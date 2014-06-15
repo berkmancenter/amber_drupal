@@ -75,6 +75,20 @@ class CAYLStorage implements iCAYLStorage {
   }
 
   /**
+   * Define the relative path for the asset, based on the asset filename, body, and
+   * headers provided.  
+   */
+  public function build_asset_path($asset) {
+    $url = md5($asset['url']);
+    $extension = substr($asset['url'], strrpos($asset['url'], '.'));
+    /* Heuristic to see if this is really an extension that the browser needs to parse the html */
+    if ((strlen($extension) < 5) && (substr($extension,-1,1) != "/"))
+      $url .= substr($asset['url'], strrpos($asset['url'], '.'));
+      // TODO: Check to see if the mime-type means we should add an extension
+    return $url;
+  }
+
+  /**
    * Lookup metadata for a cached item based on ID or URL
    * @param $key string URL or an MD5 hash
    * @return array
@@ -285,11 +299,11 @@ class CAYLStorage implements iCAYLStorage {
       return false;
     }
     foreach ($assets as $asset) {
-      $asset_path = join(DIRECTORY_SEPARATOR,array($base_asset_path, md5($asset['url'])));
-      $extension = substr($asset['url'], strrpos($asset['url'], '.'));
-      /* Heuristic to see if this is really an extension that the browser needs to parse the html */
-      if ((strlen($extension) < 5) && (substr($extension,-1,1) != "/"))
-        $asset_path .= $extension;
+      if (empty($asset['url'])) {
+        error_log(join(":", array(__FILE__, __METHOD__, "Could not save asset with no URL specified", $id, $asset_path)));
+      }
+
+      $asset_path = join(DIRECTORY_SEPARATOR,array($base_asset_path, $this->build_asset_path($asset)));
       if (!file_exists(dirname($asset_path))) {
         if (!mkdir(dirname($asset_path), 0777, true)) {
           error_log(join(":", array(__FILE__, __METHOD__, "Could not create asset directory for asset", $asset_path)));
