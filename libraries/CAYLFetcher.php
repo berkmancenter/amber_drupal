@@ -268,7 +268,7 @@ class CAYLAssetHelper {
       }
     }
     $result = $this->rewrite_base_tag($result);
-    $result = $this->insert_breakout_buster($result);
+    // $result = $this->insert_breakout_buster($result);
     return $result;
   }
 
@@ -277,7 +277,7 @@ class CAYLAssetHelper {
    * relative URLs are relative to, which gives us problems if it refers back to the original site.
    **/ 
   public function rewrite_base_tag($body) {
-    $body = preg_replace('/<base\s+href=[\'"]\S+[\'"]\/?>/','',$body,1);
+    $body = preg_replace('/<base\s+href=[\'"]\S+[\'"]\s*\/?>/','',$body,1);
     return $body;
   }
 

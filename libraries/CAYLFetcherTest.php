@@ -1,6 +1,7 @@
 <?php
 
 require_once("CAYLFetcher.php");
+require_once("CAYLStorage.php");
 
 //class CAYLFetcherTest extends \PHPUnit_Framework_TestCase {
 //
@@ -81,7 +82,7 @@ EOD
 class CAYLAssetHelperTest extends \PHPUnit_Framework_TestCase {
 
   public function provider() {
-    return array(array(new CAYLAssetHelper()));
+    return array(array(new CAYLAssetHelper(new CAYLStorage())));
   }
 
   /**
@@ -117,6 +118,15 @@ class CAYLAssetHelperTest extends \PHPUnit_Framework_TestCase {
   public function testBaseRewrite2(CAYLAssetHelper $a)
   {
     $result = $a->rewrite_base_tag('<head><base    href=\'http://tinyurl.com\'></head><body><img src="../peacock.png">And the band played on....</body>');
+    $this->assertEquals($result,'<head></head><body><img src="../peacock.png">And the band played on....</body>');
+  }
+
+  /**
+   * @dataProvider provider
+   */
+  public function testBaseRewrite3(CAYLAssetHelper $a)
+  {
+    $result = $a->rewrite_base_tag('<head><base    href=\'http://tinyurl.com\' ></head><body><img src="../peacock.png">And the band played on....</body>');
     $this->assertEquals($result,'<head></head><body><img src="../peacock.png">And the band played on....</body>');
   }
 
@@ -173,6 +183,22 @@ EOF;
   {
     $s = <<<EOF
 <head><script src="banana.js" ></head>
+<body>And the band played on....And the BAND said to the
+<a href="leader.html">leader</a>.</body>
+EOF;
+
+    $result = $a->extract_assets($s);
+    $this->assertTrue(count($result) == 1);
+    $this->assertTrue($result[0] == "banana.js");
+  }
+
+  /**
+   * @dataProvider provider
+   */
+  public function testAsyncJavascript(CAYLAssetHelper $a)
+  {
+    $s = <<<EOF
+<head><script async src="banana.js" ></head>
 <body>And the band played on....And the BAND said to the
 <a href="leader.html">leader</a>.</body>
 EOF;
