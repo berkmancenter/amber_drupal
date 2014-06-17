@@ -53,22 +53,7 @@ class CAYLFetcher implements iCAYLFetcher {
       $asset_paths = $this->assetHelper->extract_assets($body);
       $assets = $this->assetHelper->expand_asset_references($url, $asset_paths);
       $assets = $this->download_assets($assets, $url);
-
-      $all_css_assets = array();
-      foreach ($assets as &$value) {
-        $size += $value['info']['size_download'];
-        /* For CSS assets, parse the CSS file to find and download any referenced images, and rewrite the CSS file to use them */
-        if (isset($value['headers']['Content-Type']) && (strpos($value['headers']['Content-Type'],'text/css') !== FALSE)) {
-          $css_body = $value['body'];
-          $css_asset_paths = $this->assetHelper->extract_css_assets($css_body);
-          $css_assets = $this->assetHelper->expand_asset_references($value['url'], $css_asset_paths);
-          $css_assets = $this->download_assets($css_assets, $url);
-          $all_css_assets = array_merge($all_css_assets, $css_assets);
-          $css_body = $this->assetHelper->rewrite_links($css_body, $css_assets, $value['url']);
-          $value['body'] = $css_body;
-        }
-      }
-      $assets = array_merge($assets, $all_css_assets);
+      $assets = $this->download_css_assets_recursive($assets, $url, $size);
       $body = $this->assetHelper->rewrite_links($body, $assets);
       $body = $this->assetHelper->insert_banner($body, $this->headerText);
       $root_item['body'] = $body;
@@ -101,6 +86,45 @@ class CAYLFetcher implements iCAYLFetcher {
     } else {
       throw new RuntimeException("Content empty or could not save to disk");
     }
+  }
+
+  /**
+   * Given a list of assets (CSS, images, javascript, etc.) to download, also download any assets referenced
+   * from any CSS files in the list. For example, background images, or incldued CSS files. 
+   * Repeat until all referenced CSS files have been processed
+   * @param $assets array of assets to scan for referenced assets
+   * @param $base string with the URL of the document that included the assets (needed for relative paths)
+   * @param $size integer with the total size of all downloaded assets
+   * @param $max_depth integer with the maximum number of times to recurse to find additional assets
+   */
+  private function download_css_assets_recursive(&$assets, $base, &$size, $max_depth = 5) {
+    if ($max_depth <= 0) {
+      return $assets;
+    }
+    $all_css_assets = array();
+    $url = $base;
+
+    foreach ($assets as &$value) {
+      $size += $value['info']['size_download'];
+      /* For CSS assets, parse the CSS file to find and download any referenced images, and rewrite the CSS file to use them */
+
+      if (isset($value['headers']['Content-Type']) && (strpos($value['headers']['Content-Type'],'text/css') !== FALSE)) {
+        $css_body = $value['body'];
+        $css_asset_paths = $this->assetHelper->extract_css_assets($css_body);
+        $css_assets = $this->assetHelper->expand_asset_references($value['url'], $css_asset_paths);
+        $css_assets = $this->download_assets($css_assets, $url);
+
+        if (!empty($css_assets)) {
+          $css_assets = $this->download_css_assets_recursive($css_assets,$value['url'],$size,$max_depth - 1);  
+        } 
+
+        $all_css_assets = array_merge($all_css_assets, $css_assets);
+        $css_body = $this->assetHelper->rewrite_links($css_body, $css_assets, $value['url']);
+        $value['body'] = $css_body;
+      }
+    }
+    $assets = array_merge($assets, $all_css_assets);
+    return $assets;
   }
 
   /**
