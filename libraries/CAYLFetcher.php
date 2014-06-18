@@ -323,8 +323,13 @@ EOD;
     $banner = <<<EOD
 <div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:2147483647;background-color:rgba(0,0,0,0.75) !important;color:white !important;text-align:center !important;font:bold 18px/30px sans-serif !important;">${text}</div>
 EOD;
-    $result = str_ireplace("</body>","${banner}</body>",$body,$count);
-    if ($count == 0) {
+    $close_body_tag = "</body>";
+    /* We want to replace only the LAST instance of </body>. It's possible to have multiple
+       </body> tags (for example, in an inline iframe) */
+    $pos = strripos($body, $close_body_tag);
+    if ($pos !== FALSE) {
+      $result = substr_replace($body, "${banner}${close_body_tag}", $pos, strlen($close_body_tag));
+    } else {
       $result = $body . $banner;
     }
     return $result;
