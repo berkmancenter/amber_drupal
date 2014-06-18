@@ -149,7 +149,27 @@ class CAYLStorageTest extends PHPUnit_Framework_TestCase {
 
   }
 
+  /**
+   * @dataProvider provider
+   */
+  public function testAssetPathExtension(iCAYLStorage $storage, $file) {
+    $path = "/foo/bar/logo.svg";
+    $hash = md5($path);
+    $asset = array("url" => $path, 'headers' => array('Content-Type' => 'text/css'));
+    $url = $storage->build_asset_path($asset);
+    $this->assertSame($hash . ".css",$url);
+  }
 
+  /**
+   * @dataProvider provider
+   */
+  public function testAssetPathExtension2(iCAYLStorage $storage, $file) {
+    $path = "https://pages.github.com/css/../images/download@2x.png";
+    $hash = md5($path);
+    $asset = array("url" => $path);
+    $url = $storage->build_asset_path($asset);
+    $this->assertSame($hash . ".png",$url);
+  }
 
   private function get_storage_path() {
     return join(DIRECTORY_SEPARATOR,array(realpath(sys_get_temp_dir()),"cayl"));

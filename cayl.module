@@ -430,6 +430,7 @@ function cayl_retrieve_cache_asset() {
     switch ($extension) {
       case "css" : $data['metadata']['type'] = 'text/css'; break;
       case "jpg" : $data['metadata']['type'] = 'image/jpeg'; break;      
+      case "svg" : $data['metadata']['type'] = 'image/svg+xml'; break;      
     }
   }
   return (isset($data)) ? $data : MENU_NOT_FOUND;

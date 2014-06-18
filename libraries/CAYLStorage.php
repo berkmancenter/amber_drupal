@@ -80,22 +80,19 @@ class CAYLStorage implements iCAYLStorage {
    */
   public function build_asset_path($asset) {
     $url = md5($asset['url']);
+    $ext = "";
     /* Add .css extension if Content-Type is text/css */
-    if (isset($asset['headers']['Content-Type'])) {
-      $ext = "";
-      $ct = $asset['headers']['Content-Type'];
-      if (strpos($ct,'text/css') !== FALSE) {
-        $ext = ".css";
-      }
-      $url .= $ext;    
+    $ct = isset($asset['headers']['Content-Type']) ? $asset['headers']['Content-Type'] : "";
+    if ((strpos($ct,'text/css') !== FALSE)) {
+      $ext = ".css";
     } else {
-      $extension = substr($asset['url'], strrpos($asset['url'], '.'));
+      $extension_candidate = substr($asset['url'], strrpos($asset['url'], '.'));
       /* Additional heuristic to see if this is really an extension that the browser needs to parse the html 
          Could also create a mapping of content-types to filename extensions */
-      if ((strlen($extension) < 5) && (substr($extension,-1,1) != "/"))
-        $url .= $extension;      
+      if ((strlen($extension_candidate) < 5) && (substr($extension_candidate,-1,1) != "/"))
+        $ext = $extension_candidate;      
     }
-    return $url;
+    return $url . $ext;
   }
 
   /**
