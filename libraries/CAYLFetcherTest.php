@@ -339,6 +339,19 @@ EOF;
     $this->assertEquals($result['http://othersite.org/frank/james.css']['url'],'http://othersite.org/frank/james.css');
   }
 
+  
+  /**
+   * @dataProvider provider
+   */
+  public function testRewriteLinks(CAYLAssetHelper $a)
+  {
+    $body = "Now is the <script> .styling:  url('time'); </script> for all good <img src='men.jpg'/> to come to the aid of the party";
+    $assets = array("time" => array("url" => 'http://example.com/time'), 'men.jpg' => array('url' => 'http://example.com/men.jpg', 'body' => 'somebinaerystuff'));
+    $result = $a->rewrite_links($body,$assets);
+    $a = md5('http://example.com/men.jpg') . ".jpg";
+    $this->assertEquals("Now is the <script> .styling:  url('time'); </script> for all good <img src='assets/${a}'/> to come to the aid of the party",$result);  
+  }
+
   /**
    * @dataProvider provider
    */
