@@ -442,7 +442,7 @@ class CAYLNetworkUtils {
           CURLOPT_RETURNTRANSFER => 1,      /* Return the output as a string */
           CURLOPT_HEADER => TRUE,           /* Return header information as part of the file */
           CURLOPT_USERAGENT => "CAYL/0.1",
-          CURLOPT_ENCODING => "gzip",        /* Handle gzipped data */
+          CURLOPT_ENCODING => '',           /* Handle compressed data */
           // CURLOPT_VERBOSE => true,
           // CURLOPT_PROXY => 'localhost:8889',
           // CURLOPT_PROXYTYPE => CURLPROXY_SOCKS5,
@@ -539,6 +539,7 @@ class CAYLNetworkUtils {
           CURLOPT_FILE => $tmp_body_file,
           CURLOPT_WRITEHEADER => $tmp_header_file,
           CURLOPT_USERAGENT => "CAYL/0.1",
+          CURLOPT_ENCODING => '',           /* Handle compressed data */          
           // CURLOPT_VERBOSE => true,
           // CURLOPT_PROXY => 'localhost:8889',
           // CURLOPT_PROXYTYPE => CURLPROXY_SOCKS5,
