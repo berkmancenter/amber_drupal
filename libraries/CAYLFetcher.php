@@ -43,11 +43,10 @@ class CAYLFetcher implements iCAYLFetcher {
     }
 
     $size = $root_item['info']['size_download'];
-
     // Get other assets
     if (isset($root_item['headers']['Content-Type']) &&
         ($content_type = $root_item['headers']['Content-Type']) &&
-        (strpos(strtolower($content_type),"text/html") !== FALSE)) {
+        CAYLNetworkUtils::is_html_mime_type($content_type)) {
 
       $body = stream_get_contents($root_item['body']);
       $asset_paths = $this->assetHelper->extract_assets($body);
@@ -413,6 +412,15 @@ class CAYLNetworkUtils {
       }
     }
     return $headers;
+  }
+
+  /** 
+   * Given a mime-type, determine if it would be rendered as HTML by a browser.
+   * If this is true, we will attempt to parse it for related assets (css, images, etc.)
+   */
+  public static function is_html_mime_type($mime) {
+    return ((strpos(strtolower($mime),"text/html") !== FALSE) ||
+            (strpos(strtolower($mime),"application/xhtml+xml") !== FALSE));
   }
 
 

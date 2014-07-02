@@ -76,6 +76,13 @@ EOD
     $headers = CAYLNetworkUtils::extract_headers($raw);
     $this->assertEquals($headers["Content-Type"],"text/html");
   }
+
+  public function testMimeTypeChecking(){
+    $this->assertTrue(CAYLNetworkUtils::is_html_mime_type("text/html"));    
+    $this->assertFalse(CAYLNetworkUtils::is_html_mime_type("image/jpg"));    
+    $this->assertTrue(CAYLNetworkUtils::is_html_mime_type("application/xhtml+xml"));    
+  }
+
 }
 
 
