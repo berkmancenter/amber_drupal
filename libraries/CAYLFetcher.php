@@ -441,7 +441,7 @@ class CAYLNetworkUtils {
           CURLOPT_TIMEOUT => 10,            /* 30 second timeout for any CURL function */
           CURLOPT_RETURNTRANSFER => 1,      /* Return the output as a string */
           CURLOPT_HEADER => TRUE,           /* Return header information as part of the file */
-          CURLOPT_USERAGENT => "CAYL/0.1",
+          CURLOPT_USERAGENT => "Amber 1.0/compatible",
           CURLOPT_ENCODING => '',           /* Handle compressed data */
           // CURLOPT_VERBOSE => true,
           // CURLOPT_PROXY => 'localhost:8889',
@@ -538,7 +538,7 @@ class CAYLNetworkUtils {
           CURLOPT_HEADER => TRUE,           /* Return header information as part of the file */
           CURLOPT_FILE => $tmp_body_file,
           CURLOPT_WRITEHEADER => $tmp_header_file,
-          CURLOPT_USERAGENT => "CAYL/0.1",
+          CURLOPT_USERAGENT => "Amber 1.0/compatible",
           CURLOPT_ENCODING => '',           /* Handle compressed data */          
           // CURLOPT_VERBOSE => true,
           // CURLOPT_PROXY => 'localhost:8889',
