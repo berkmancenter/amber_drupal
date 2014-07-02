@@ -50,9 +50,14 @@ class CAYLFetcher implements iCAYLFetcher {
 
       $body = stream_get_contents($root_item['body']);
       $asset_paths = $this->assetHelper->extract_assets($body);
-      $assets = $this->assetHelper->expand_asset_references($url, $asset_paths);
-      $assets = $this->download_assets($assets, $url);
-      $assets = $this->download_css_assets_recursive($assets, $url, $size);
+
+      /* Use the url of the document we end up downloading as a reference point for
+         relative asset references, since we may have been redirected from the one
+         we originally requested.
+      */
+      $assets = $this->assetHelper->expand_asset_references($root_item['info']['url'], $asset_paths);
+      $assets = $this->download_assets($assets, $root_item['info']['url']);
+      $assets = $this->download_css_assets_recursive($assets, $root_item['info']['url'], $size);
       $body = $this->assetHelper->rewrite_links($body, $assets);
       $body = $this->assetHelper->insert_banner($body, $this->headerText);
       $root_item['body'] = $body;
