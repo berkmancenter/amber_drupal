@@ -89,6 +89,10 @@ class CAYLStorage implements iCAYLStorage {
       $extension_candidate = substr($asset['url'], strrpos($asset['url'], '.'));
       /* Additional heuristic to see if this is really an extension that the browser needs to parse the html 
          Could also create a mapping of content-types to filename extensions */
+
+      if (strrpos($extension_candidate, '?') !== FALSE) {
+        $extension_candidate = substr($extension_candidate, 0, strrpos($extension_candidate, '?'));
+      }
       if ((strlen($extension_candidate) < 5) && (substr($extension_candidate,-1,1) != "/"))
         $ext = $extension_candidate;      
     }
@@ -307,18 +311,26 @@ class CAYLStorage implements iCAYLStorage {
     }
     foreach ($assets as $asset) {
       if (empty($asset['url'])) {
-        error_log(join(":", array(__FILE__, __METHOD__, "Could not save asset with no URL specified", $id, $asset_path)));
+        error_log(join(":", array(__FILE__, __METHOD__, "Could not save asset with no URL specified", $id)));
+        continue;
       }
-
       $asset_path = join(DIRECTORY_SEPARATOR,array($base_asset_path, $this->build_asset_path($asset)));
+      if (empty($asset_path)) {
+        error_log(join(":", array(__FILE__, __METHOD__, "Could not generate asset path to save asset ", $id, $asset['url'])));
+        continue;
+      }
       if (!file_exists(dirname($asset_path))) {
         if (!mkdir(dirname($asset_path), 0777, true)) {
-          error_log(join(":", array(__FILE__, __METHOD__, "Could not create asset directory for asset", $asset_path)));
+          error_log(join(":", array(__FILE__, __METHOD__, "Could not create asset directory for asset", $asset_path, $asset['url'])));
           continue;
         }
       }
-      if (empty($asset_path) || empty($asset['body']) || (file_put_contents($asset_path, $asset['body']) === FALSE)) {
-        error_log(join(":", array(__FILE__, __METHOD__, "Could not save asset", $id, $asset_path)));
+      if (empty($asset['body'])) {
+        error_log(join(":", array(__FILE__, __METHOD__, "Could not save asset with empty content", $id, $asset_path, $asset['url'])));
+        continue;
+      }
+      if (file_put_contents($asset_path, $asset['body']) === FALSE) {
+        error_log(join(":", array(__FILE__, __METHOD__, "Could not save asset", $id, $asset_path, $asset['url'])));
         continue;
       }
     }
