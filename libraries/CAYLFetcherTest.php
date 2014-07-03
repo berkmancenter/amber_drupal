@@ -346,6 +346,71 @@ EOF;
     $this->assertEquals($result['http://othersite.org/frank/james.css']['url'],'http://othersite.org/frank/james.css');
   }
 
+  /**
+   * @dataProvider provider
+   */
+  public function testExpandReferencesThatGoUp(CAYLAssetHelper $a)
+  {
+    $url = "http://img.xuite.net/_v_1.0.32/personal/photo/fix.css";
+    $assets = array("../common.css");
+    $result = $a->expand_asset_references($url,$assets);
+    $this->assertEquals(1,count($result));
+    $this->assertEquals('http://img.xuite.net/_v_1.0.32/personal/common.css', $result['../common.css']['url']);
+  }
+
+  public function testFullRelativePath()
+  {
+    $this->assertEquals(
+      "dir1/common.css",
+      CAYLNetworkUtils::full_relative_path("dir1","common.css"));
+    $this->assertEquals(
+      "dir1/bananas/common.css",
+      CAYLNetworkUtils::full_relative_path("dir1","bananas/common.css"));
+    $this->assertEquals(
+      "dir1/common.css",
+      CAYLNetworkUtils::full_relative_path("dir1","bananas/../common.css"));
+    $this->assertEquals(
+      "dir1/common.css",
+      CAYLNetworkUtils::full_relative_path("dir1/dir2","../common.css"));
+    $this->assertEquals(
+      "_v_1.0.32/personal/common.css",
+      CAYLNetworkUtils::full_relative_path("_v_1.0.32/personal/photo","../common.css"));
+
+  }
+
+  public function testCleanUpPathString()
+  {
+    $this->assertEquals(
+      "common.css",
+      CAYLNetworkUtils::clean_up_path("../common.css"));
+    $this->assertEquals(
+      "_v_1.0.32/personal/common.css",
+      CAYLNetworkUtils::clean_up_path("_v_1.0.32/personal/common.css"));
+    $this->assertEquals(
+      "_v_1.0.32/personal/common.css",
+      CAYLNetworkUtils::clean_up_path("_v_1.0.32/personal/photo/../common.css"));
+    $this->assertEquals(
+      "_v_1.0.32/common.css",
+      CAYLNetworkUtils::clean_up_path("_v_1.0.32/personal/photo/../../common.css"));
+    $this->assertEquals(
+      "common.css",
+      CAYLNetworkUtils::clean_up_path("_v_1.0.32/personal/photo/../../../../common.css"));
+  }
+
+
+  /**
+   * @dataProvider provider
+   */
+  // public function testExpandReferencesThatGoAboveRoot(CAYLAssetHelper $a)
+  // {
+  //   $url = "http://example.com/fruit/cake";
+  //   $assets = array("../../../banana.jpg", 'scripts/?h=x');
+  //   $result = $a->expand_asset_references($url,$assets);
+  //   $this->assertEquals(count($result),2);
+  //   $this->assertEquals('http://example.com/banana.jpg', $result['../../../banana.jpg']['url']);
+  //   $this->assertEquals('http://example.com/fruit/scripts/?h=x', $result['scripts/?h=x']['url']);
+  // }
+
   
   /**
    * @dataProvider provider
@@ -416,6 +481,12 @@ EOF;
    */
   public function testCSSAssets(CAYLAssetHelper $a) {
     $s = <<<EOF
+@charset "utf-8";
+@import "../common.css";
+img {
+    border: none
+}
+
 div.indentation {
     width: 20px;
     height: 1.7em;
@@ -441,12 +512,13 @@ div.tree-child-vertical{
 EOF;
 
     $result = $a->extract_css_assets($s);
-    $this->assertEquals(4,count($result));
+    $this->assertEquals(5,count($result));
     sort($result);
-    $this->assertEquals("/misc/tree.png", $result[0]);
-    $this->assertEquals("/misc/tree1-bottom.png", $result[1]);
-    $this->assertEquals("/misc/tree1-one.png", $result[2]);
-    $this->assertEquals("/misc/tree2-one.png", $result[3]);
+    $this->assertEquals("../common.css", $result[0]);
+    $this->assertEquals("/misc/tree.png", $result[1]);
+    $this->assertEquals("/misc/tree1-bottom.png", $result[2]);
+    $this->assertEquals("/misc/tree1-one.png", $result[3]);
+    $this->assertEquals("/misc/tree2-one.png", $result[4]);
   }
 
   /**

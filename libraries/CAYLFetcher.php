@@ -219,8 +219,25 @@ class CAYLAssetHelper {
   }
 
   public function extract_css_assets($body) {
+    $refs = $this->extract_css_assets_urls($body);
+    $refs = array_merge($refs,$this->extract_css_asset_imports($body));
+    return $refs;    
+  }
+
+
+  public function extract_css_assets_urls($body) {
     if ($body) {
       $re = '/url\(\s*["\']?([^\v()<>{}\[\]"\']+)[\'"]?\s*\)/';
+      $count = preg_match_all($re, $body, $matches);
+      return $count ? array_unique($matches[1]) : array();
+    } else {
+      return array();
+    }
+  }
+
+  public function extract_css_asset_imports($body) {
+    if ($body) {
+      $re = '/@import\s*["\']?([^\v()<>{}\[\]"\']+)[\'"]?\s*/';
       $count = preg_match_all($re, $body, $matches);
       return $count ? array_unique($matches[1]) : array();
     } else {
@@ -256,14 +273,14 @@ class CAYLAssetHelper {
         $asset_url = parse_url($asset_copy);
         if ($asset_url) {
           if (!isset($asset_url['host'])) {
-            $asset_copy = CAYLNetworkUtils::full_relative_path($asset_copy);
             if ($asset_copy && $asset_copy[0] == '/') {
               /* Absolute path */
               $asset_copy = preg_replace("/^\\//","", $asset_copy); /* Remove leading '/' */
               $asset_path = join('/',array($server, $asset_copy));
             } else {
               /* Relative path */
-              $asset_path = join('/',array($base, $asset_copy));
+              $full_relative_path = CAYLNetworkUtils::full_relative_path(join('/',$path_array), $asset_copy);
+              $asset_path = $server . $full_relative_path;
             }
             $result[$asset]['url'] = $asset_path;
           } else {
@@ -323,7 +340,7 @@ class CAYLAssetHelper {
     $script = <<<EOD
 <script type="text/javascript">window.onbeforeunload = function(e) { return "This page is trying to beat it"; }; window.onload = function() { window.onbeforeunload=null; }</script>
 EOD;
-    $result = str_ireplace("</head>", "</head>$script", $body);
+    $result = str_ireplace("<head>", "<head>$script", $body);
     return $result;
   }
 
@@ -390,12 +407,45 @@ class CAYLNetworkUtils {
     return in_array("curl", get_loaded_extensions());
   }
 
-  public static function full_relative_path($url) {
+  public static function full_relative_path($base, $url) {
     $dict = parse_url($url);
-    $result = isset($dict['host']) ? "/" . $dict['host'] : '';
-    $result .= isset($dict['path']) ? $dict['path'] : '';
+    if (isset($dict['path'])) {
+      $result = CAYLNetworkUtils::clean_up_path(join('/',array($base,$dict['path'])));
+    } else {
+      $result = $base;  
+    }
     $result .= isset($dict['query']) ? '?' . $dict['query'] : '';
     return $result;
+  }
+
+  /**
+   * Remove '../' elements from the path. This is only necessary because sometimes the
+   * relative paths go above the 'root' level, which browsers handle by ignoring any
+   * '..' elements which go above the root. We need to replicate this behavior 
+   * because many pages in the wild depend on it.
+   * @pararm $path_string string with the path component of the URL
+   */
+  public static function clean_up_path($path_string) {
+    $path = explode("/",$path_string);
+    $done = false;
+    $i = 0;
+    while ($i < count($path)) {
+      if ($path[$i] == "..") {
+        if ($i == 0) {
+          unset($path[$i]);          
+        } else if ($path[$i-1] != "..") {
+          unset($path[$i]);          
+          unset($path[$i-1]);       
+          $i -= 1;   
+        } else {
+          $i += 1;
+        }
+        $path = array_values($path);
+      } else {
+        $i += 1;
+      }
+    }
+    return join("/",$path);
   }
 
   /**
