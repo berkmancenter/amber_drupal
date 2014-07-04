@@ -270,22 +270,18 @@ class CAYLAssetHelper {
         if (strpos($asset,";base64") !== FALSE) {
           continue;
         }
-        $asset_url = parse_url($asset_copy);
-        if ($asset_url) {
-          if (!isset($asset_url['host'])) {
-            if ($asset_copy && $asset_copy[0] == '/') {
-              /* Absolute path */
-              $asset_copy = preg_replace("/^\\//","", $asset_copy); /* Remove leading '/' */
-              $asset_path = join('/',array($server, $asset_copy));
-            } else {
+        $parsed_asset_copy = parse_url($asset_copy);
+        $asset_path = $asset_copy;
+        if ($parsed_asset_copy) {
+          if (!isset($parsed_asset_copy['host'])) {
+            if (!($asset_path && $asset_path[0] == '/')) {
               /* Relative path */
-              $full_relative_path = CAYLNetworkUtils::full_relative_path(join('/',$path_array), $asset_copy);
-              $asset_path = $server . $full_relative_path;
+              $asset_path = CAYLNetworkUtils::full_relative_path(join('/',$path_array), $asset_path);
             }
-            $result[$asset]['url'] = $asset_path;
-          } else {
-            $result[$asset]['url'] = $asset_copy;
+            $asset_path = preg_replace("/^\\//","", $asset_path); /* Remove leading '/' */
+            $asset_path = join('/',array($server, $asset_path));            
           }
+          $result[$asset]['url'] = $asset_path;
         }
       }
     }

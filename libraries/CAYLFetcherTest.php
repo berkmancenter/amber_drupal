@@ -401,15 +401,15 @@ EOF;
   /**
    * @dataProvider provider
    */
-  // public function testExpandReferencesThatGoAboveRoot(CAYLAssetHelper $a)
-  // {
-  //   $url = "http://example.com/fruit/cake";
-  //   $assets = array("../../../banana.jpg", 'scripts/?h=x');
-  //   $result = $a->expand_asset_references($url,$assets);
-  //   $this->assertEquals(count($result),2);
-  //   $this->assertEquals('http://example.com/banana.jpg', $result['../../../banana.jpg']['url']);
-  //   $this->assertEquals('http://example.com/fruit/scripts/?h=x', $result['scripts/?h=x']['url']);
-  // }
+  public function testExpandReferencesThatGoAboveRoot(CAYLAssetHelper $a)
+  {
+    $url = "http://example.com/fruit/cake";
+    $assets = array("../../../banana.jpg", 'scripts/?h=x');
+    $result = $a->expand_asset_references($url,$assets);
+    $this->assertEquals(count($result),2);
+    $this->assertEquals('http://example.com/banana.jpg', $result['../../../banana.jpg']['url']);
+    $this->assertEquals('http://example.com/fruit/scripts/?h=x', $result['scripts/?h=x']['url']);
+  }
 
   
   /**
