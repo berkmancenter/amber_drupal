@@ -179,8 +179,8 @@ function _cayl_extract_node_links($node) {
   $url_options = (empty($node->language) || empty($languages[$node->language])) ? array('absolute' => TRUE) : array('language' => $languages[$node->language], 'absolute' => TRUE);
 
   // Extract all links in a node.
-  //  NOTE: The linkchecker module parses the HTML and then looks through the DOM. Consider this if the current
-  //  approach does not work
+  // NOTE: The linkchecker module parses the HTML and then looks through the DOM. 
+  // Consider this if the current approach does not work
   //  $links = _linkchecker_extract_links(implode(' ', $text_items), $path);
   $links = _cayl_extract_links(implode(' ', $text_items));
   $links = _cayl_filter_links($links, explode(PHP_EOL,variable_get("cayl_excluded_sites","")));
