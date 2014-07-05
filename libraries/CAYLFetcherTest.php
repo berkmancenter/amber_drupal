@@ -358,6 +358,23 @@ EOF;
     $this->assertEquals('http://img.xuite.net/_v_1.0.32/personal/common.css', $result['../common.css']['url']);
   }
 
+  /**
+   * @dataProvider provider
+   */
+  public function testExpandReferencesWithHTMLBaseTag(CAYLAssetHelper $a)
+  {
+    $url = "http://example.com/fruit/cake";
+    $assets = array("banana.jpg", 'scripts/?h=x', 'http://example.com/data/?q=fruit', 'http://othersite.org/frank/james.css', '//example.com/funky.jpg', '/abs.css');
+    $result = $a->expand_asset_references($url,$assets,"http://example.com/somewhere/else/");
+    $this->assertEquals(count($result),6);
+    $this->assertEquals($result['banana.jpg']['url'],'http://example.com/somewhere/else/banana.jpg');
+    $this->assertEquals($result['scripts/?h=x']['url'],'http://example.com/somewhere/else/scripts/?h=x');
+    $this->assertEquals($result['http://example.com/data/?q=fruit']['url'],'http://example.com/data/?q=fruit');
+    $this->assertEquals($result['//example.com/funky.jpg']['url'],'http://example.com/funky.jpg');
+    $this->assertEquals($result['/abs.css']['url'],'http://example.com/abs.css');
+    $this->assertEquals($result['http://othersite.org/frank/james.css']['url'],'http://othersite.org/frank/james.css');
+  }
+
   public function testFullRelativePath()
   {
     $this->assertEquals(
@@ -375,6 +392,9 @@ EOF;
     $this->assertEquals(
       "_v_1.0.32/personal/common.css",
       CAYLNetworkUtils::full_relative_path("_v_1.0.32/personal/photo","../common.css"));
+    $this->assertEquals(
+      "/persian/news/newsitem/article/typo3conf/ext/kj_imagelightbox2/res/lightbox2.04/js/prototype.js",
+      CAYLNetworkUtils::full_relative_path("/persian/news/newsitem/article","typo3conf/ext/kj_imagelightbox2/res/lightbox2.04/js/prototype.js"));
 
   }
 
@@ -474,6 +494,20 @@ EOF;
     $this->assertEquals($result[0],"banana.css");
     $this->assertEquals($result[1],"banana.js?eatmyshorts=1");
     $this->assertEquals($result[2],"http://band.com/band.jpg");
+  }
+
+  /**
+   * @dataProvider provider
+   */
+  public function testExtractBaseTag(CAYLAssetHelper $a) {
+    $s = <<<EOF
+<head>  <base href="http://www.roozonline.com/" />
+<link href="banana.css" rel="stylesheet" type="text.css"><script src="banana.js?eatmyshorts=1" type="text/javascript"></head><body><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAAASCAMAAAA62ONUAAAB41BMVEVOapxPaJ1QaJ0AnuMAnuMAnuMAnuMAnuMtMnctMnctMnctMnctMncqL3AAnuMAnuMAnuMkRIgAnuMoP4QnOHpScaQtMnc+UY83VZFYeadAVJIrMHMtMncAnuMdTpAsMXQZV5goPYItMncAnuMtMncAmt4AnuMqL3EtMndOaJ4rMHItMncAmNoqL3AAneIAnuMtMncqL28AnuMtMncAltcAnuMtMncAnuMqL3EAlNUsMXYsMHQtMnctMnctMnctMncrMHItMncAAAAbVpgcVZguSYw8T40iXKB/l78YYKMFkdbKzN1MXZZjdaemvtlYcaZXcaZHW5YrSIyaosKIo8c3RYYzS40cWp9JXJZFWpaRnsFJZJ0vOn5gdKdPaJ4mTpJof69GW5acqsk+UI5CWZUDmN1BWZVtga8yVpYpV5pmfq4VZ6o0S4yz2e7h8vrw+f0nQIV9pswPeb4/WpciTZJEWpVVYJe/x9sxQ4W+x9uzu9Oyu9PK1OSnrsstOX5VaJ5acqYOfMHL1ORCUY4RdrvX2OU2TY0cW6A5To1LZJ0ZYaZ+j7gqOX4WaK0Iis+Im8AGkNUhVJm9v9R2jLcDl9wqL28XaK0Rdbrl5e4Ub7QLg8gqL3Dy8vYAldYtMnf///8AnuNA03DVAAAAQ3RSTlP8/v6ImHBkTF9vaoKX62pKkrCCiM3Wj5629o++iBDcs/6XoFA/tUDbcP7HUMjuoTB/74Ag3GBAkNzvobVgkBAwyIAAQngpRwAAAo9JREFUeNqV0mVv3EAQBuCTyswcZuWYjWd7pDIzp8wMYWzaMB3k0Ofx/NSu75KDNB/SV9burK19ZM/aBsXYtbqGhYWF83WNUgQ2HEVWCnNBiRxqWKTVXMge8G9U0TBUUqQPr8jKr1QqHbWKP40r7xMRVK1DFSPQwSEbQ+JuQRUVANnLlnZO5zCk6agqTDneNZnKUS5742rvxaXpWDqXy37sKjJC0pPEo+2ihJyMoh+de5Kedh3sKApYo+sCYo31RLXBsc9mPv7m5eij3sy1mX4zs5SYi+fNEwVG1UBQQUMZOVVHDSOogb8F/ILqRYHVMp5CBVS0hT6ZhbwYH7w9nLk+Zxbz5eSKohUVWWMpKiHoQFWoVo6sbHv6bCzPpsdjK+tvlYqEoqbKGoKTs3NOdkMTcRfqmq7vtL7Ia3s7s5QxK7L028ImEj+s7ssSSDJInWwfehU2K/Wd9QooXkQhInHotYOMyCm2hWj23fTz/ol8Eclnhl/H30/G0t+ZsuHYYkQUfTL6+2F3ImMp94bGR9LWaf+XcniZiNKjD8yBgS7THBrM30/0EctPqIw7QHwQwgYF3EGejGbwGcS7y4o0RSy5O7cy5qXuK/mem3OzUesPFKsUnsI87SNHmHyGwa5tFGBjWQFn1mIWZ2cum4lzPfGR2WVLnVeqFGqFIO11OQK0mcIQJhc1s7GtrCjJqeWCc/bM6em+1KJVZ1GCf5X95PDRppLiIndZYcx8ijnlpL+uRYCI9eQghVtpC2+4DNpKfJh4qFAg0oQYS+UKUi57dx47FVirBHg+WOsgw1XrDvABagvyrNGVCovf046rcTatc8bkK5WF7q496dUi0rLd4/HsaPHDenG0lcqgQUYQqvMXuNS61rudHXMAAAAASUVORK5CYII=">And the band played on....And the <img src="http://band.com/band.jpg"/> said to the
+<a href="leader.html">leader</a>.</body>
+EOF;
+
+    $result = $a->extract_base_tag($s);
+    $this->assertEquals("http://www.roozonline.com/",$result);
   }
 
   /**

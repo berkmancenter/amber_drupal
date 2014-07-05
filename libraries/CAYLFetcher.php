@@ -49,14 +49,14 @@ class CAYLFetcher implements iCAYLFetcher {
         CAYLNetworkUtils::is_html_mime_type($content_type)) {
 
       $body = stream_get_contents($root_item['body']);
-      $asset_paths = $this->assetHelper->extract_assets($body);
 
+      $asset_paths = $this->assetHelper->extract_assets($body);
       /* Use the url of the document we end up downloading as a reference point for
          relative asset references, since we may have been redirected from the one
-         we originally requested.
-      */
-      $assets = $this->assetHelper->expand_asset_references($root_item['info']['url'], $asset_paths);
-      $assets = $this->download_assets($assets, $root_item['info']['url']);
+         we originally requested. */
+      $assets = $this->assetHelper->expand_asset_references($root_item['info']['url'], $asset_paths, 
+                                                            $this->assetHelper->extract_base_tag($body));
+      $assets = $this->download_assets($assets, $root_item['info']['url']); 
       $assets = $this->download_css_assets_recursive($assets, $root_item['info']['url'], $size);
       $body = $this->assetHelper->rewrite_links($body, $assets);
       $body = $this->assetHelper->insert_banner($body, $this->headerText);
@@ -197,13 +197,11 @@ class CAYLAssetHelper {
    * Extract a list of assets to be downloaded to go along with an HTML file
    * @param $file
    */
-  public function extract_assets($body) {
+  public function extract_assets($body, $dom = null) {
     if ($body) {
-      $dom = new DOMDocument;
-      $old_setting = libxml_use_internal_errors(true);
-      $dom->loadHTML($body);
-      libxml_clear_errors();
-      libxml_use_internal_errors($old_setting);
+      if (!$dom) {
+        $dom = $this->get_dom($body);        
+      }
 
       $refs = $this->extract_dom_tag_attributes($dom, 'img', 'src');
       $refs = array_merge($refs,$this->extract_dom_tag_attributes($dom, 'script', 'src'));
@@ -216,6 +214,15 @@ class CAYLAssetHelper {
     } else {
       return array();
     }
+  }
+
+  public function get_dom($body) {
+    $dom = new DOMDocument;
+    $old_setting = libxml_use_internal_errors(true);
+    $dom->loadHTML($body);
+    libxml_clear_errors();
+    libxml_use_internal_errors($old_setting);
+    return $dom;    
   }
 
   public function extract_css_assets($body) {
@@ -246,19 +253,20 @@ class CAYLAssetHelper {
   }
 
   /**
-   * Given a base URL and a list of assets referenced from that page, return an array list of absolute URIs
-   * to each of the assets keyed by the path used to reference it
-   * @param $base
+   * Given a page URL and a list of assets referenced from that page, return an array list of absolute URIs
+   * to each of the assets keyed by the path used to reference it. 
+   * @param $page_url
    * @param $assets
+   * @param $html_base string with the contents of the <base> tag from the page, if exists
    */
-  public function expand_asset_references($base, $assets) {
+  public function expand_asset_references($page_url, $assets, $html_base = "") {
     $result = array();
-    $p = parse_url($base);
+    $p = parse_url($page_url);
     if ($p) {
       $path_array = explode('/',isset($p['path']) ? $p['path'] : "");
       array_pop($path_array);
       $server = $p['scheme'] . "://" . $p['host'] . (isset($p['port']) ? ":" . $p['port'] : '');
-      $base = $server . join('/',$path_array);
+      $page_url = $server . join('/',$path_array);
       foreach ($assets as $asset) {
         $asset_copy = $asset;
         if (strpos($asset,"//") === 0) {
@@ -273,10 +281,15 @@ class CAYLAssetHelper {
         $parsed_asset_copy = parse_url($asset_copy);
         $asset_path = $asset_copy;
         if ($parsed_asset_copy) {
-          if (!isset($parsed_asset_copy['host'])) {
+          if (!isset($parsed_asset_copy['host'])) {          
             if (!($asset_path && $asset_path[0] == '/')) {
               /* Relative path */
-              $asset_path = CAYLNetworkUtils::full_relative_path(join('/',$path_array), $asset_path);
+              if ($html_base) {
+                $result[$asset]['url'] = $html_base . $asset_path;
+                continue;
+              } else {
+                $asset_path = CAYLNetworkUtils::full_relative_path(join('/',$path_array), $asset_path);
+              }
             }
             $asset_path = preg_replace("/^\\//","", $asset_path); /* Remove leading '/' */
             $asset_path = join('/',array($server, $asset_path));            
@@ -393,6 +406,21 @@ EOD;
       }
     }
     return $attributes;
+  }
+
+  public function extract_base_tag($body, $dom="") {
+    $attribute = "";
+    if ($body) {
+      if (!$dom) {
+        $dom = $this->get_dom($body);        
+      }
+      foreach ($dom->getElementsByTagName('base') as $t) {
+        if ($t->hasAttribute('href')) {
+          $attribute = trim($t->getAttribute('href'));
+        }
+      }
+    }
+    return $attribute;
   }
 
 }
