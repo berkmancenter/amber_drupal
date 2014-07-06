@@ -465,6 +465,26 @@ EOF;
   /**
    * @dataProvider provider
    */
+  public function testIgnoreExcludedAssetPaths(CAYLAssetHelper $a) {
+    $s = <<<EOF
+<head><link href="banana.css" rel="stylesheet" type="text.css"><script src="banana.js" type="text/javascript"></head><body><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAAASCAMAAAA62ONUAAAB41BMVEVOapxPaJ1QaJ0AnuMAnuMAnuMAnuMAnuMtMnctMnctMnctMnctMncqL3AAnuMAnuMAnuMkRIgAnuMoP4QnOHpScaQtMnc+UY83VZFYeadAVJIrMHMtMncAnuMdTpAsMXQZV5goPYItMncAnuMtMncAmt4AnuMqL3EtMndOaJ4rMHItMncAmNoqL3AAneIAnuMtMncqL28AnuMtMncAltcAnuMtMncAnuMqL3EAlNUsMXYsMHQtMnctMnctMnctMncrMHItMncAAAAbVpgcVZguSYw8T40iXKB/l78YYKMFkdbKzN1MXZZjdaemvtlYcaZXcaZHW5YrSIyaosKIo8c3RYYzS40cWp9JXJZFWpaRnsFJZJ0vOn5gdKdPaJ4mTpJof69GW5acqsk+UI5CWZUDmN1BWZVtga8yVpYpV5pmfq4VZ6o0S4yz2e7h8vrw+f0nQIV9pswPeb4/WpciTZJEWpVVYJe/x9sxQ4W+x9uzu9Oyu9PK1OSnrsstOX5VaJ5acqYOfMHL1ORCUY4RdrvX2OU2TY0cW6A5To1LZJ0ZYaZ+j7gqOX4WaK0Iis+Im8AGkNUhVJm9v9R2jLcDl9wqL28XaK0Rdbrl5e4Ub7QLg8gqL3Dy8vYAldYtMnf///8AnuNA03DVAAAAQ3RSTlP8/v6ImHBkTF9vaoKX62pKkrCCiM3Wj5629o++iBDcs/6XoFA/tUDbcP7HUMjuoTB/74Ag3GBAkNzvobVgkBAwyIAAQngpRwAAAo9JREFUeNqV0mVv3EAQBuCTyswcZuWYjWd7pDIzp8wMYWzaMB3k0Ofx/NSu75KDNB/SV9burK19ZM/aBsXYtbqGhYWF83WNUgQ2HEVWCnNBiRxqWKTVXMge8G9U0TBUUqQPr8jKr1QqHbWKP40r7xMRVK1DFSPQwSEbQ+JuQRUVANnLlnZO5zCk6agqTDneNZnKUS5742rvxaXpWDqXy37sKjJC0pPEo+2ihJyMoh+de5Kedh3sKApYo+sCYo31RLXBsc9mPv7m5eij3sy1mX4zs5SYi+fNEwVG1UBQQUMZOVVHDSOogb8F/ILqRYHVMp5CBVS0hT6ZhbwYH7w9nLk+Zxbz5eSKohUVWWMpKiHoQFWoVo6sbHv6bCzPpsdjK+tvlYqEoqbKGoKTs3NOdkMTcRfqmq7vtL7Ia3s7s5QxK7L028ImEj+s7ssSSDJInWwfehU2K/Wd9QooXkQhInHotYOMyCm2hWj23fTz/ol8Eclnhl/H30/G0t+ZsuHYYkQUfTL6+2F3ImMp94bGR9LWaf+XcniZiNKjD8yBgS7THBrM30/0EctPqIw7QHwQwgYF3EGejGbwGcS7y4o0RSy5O7cy5qXuK/mem3OzUesPFKsUnsI87SNHmHyGwa5tFGBjWQFn1mIWZ2cum4lzPfGR2WVLnVeqFGqFIO11OQK0mcIQJhc1s7GtrCjJqeWCc/bM6em+1KJVZ1GCf5X95PDRppLiIndZYcx8ijnlpL+uRYCI9eQghVtpC2+4DNpKfJh4qFAg0oQYS+UKUi57dx47FVirBHg+WOsgw1XrDvABagvyrNGVCovf046rcTatc8bkK5WF7q496dUi0rLd4/HsaPHDenG0lcqgQUYQqvMXuNS61rudHXMAAAAASUVORK5CYII=">And the band played on....And the <img src="http://band.com/band.jpg"/> said to the
+<a href="leader.html">leader</a>.<script>function url(link); </script></body>
+EOF;
+
+    $result = $a->extract_assets($s);
+    $this->assertEquals(3,count($result));
+    sort($result);
+    $this->assertEquals($result[0],"banana.css");
+    $this->assertEquals($result[1],"banana.js");
+    $this->assertEquals($result[2],"http://band.com/band.jpg");
+
+  }
+
+
+
+  /**
+   * @dataProvider provider
+   */
   public function testImagesWithSpacesInURL(CAYLAssetHelper $a) {
     $s = <<<EOF
 <head><link href=" banana.css" rel="stylesheet" type="text.css"><script src=" banana.js " type="text/javascript"></head><body><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAAASCAMAAAA62ONUAAAB41BMVEVOapxPaJ1QaJ0AnuMAnuMAnuMAnuMAnuMtMnctMnctMnctMnctMncqL3AAnuMAnuMAnuMkRIgAnuMoP4QnOHpScaQtMnc+UY83VZFYeadAVJIrMHMtMncAnuMdTpAsMXQZV5goPYItMncAnuMtMncAmt4AnuMqL3EtMndOaJ4rMHItMncAmNoqL3AAneIAnuMtMncqL28AnuMtMncAltcAnuMtMncAnuMqL3EAlNUsMXYsMHQtMnctMnctMnctMncrMHItMncAAAAbVpgcVZguSYw8T40iXKB/l78YYKMFkdbKzN1MXZZjdaemvtlYcaZXcaZHW5YrSIyaosKIo8c3RYYzS40cWp9JXJZFWpaRnsFJZJ0vOn5gdKdPaJ4mTpJof69GW5acqsk+UI5CWZUDmN1BWZVtga8yVpYpV5pmfq4VZ6o0S4yz2e7h8vrw+f0nQIV9pswPeb4/WpciTZJEWpVVYJe/x9sxQ4W+x9uzu9Oyu9PK1OSnrsstOX5VaJ5acqYOfMHL1ORCUY4RdrvX2OU2TY0cW6A5To1LZJ0ZYaZ+j7gqOX4WaK0Iis+Im8AGkNUhVJm9v9R2jLcDl9wqL28XaK0Rdbrl5e4Ub7QLg8gqL3Dy8vYAldYtMnf///8AnuNA03DVAAAAQ3RSTlP8/v6ImHBkTF9vaoKX62pKkrCCiM3Wj5629o++iBDcs/6XoFA/tUDbcP7HUMjuoTB/74Ag3GBAkNzvobVgkBAwyIAAQngpRwAAAo9JREFUeNqV0mVv3EAQBuCTyswcZuWYjWd7pDIzp8wMYWzaMB3k0Ofx/NSu75KDNB/SV9burK19ZM/aBsXYtbqGhYWF83WNUgQ2HEVWCnNBiRxqWKTVXMge8G9U0TBUUqQPr8jKr1QqHbWKP40r7xMRVK1DFSPQwSEbQ+JuQRUVANnLlnZO5zCk6agqTDneNZnKUS5742rvxaXpWDqXy37sKjJC0pPEo+2ihJyMoh+de5Kedh3sKApYo+sCYo31RLXBsc9mPv7m5eij3sy1mX4zs5SYi+fNEwVG1UBQQUMZOVVHDSOogb8F/ILqRYHVMp5CBVS0hT6ZhbwYH7w9nLk+Zxbz5eSKohUVWWMpKiHoQFWoVo6sbHv6bCzPpsdjK+tvlYqEoqbKGoKTs3NOdkMTcRfqmq7vtL7Ia3s7s5QxK7L028ImEj+s7ssSSDJInWwfehU2K/Wd9QooXkQhInHotYOMyCm2hWj23fTz/ol8Eclnhl/H30/G0t+ZsuHYYkQUfTL6+2F3ImMp94bGR9LWaf+XcniZiNKjD8yBgS7THBrM30/0EctPqIw7QHwQwgYF3EGejGbwGcS7y4o0RSy5O7cy5qXuK/mem3OzUesPFKsUnsI87SNHmHyGwa5tFGBjWQFn1mIWZ2cum4lzPfGR2WVLnVeqFGqFIO11OQK0mcIQJhc1s7GtrCjJqeWCc/bM6em+1KJVZ1GCf5X95PDRppLiIndZYcx8ijnlpL+uRYCI9eQghVtpC2+4DNpKfJh4qFAg0oQYS+UKUi57dx47FVirBHg+WOsgw1XrDvABagvyrNGVCovf046rcTatc8bkK5WF7q496dUi0rLd4/HsaPHDenG0lcqgQUYQqvMXuNS61rudHXMAAAAASUVORK5CYII=">And the band played on....And the <img src="http://band.com/band.jpg"/> said to the
@@ -543,6 +563,11 @@ div.tree-child-horizontal {
 div.tree-child-vertical{
     background: url(  "/misc/tree2-one.png" ) no-repeat -11px center;
 }
+
+div.bogus {
+    background: url("link") no-repeat -11px center;
+}
+
 EOF;
 
     $result = $a->extract_css_assets($s);

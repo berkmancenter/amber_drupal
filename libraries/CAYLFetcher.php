@@ -210,6 +210,7 @@ class CAYLAssetHelper {
       $refs = array_merge($refs,$this->extract_dom_link_references($dom));
       $refs = array_merge($refs,$this->extract_dom_style_references($dom));
       $refs = array_merge($refs,$this->extract_css_assets($body));
+      $refs = array_filter($refs, array($this, "filter_css_asset_names"));
       return $refs;
     } else {
       return array();
@@ -228,9 +229,9 @@ class CAYLAssetHelper {
   public function extract_css_assets($body) {
     $refs = $this->extract_css_assets_urls($body);
     $refs = array_merge($refs,$this->extract_css_asset_imports($body));
+    $refs = array_filter($refs, array($this, "filter_css_asset_names"));
     return $refs;    
   }
-
 
   public function extract_css_assets_urls($body) {
     if ($body) {
@@ -250,6 +251,28 @@ class CAYLAssetHelper {
     } else {
       return array();
     }
+  }
+
+  /* The CSS asset detection function relies on regular expressions, not on
+     parsing the DOM. Therefore, when called on HTML files that contain embedded
+     javscript, there can be false positives where a function signature looks
+     like a file reference from a CSS file. For example: given 
+     "function url(link)", the text 'link' gets incorrectly detected as an asset. This
+     shouldn't be a problem, since the asset won't get downloaded, UNLESS the
+     site doesn't serve a 404 when it's reqested. (bad! bad!). In such a case, 
+     we replace all instances of "link" in the HTML doc with the asset path, 
+     leading to predictably messy results.
+
+     Therefore, this function, which filters out some 'known bad' asset names, 
+     those that if applied through search-replace to the HTML document would
+     cause problems. This is a partial solution to a broader problem, which is
+     that our current search-replace logic is vulnerable to collisions between 
+     asset paths and HTML text that doesn't represent an asset path. A more 
+     complete solution could involve smarter regexes, or using DOM parsing logic
+     as part of the search-replace process.
+  */
+  public function filter_css_asset_names($val) {
+    return !in_array($val,array("link"));
   }
 
   /**
