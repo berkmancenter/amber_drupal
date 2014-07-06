@@ -378,7 +378,7 @@ EOD;
 
   public function insert_banner($body, $text) {
     $banner = <<<EOD
-<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:2147483647;background-color:rgba(0,0,0,0.75) !important;color:white !important;text-align:center !important;font:bold 18px/30px Arial, sans-serif !important;">${text}</div>
+<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:2147483647;background-color:rgba(0,0,0,0.75) !important;color:white !important;text-align:center !important;font:bold 18px/30px Arial, sans-serif !important;border-radius:0 !important;margin:0 !important;max-width:100% !important;">${text}</div>
 EOD;
     $close_body_tag = "</body>";
     /* We want to replace only the LAST instance of </body>. It's possible to have multiple
