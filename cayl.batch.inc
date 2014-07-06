@@ -156,7 +156,8 @@ function cayl_batch_cache_process($queue_name, $context) {
   $url = $item->data;
   cayl_process_check_queue($url, true);
   $queue->deleteItem($item);
-  $context['message'] = t('Cached URL "@url"', array('@url' => $url));
+  $context['results'][] = $url;
+  $context['message'] = t('Processed URL "@url"', array('@url' => $url));
 }
 
 /**
@@ -167,7 +168,11 @@ function cayl_batch_cache_process($queue_name, $context) {
  */
 function cayl_batch_cache_all_finished($success, $results, $operations) {
   if ($success) {
-    drupal_set_message(t('@count URLs cached', array('@count' => count($results))));
+    $count = count($results);
+    if ($count == 1)
+      drupal_set_message(t('@count URL processed', array('@count' => $count)));
+    else
+      drupal_set_message(t('@count URLs processed', array('@count' => $count)));
     cache_clear_all('*', 'cache_filter',TRUE);
     cache_clear_all('*', 'cache_field',TRUE);
   } else {
