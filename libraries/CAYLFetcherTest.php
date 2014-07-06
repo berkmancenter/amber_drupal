@@ -593,7 +593,7 @@ EOF;
     $expected_result = <<<EOF
 <html><head><script src="banana.js" ></head>
 <body>And the band played on....And the BAND said to the
-<a href="leader.html">leader</a>.<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:2147483647;background-color:rgba(0,0,0,0.75) !important;color:white !important;text-align:center !important;font:bold 18px/30px sans-serif !important;">This is a cached page</div></body></html>
+<a href="leader.html">leader</a>.<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:2147483647;background-color:rgba(0,0,0,0.75) !important;color:white !important;text-align:center !important;font:bold 18px/30px Arial, sans-serif !important;">This is a cached page</div></body></html>
 EOF;
     $result = $a->insert_banner($s, "This is a cached page");
     $this->assertEquals($result,$expected_result);
@@ -612,7 +612,7 @@ EOF;
     $expected_result = <<<EOF
 <html><head><script src="banana.js" ></head>
 <body>And the band played on....And the BAND said to the
-<a href="leader.html">leader</a>.<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:2147483647;background-color:rgba(0,0,0,0.75) !important;color:white !important;text-align:center !important;font:bold 18px/30px sans-serif !important;">This is a cached page</div></body></html>
+<a href="leader.html">leader</a>.<div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:2147483647;background-color:rgba(0,0,0,0.75) !important;color:white !important;text-align:center !important;font:bold 18px/30px Arial, sans-serif !important;">This is a cached page</div></body></html>
 EOF;
     $result = $a->insert_banner($s, "This is a cached page");
     $this->assertEquals($result,$expected_result);
@@ -631,7 +631,7 @@ EOF;
     $expected_result = <<<EOF
 <html><head><script src="banana.js" ></head>
 <body>And the band played on....And the BAND said to the
-<a href="leader.html">leader</a>.</html><div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:2147483647;background-color:rgba(0,0,0,0.75) !important;color:white !important;text-align:center !important;font:bold 18px/30px sans-serif !important;">This is a cached page</div>
+<a href="leader.html">leader</a>.</html><div style="position:absolute;top:0;left:0;width:100%;height:30px;z-index:2147483647;background-color:rgba(0,0,0,0.75) !important;color:white !important;text-align:center !important;font:bold 18px/30px Arial, sans-serif !important;">This is a cached page</div>
 EOF;
     $result = $a->insert_banner($s, "This is a cached page");
     $this->assertEquals($result,$expected_result);
