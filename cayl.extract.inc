@@ -67,7 +67,7 @@ function _cayl_filter_links($links, $blacklist) {
       $exclude = FALSE;
       foreach ($blacklist as $blacklistitem) {
         $blacklistitem = trim($blacklistitem);
-        if ($blacklistitem && (strpos($host,$blacklistitem) !== FALSE)) {
+        if (strcasecmp($host,$blacklistitem) === 0) {
           $exclude = TRUE;
         }
       }

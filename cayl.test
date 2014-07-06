@@ -154,31 +154,31 @@ EOT;
     $blacklist = array("yahoo.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake");
     $result = _cayl_filter_links($links,$blacklist);
-    $this->assertEqual(count($result),2);
-    $this->assertEqual($result[0],"https://google.com");
+    $this->assertEqual(count($result),3);
+    $this->assertEqual($result[1],"https://google.com");
   }
 
   public function testCAYLLinkFilter2() {
     $blacklist = array("yahoo.com","www.google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake");
     $result = _cayl_filter_links($links,$blacklist);
-    $this->assertEqual(count($result),2);
-    $this->assertEqual($result[1],"http://www.peanuts.com/fruitcake");
+    $this->assertEqual(count($result),3);
+    $this->assertEqual($result[1],"https://google.com");
   }
 
   public function testCAYLLinkFilter3() {
     $blacklist = array("yahoo.com","google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake/www.yahoo.com");
     $result = _cayl_filter_links($links, $blacklist);
-    $this->assertEqual(count($result),1);
-    $this->assertEqual($result[0],"http://www.peanuts.com/fruitcake/www.yahoo.com");
+    $this->assertEqual(count($result),2);
+    $this->assertEqual($result[0],"http://www.yahoo.com");
   }
 
   public function testCAYLLinkFilter4() {
     $blacklist = array("yahoo.com ","google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake/www.yahoo.com");
     $result = _cayl_filter_links($links, $blacklist);
-    $this->assertEqual(count($result),1);
+    $this->assertEqual(count($result),2);
   }
 
 }
