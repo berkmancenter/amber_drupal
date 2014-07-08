@@ -33,6 +33,18 @@ Disallow: /man
 
 EOD
 ,"/man/a_url"));
+    $this->assertTrue(CAYLRobots::url_permitted(<<<EOD
+User-agent: *
+Disallow: /man
+
+EOD
+,"/foo"));
+    $this->assertTrue(CAYLRobots::url_permitted(<<<EOD
+User-agent: *
+Disallow: 
+
+EOD
+,"/man/a_url"));
   }
 
 }
