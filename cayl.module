@@ -88,8 +88,8 @@ function cayl_init() {
 function cayl_permission()
 {
   return array('administer cayl' => array(
-      'title' => t('Administer CAYL'),
-      'description' => t('Adminster CAYL cache and display of cached links'),
+      'title' => t('Administer Amber'),
+      'description' => t('Adminster Amber storage and display of site captures'),
     )
   );  
 }
@@ -100,8 +100,8 @@ function cayl_permission()
 function cayl_menu() {
   $items = array();
   $items['admin/config/content/cayl'] = array(
-    'title' => 'Cache As You Link',
-    'description' => 'Configuration for the Cache As You Link module',
+    'title' => 'Amber',
+    'description' => 'Configuration for the Amber module',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cayl_config_form'),
     'access arguments' => array('administer cayl'),
@@ -109,8 +109,8 @@ function cayl_menu() {
     'file' => 'cayl.admin.inc',
   );
   $items['admin/reports/cayl'] = array(
-    'title' => 'CAYL Dashboard',
-    'description' => 'CAYL Dashboard',
+    'title' => 'Amber Dashboard',
+    'description' => 'Amber Dashboard',
     'file' => 'cayl.pages.inc',
     'page callback' => array('drupal_get_form'),
     'page arguments' => array('cayl_dashboard_summary_form'),
@@ -133,7 +133,7 @@ function cayl_menu() {
   );
   $items['admin/reports/cayl/delete'] = array(
     'title' => 'Delete',
-    'description' => 'Delete an item from the cache',
+    'description' => 'Delete a capture from storage',
     'file' => 'cayl.pages.inc',
     'page callback' => array('cayl_dashboard_delete_item'),
     'access arguments' => array('administer cayl'),
