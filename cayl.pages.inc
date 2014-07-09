@@ -4,9 +4,9 @@ function cayl_dashboard_summary_form() {
 
   $header = array(t("Global Statistics"),"");
   $rows = array();
-  $rows[] = array(t('Number of items in the cache'), _cayl_cache_size());
-  $rows[] = array(t('Number of links to be cached or updated'), _cayl_queue_size(CAYL_QUEUE_CHECK_NEW) + _cayl_queue_size(CAYL_QUEUE_CHECK_EXISTING));
-  $rows[] = array(t('Last time items were checked'), _cayl_last_run(CAYL_VAR_LAST_CHECK_RUN));
+  $rows[] = array(t('Captures preserved'), _cayl_cache_size());
+  $rows[] = array(t('Links to capture'), _cayl_queue_size(CAYL_QUEUE_CHECK_NEW) + _cayl_queue_size(CAYL_QUEUE_CHECK_EXISTING));
+  $rows[] = array(t('Last check'), _cayl_last_run(CAYL_VAR_LAST_CHECK_RUN));
   $rows[] = array(t('Disk space used'), _cayl_disk_usage());
 
   $build['cayl_summary_table'] = array(
@@ -17,17 +17,17 @@ function cayl_dashboard_summary_form() {
 
   $build['buttons']['clear'] = array(
     '#type' => 'submit',
-    '#value' => t('Clear all cached data'),
+    '#value' => t('Delete all captures'),
     '#submit' => array('cayl_dashboard_summary_form_clear')
   );
   $build['buttons']['cache'] = array(
     '#type' => 'submit',
-    '#value' => t('Scan content for links to cache'),
+    '#value' => t('Scan content for links to preserve'),
     '#submit' => array('cayl_dashboard_summary_form_scan')
   );
   $build['buttons']['cache_now'] = array(
     '#type' => 'submit',
-    '#value' => t('Cache all links now'),
+    '#value' => t('Preserve all new links'),
     '#submit' => array('cayl_dashboard_summary_form_cache')
   );
 
@@ -42,10 +42,10 @@ function cayl_dashboard_detail_form() {
     array('data' => t('URL')),
     array('data' => t('Status'), 'field' => 'status'),
     array('data' => t('Last Checked'), 'field' => 'last_checked', 'sort' => 'desc'),
-    array('data' => t('Cache Date'), 'field' => 'ca.date'),
+    array('data' => t('Date Preserved'), 'field' => 'ca.date'),
     array('data' => t('Size'), 'field' => 'ca.size' ),
     array('data' => t('Last viewed'), 'field' => 'a.date' ),
-    array('data' => t('Number of views'), 'field' => 'a.views' ),
+    array('data' => t('Total views'), 'field' => 'a.views' ),
     array('data' => t(''),  ),
     array('data' => t(''),  ),
   );
@@ -122,7 +122,7 @@ function cayl_dashboard_summary_form_clear($form, &$form_state) {
   cayl_clear_cache();
   cache_clear_all('*', 'cache_filter',TRUE);
   cache_clear_all('*', 'cache_field',TRUE);
-  drupal_set_message("All cached data has been deleted");
+  drupal_set_message("All captures have been deleted");
 }
 
 function cayl_dashboard_summary_form_scan($form, &$form_state) {
@@ -153,10 +153,10 @@ function cayl_dashboard_detail_form_export($form, &$form_state) {
     t('URL'),
     t('Status'),
     t('Last Checked'),
-    t('Cache Date'),
+    t('Date preserved'),
     t('Size'),
     t('Last viewed'),
-    t('Number of views'),
+    t('Total views'),
     t('Notes')
   );
 
