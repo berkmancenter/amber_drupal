@@ -6,19 +6,19 @@ function cayl_config_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Enable Amber'),
     '#default_value' => variable_get('cayl_enabled', 1),
-    '#description' => t('Enable all functionality (front-end widgets, caching, and link checking). Disabling this will not remove existing cached data.'),
+    '#description' => t('Enable all functionality, including the preservation of new captures and notifications to site visitors. Disabling this will not remove existing captures.'),
   );
   $form['cayl_cache'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Cache Settings'),
-    '#description' => t("Settings that control how the cache is managed"),
+    '#title' => t('Storage Settings'),
+    '#description' => t("Control how Amber stores captures"),
   );
   $form['cayl_cache']['cayl_max_file'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum file size (kB)'),
     '#size' => 10,
     '#default_value' => variable_get('cayl_max_file', '1000'),
-    '#description' => t('The maximum file size of an item to be cached. Items (or assets associated with items) that exceed this size will not be cached'),
+    '#description' => t('Amber will store captures up to a specified size. Links to pages that exceed this size will not be preserved.'),
   );
   $form['cayl_cache']['cayl_max_disk'] = array(
     '#type' => 'textfield',
@@ -31,7 +31,7 @@ function cayl_config_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Storage location'),
     '#default_value' => variable_get('cayl_storage_location', 'sites/default/files/cayl'),
-    '#description' => t('Path to the location where sites are stored on disk, relative to the Drupal root'),
+    '#description' => t('Path to the location where captures are stored on disk, relative to the Drupal root'),
   );
 
   $form['cayl_cache']['advanced'] = array(
@@ -43,53 +43,53 @@ function cayl_config_form($form, &$form_state) {
 
   $form['cayl_cache']['advanced']['cayl_update_strategy'] = array(
     '#type' => 'select',
-    '#title' => t('Cache update strategy'),
+    '#title' => t('Update strategy for captures'),
     '#options' => array (
-      0 => t('Update the cache periodically'),
-      1 => t('Do not update a cached item after it is cached'),
+      0 => t('Update captures periodically'),
+      1 => t('Do not update captures'),
     ),
     '#default_value' => variable_get('cayl_update_strategy', 0),
-    '#description' => t('Whether an item in the cache should be updated periodically, or never change after it\'s cached for the first time'),
+    '#description' => t('Select "Do not update" if you want to preserve links at the time the content is published. Otherwise, link storage will be periodically updated.'),
   );
 
   $form['cayl_cache']['advanced']['cayl_excluded_sites'] = array(
     '#type' => 'textarea',
     '#title' => t('Excluded sites'),
     '#default_value' => variable_get('cayl_excluded_sites', ''),
-    '#description' => t('A list of hostnames or IP addresses. Links to servers that match any of the excluded sites will not be cached. A link matches an excluded site if the excluded site is contained within the link\'s hostname using substring matching'),
+    '#description' => t('A list of hostnames or IP addresses, separated by line. Amber will not preserve any link containing an excluded site.'),
   );
 
   $form['cayl_cache']['advanced']['cayl_excluded_formats'] = array(
     '#type' => 'textarea',
     '#title' => t('Excluded file formats'),
     '#default_value' => variable_get('cayl_excluded_formats', ''),
-    '#description' => t('A list of of excluded mime-types for files that will not be cached'),
+    '#description' => t('A list of of MIME types, separated by line. Amber will not preserve any link containing an excluded MIME type.'),
   );
 
   $form['cayl_delivery'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Cache Delivery'),
+    '#title' => t('Amber Delivery'),
     '#description' => t("Settings that control the user experience"),
   );
 
   $form['cayl_delivery']['cayl_available_action'] = array(
     '#type' => 'select',
-    '#title' => t('Available site links'),
+    '#title' => t('Available links'),
     '#options' => array (
       CAYL_ACTION_NONE => t('None'),
       CAYL_ACTION_HOVER => t('Hover'),
       CAYL_ACTION_POPUP => t('Link to popup'),
     ),
     '#default_value' => variable_get('cayl_available_action', 0),
-    '#description' => t('What action should be taken for links to available sites.'),
+    '#description' => t('How a visitor to your site will experience links to pages that are currently available.'),
   );
 
   $form['cayl_delivery']['cayl_available_action_hover'] = array(
     '#type' => 'textfield',
-    '#title' => t('Available sites hover delay (seconds)'),
+    '#title' => t('Hover delay (seconds)'),
     '#size' => 2,
     '#default_value' => variable_get('cayl_available_action_hover', 2),
-    '#description' => t('How long before the hover box appears for links to available sites'),
+    '#description' => t('Delay before "Site Available" notification appears to a visitor on your site.'),
     '#states' => array(
       'visible' => array(
         ':input[name="cayl_available_action"]' => array('value' => '1'),
@@ -99,7 +99,7 @@ function cayl_config_form($form, &$form_state) {
 
   $form['cayl_delivery']['cayl_unavailable_action'] = array(
     '#type' => 'select',
-    '#title' => t('Unavailable site links'),
+    '#title' => t('Unavailable links'),
     '#options' => array (
       CAYL_ACTION_NONE => t('None'),
       CAYL_ACTION_HOVER => t('Hover'),
@@ -107,15 +107,15 @@ function cayl_config_form($form, &$form_state) {
       CAYL_ACTION_CACHE => t('Link to cache'),
     ),
     '#default_value' => variable_get('cayl_unavailable_action', 1),
-    '#description' => t('What action should be taken for links to unavailable sites.'),
+    '#description' => t('How a visitor to your site will experience links to pages that are currently unavailable.'),
   );
 
   $form['cayl_delivery']['cayl_unavailable_action_hover'] = array(
     '#type' => 'textfield',
-    '#title' => t('Unavailable sites hover delay (seconds)'),
+    '#title' => t('Hover delay (seconds)'),
     '#size' => 2,
     '#default_value' => variable_get('cayl_unavailable_action_hover', 2),
-    '#description' => t('How long before the hover box appears for links to available sites'),
+    '#description' => t('Delay before "Site Unvailable" notification appears to a visitor on your site.'),
     '#states' => array(
       'visible' => array(
         ':input[name="cayl_unavailable_action"]' => array('value' => '1'),
@@ -125,7 +125,7 @@ function cayl_config_form($form, &$form_state) {
 
   $form['cayl_country'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Cache Delivery for a specific country'),
+    '#title' => t('Activity for a specific country'),
     '#description' => t("Customize the user experience for visitors from a specific country"),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
@@ -136,14 +136,14 @@ function cayl_config_form($form, &$form_state) {
     '#title' => t('Country'),
     '#options' => array("" => "") + _cayl_get_countries(),
     '#default_value' => variable_get('cayl_country_id', ""),
-    '#description' => t('Specify cache delivery setting for browsers from this country'),
+    '#description' => t('Visitors to your website with browser IP addresses originating in this country will experience specified behavior.'),
   );
 
   $form['cayl_country']['cayl_country_proxy'] = array(
     '#type' => 'textfield',
     '#title' => t('Proxy'),
     '#default_value' => variable_get('cayl_country_proxy', ''),
-    '#description' => t('IP address or hostname for a proxy to be used when checking site availability for users in this country'),
+    '#description' => t('IP address or hostname of a proxy. Amber will use this proxy to test country-specific site availability.'),
     '#states' => array(
       'visible' => array(
         ':input[name="cayl_country_id"]' => array('!value' => ''),
@@ -153,14 +153,14 @@ function cayl_config_form($form, &$form_state) {
 
   $form['cayl_country']['cayl_country_available_action'] = array(
     '#type' => 'select',
-    '#title' => t('Available site links'),
+    '#title' => t('Available sites'),
     '#options' => array (
       CAYL_ACTION_NONE => t('None'),
       CAYL_ACTION_HOVER => t('Hover'),
       CAYL_ACTION_POPUP => t('Link to popup'),
     ),
     '#default_value' => variable_get('cayl_country_available_action', 0),
-    '#description' => t('What action should be taken for links to available sites.'),
+    '#description' => t('How links that are available will appear to visitors to your site.'),
     '#states' => array(
       'visible' => array(
         ':input[name="cayl_country_id"]' => array('!value' => ''),
@@ -170,10 +170,10 @@ function cayl_config_form($form, &$form_state) {
 
   $form['cayl_country']['cayl_country_available_action_hover'] = array(
     '#type' => 'textfield',
-    '#title' => t('Available sites hover delay (seconds)'),
+    '#title' => t('Hover delay (seconds)'),
     '#size' => 2,
     '#default_value' => variable_get('cayl_country_available_action_hover', 2),
-    '#description' => t('How long before the hover box appears for links to available sites'),
+    '#description' => t('Delay a visitor to your site will experience before notification appears.'),
     '#states' => array(
       'visible' => array(
         ':input[name="cayl_country_id"]' => array('!value' => ''),
@@ -184,7 +184,7 @@ function cayl_config_form($form, &$form_state) {
 
   $form['cayl_country']['cayl_country_unavailable_action'] = array(
     '#type' => 'select',
-    '#title' => t('Unavailable site links'),
+    '#title' => t('Unavailable sites'),
     '#options' => array (
       CAYL_ACTION_NONE => t('None'),
       CAYL_ACTION_HOVER => t('Hover'),
@@ -192,7 +192,7 @@ function cayl_config_form($form, &$form_state) {
       CAYL_ACTION_CACHE => t('Link to cache'),
     ),
     '#default_value' => variable_get('cayl_country_unavailable_action', 1),
-    '#description' => t('What action should be taken for links to unavailable sites.'),
+    '#description' => t('How links that are available will appear to visitors to your site.'),
     '#states' => array(
       'visible' => array(
         ':input[name="cayl_country_id"]' => array('!value' => ''),
@@ -202,10 +202,10 @@ function cayl_config_form($form, &$form_state) {
 
   $form['cayl_country']['cayl_country_unavailable_action_hover'] = array(
     '#type' => 'textfield',
-    '#title' => t('Unavailable sites hover delay (seconds)'),
+    '#title' => t('Hover delay (seconds)'),
     '#size' => 2,
     '#default_value' => variable_get('cayl_country_unavailable_action_hover', 2),
-    '#description' => t('How long before the hover box appears for links to available sites'),
+    '#description' => t('Delay a visitor to your site will experience before notification appears.'),
     '#states' => array(
       'visible' => array(
         ':input[name="cayl_country_id"]' => array('!value' => ''),
