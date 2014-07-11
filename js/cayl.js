@@ -10,16 +10,16 @@ var cayl = {
       '<div class="cayl-interstitial"><a href="#" class="cayl-close"></a><div class="cayl-body"><div class="cayl-status-text">This page may not be available</div><div class="cayl-cache-text">{{NAME}} has a cache from {{DATE}}</div>' +
       '<a class="cayl-focus" href="{{CACHE}}">View the cache</a><div class="cayl-iframe-container"><iframe src="{{LINK}}"/></div><a class="cayl-original-link" href="{{LINK}}">Continue to the page</a></div><a class="cayl-info" href="http://brk.mn/robustness" target="_blank">i</a></div>',
       hover_html_up   : '<div class="cayl-hover cayl-up"><a class="cayl-info" href="http://brk.mn/robustness" target="_blank">i</a><div class="cayl-text"><div class="cayl-status-text">This page should be available</div><div class="cayl-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="cayl-links"><a href="{{CACHE}}">View the cache</a><a href="{{LINK}}" class="cayl-focus">Continue to the page</a></div><div class="cayl-arrow"></div></div>',
-      hover_html_down : '<div class="cayl-hover cayl-down"><a class="cayl-info" href="http://brk.mn/robustness" target="_blank">i</a><div class="cayl-text"><div class="cayl-status-text">This page may not be available</div><div class="cayl-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="cayl-links"><a href="{{CACHE}}" class="cayl-focus">View the cache</a><a href="{{LINK}}">Continue to the page</a></div><div class="cayl-arrow"></div></div>'
+      hover_html_down : '<div class="cayl-hover cayl-down"><a class="cayl-info" href="http://brk.mn/robustness" target="_blank">i</a><div class="cayl-text"><div class="cayl-status-text">This page may not be available</div><div class="cayl-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="cayl-links"><a href="{{CACHE}}" class="cayl-focus">View the cache</a><a href="{{LINK}}">Continue to the page</a></div><div class="cayl-arrow"></div></div>',
+      this_site: "This site"     
     },
-    fa : {
+    fa : {    
         interstitial_html :
-        '<div class="cayl-interstitial"><a href="#" class="cayl-close"></a><div class="cayl-body"><div class="cayl-message"><span>لینکی که کلیک کردید ممکن است در دسترس برای مشاهده شود.</span><br/>ما پیدا کردن یک نسخه ذخیره سازی این صفحه.</div>' +
-        '<div class="cayl-cached"><div>پیوند زندگی می کنند ممکن است به صفحه شما به دنبال نمی شود و ممکن است جایگزین شده است و یا روت به سرور دیگری.<div>اتصال به مخزن ما این است که از<br/>  ' +
-        '{{DATE}}</div></div><a href="{{CACHE}}">نمایش لینک های cache شده</a></div><div class="cayl-live"><div><iframe src="{{LINK}}"/></div><a href="{{LINK}}">نمایش لینک های فعال</a></div>' +
-        '<div class="cayl-credit">بالاترین از <a href="#"> CAYL </ A></div></div></div>',
-        hover_html_up : '<div class="cayl-hover cayl-up"><div class="cayl-text">این سایت باید در دسترس باشد</div><a href="{{LINK}}" class="cayl-live">دیدن لینک زنده</a><a href="{{CACHE}}" class="cayl-cache">دیدن لینک خرید پستی</a><div class="cayl-arrow"></div></div>',
-        hover_html_down : '<div class="cayl-hover cayl-down"><div class="cayl-text">این سایت ممکن است در دسترس</div><a href="{{LINK}}" class="cayl-live">دیدن لینک زنده</a><a href="{{CACHE}}" class="cayl-cache">دیدن لینک خرید پستی</a><div class="cayl-credit"> بالاترین از <a href="#"> CAYL </a></div><div class="cayl-arrow"></div></div>',
+        '<div class="cayl-interstitial"><a href="#" class="cayl-close"></a><div class="cayl-body"><div class="cayl-status-text">این سایت ممکن است در دسترس</div><div class="cayl-cache-text">{{NAME}} یک کش از {{DATE}}</div>' +
+        '<a class="cayl-focus" href="{{CACHE}}">نمایش لینک های cache شده</a><div class="cayl-iframe-container"><iframe src="{{LINK}}"/></div><a class="cayl-original-link" href="{{LINK}}">نمایش لینک های فعال</a></div><a class="cayl-info" href="http://brk.mn/robustness" target="_blank">i</a></div>',
+        hover_html_up   : '<div class="cayl-hover cayl-up"><a class="cayl-info" href="http://brk.mn/robustness" target="_blank">i</a><div class="cayl-text"><div class="cayl-status-text">این سایت باید در دسترس باشد</div><div class="cayl-cache-text">{{NAME}} یک کش از {{DATE}}</div></div><div class="cayl-links"><a href="{{CACHE}}">دیدن لینک خرید پستی</a><a href="{{LINK}}" class="cayl-focus">دیدن لینک زنده</a></div><div class="cayl-arrow"></div></div>',
+        hover_html_down : '<div class="cayl-hover cayl-down"><a class="cayl-info" href="http://brk.mn/robustness" target="_blank">i</a><div class="cayl-text"><div class="cayl-status-text">این سایت ممکن است در دسترس</div><div class="cayl-cache-text">{{NAME}} یک کش از {{DATE}}</div></div><div class="cayl-links"><a href="{{CACHE}}" class="cayl-focus">دیدن لینک خرید پستی</a><a href="{{LINK}}">دیدن لینک زنده</a></div><div class="cayl-arrow"></div></div>',
+        this_site: "این وب سایت"     
       }
     },
 
@@ -168,7 +168,7 @@ var cayl = {
       /* Substitute dynamic text */
       var replacements = {
         '{{DATE}}' : cayl.format_date_from_string(cache.default.date),
-        '{{NAME}}' : (cayl.name == undefined) ? "This site" : cayl.name,
+        '{{NAME}}' : (cayl.name == undefined) ? cayl.get_text('this_site') : cayl.name,
         '{{CACHE}}' : cache.default.cache,
         '{{LINK}}' : this.getAttribute("href")
       }
@@ -243,7 +243,7 @@ var cayl = {
       var cache = cayl.parse_cache(this.getAttribute("data-cache"));
       var args = {
         '{{DATE}}' : cayl.format_date_from_string(cache.default.date),
-        '{{NAME}}' : (cayl.name == undefined) ? "This site" : cayl.name,
+        '{{NAME}}' : (cayl.name == undefined) ? cayl.get_text('this_site') : cayl.name,
         '{{CACHE}}' : cache.default.cache,
         '{{LINK}}' : this.getAttribute("href")
       };
@@ -348,4 +348,10 @@ cayl.util_ready(function($) {
     if (typeof Drupal != 'undefined') {
       cayl.name = Drupal.settings.cayl.name;
     }
+
+    /* Set the locale, based on global variable */
+    if (typeof cayl_locale != 'undefined') {
+      cayl.set_locale(cayl_locale);
+    }
+
 });
