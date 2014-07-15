@@ -1,5 +1,29 @@
 <?php
 
+/** 
+ * Implements hook_requirements().
+*/
+function amber_requirements($phase) {
+  switch ($phase) {
+    case 'install':
+      $t = get_t();
+      drupal_set_message($t('You should probably go to the Amber dashboard, scan existing content for links to preserve and then preserve them by clicking !here',array('!here' => l($t('here'),'admin/reports/amber'))),'warning');
+      break;
+    
+    case 'runtime':
+      $status = amber_get_status();
+      $max_size = variable_get('amber_max_disk', '1000') * 1024 * 1024;
+      $formatted_max = format_size($max_size);
+      $current_size = $status->get_cache_size();
+      $formatted_current_size = $current_size ? format_size($current_size) : "0 MB";
+      $value = t('@current (of @max)', array('@current' => $formatted_current_size, '@max' => $formatted_max));
+      $severity = $current_size < (0.9 * $max_size) ? REQUIREMENT_OK : REQUIREMENT_WARNING;
+      return array('amber' => array('title' => 'Amber disk usage', 'value' => $value, 'severity' => $severity ));
+    
+    default:
+      break;
+  }
+}
 
 /**
  * Implements hook_uninstall().
