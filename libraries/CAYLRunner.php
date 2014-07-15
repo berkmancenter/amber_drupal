@@ -1,12 +1,12 @@
 <?php
 
-require_once 'CAYLChecker.php';
-require_once 'CAYLFetcher.php';
-require_once 'CAYLStorage.php';
-require_once 'CAYLStatus.php';
+require_once 'AmberChecker.php';
+require_once 'AmberFetcher.php';
+require_once 'AmberStorage.php';
+require_once 'AmberStatus.php';
 
-$db = "/var/lib/cayl/cayl.db";
-$cache_location = "/usr/local/nginx/html/cayl/cache";
+$db = "/var/lib/amber/amber.db";
+$cache_location = "/usr/local/nginx/html/amber/cache";
 date_default_timezone_set('UTC');
 
 function main($argc, $argv) {
@@ -70,7 +70,7 @@ function cache($url) {
 
 /* Pull an item off the "queue", and save it to the cache.
    Note that if this is run in parallel, it's possible that the same item could be processed multiple times
-   To run until the queue is empty use the shell command: while php CAYLRunner.php dequeue; do true ; done
+   To run until the queue is empty use the shell command: while php AmberRunner.php dequeue; do true ; done
 */
 function dequeue() {
   global $db;
@@ -80,15 +80,15 @@ function dequeue() {
     print "Error: Cannot open database: " . $e->getMessage();
     return null;
   }
-  $result = $db_connection->query('SELECT c.url FROM cayl_queue c WHERE c.lock is NULL ORDER BY created ASC LIMIT 1');
+  $result = $db_connection->query('SELECT c.url FROM amber_queue c WHERE c.lock is NULL ORDER BY created ASC LIMIT 1');
   $row = $result->fetch();
   $result->closeCursor();
   if ($row and $row['url']) {
-    $update_query = $db_connection->prepare('UPDATE cayl_queue SET lock = :time WHERE url = :url');
+    $update_query = $db_connection->prepare('UPDATE amber_queue SET lock = :time WHERE url = :url');
     $update_query->execute(array('url' => $row['url'], 'time' => time()));
     print "Caching " . $row['url'] . "\n";
     cache($row['url']);
-    $update_query = $db_connection->prepare('DELETE from cayl_queue where url = :url');
+    $update_query = $db_connection->prepare('DELETE from amber_queue where url = :url');
     $update_query->execute(array('url' => $row['url']));
     // TODO: Need to determine behavior on failure
     exit(0);
@@ -100,18 +100,18 @@ function dequeue() {
 
 function get_storage() {
   global $cache_location;
-  return new CAYLStorage($cache_location);
+  return new AmberStorage($cache_location);
 }
 
 function get_fetcher() {
-  return new CAYLFetcher(get_storage(), array(
-    'cayl_max_file' => 1000,
+  return new AmberFetcher(get_storage(), array(
+    'amber_max_file' => 1000,
     'header_text' => "This is a cached page",
   ));
 }
 
 function get_checker() {
-  return new CAYLChecker();
+  return new AmberChecker();
 }
 
 function get_status() {
@@ -122,7 +122,7 @@ function get_status() {
     print "Error: Cannot open database: " . $e->getMessage();
     return null;
   }
-  return new CAYLStatus($db_connection);
+  return new AmberStatus($db_connection);
 }
 
 main($argc,$argv);

@@ -1,45 +1,45 @@
 <?php
 
-require_once("CAYLFetcher.php");
-require_once("CAYLStorage.php");
+require_once("AmberFetcher.php");
+require_once("AmberStorage.php");
 
-//class CAYLFetcherTest extends \PHPUnit_Framework_TestCase {
+//class AmberFetcherTest extends \PHPUnit_Framework_TestCase {
 //
 //
 //
 //}
 
-class CAYLRobotsTest extends \PHPUnit_Framework_TestCase {
+class AmberRobotsTest extends \PHPUnit_Framework_TestCase {
 
   public function testRobotsParse()
   {
-    $this->assertTrue(CAYLRobots::url_permitted("","www.google.com"));
-    $this->assertTrue(CAYLRobots::url_permitted("Donuts","www.google.com"));
-    $this->assertFalse(CAYLRobots::url_permitted(<<<EOD
+    $this->assertTrue(AmberRobots::url_permitted("","www.google.com"));
+    $this->assertTrue(AmberRobots::url_permitted("Donuts","www.google.com"));
+    $this->assertFalse(AmberRobots::url_permitted(<<<EOD
 User-agent: *
 Disallow: /
 
 EOD
 ,"/a_url"));
-    $this->assertTrue(CAYLRobots::url_permitted(<<<EOD
+    $this->assertTrue(AmberRobots::url_permitted(<<<EOD
 User-agent: *
 Disallow: /man
 
 EOD
 ,"/a_url"));
-    $this->assertFalse(CAYLRobots::url_permitted(<<<EOD
+    $this->assertFalse(AmberRobots::url_permitted(<<<EOD
 User-agent: *
 Disallow: /man
 
 EOD
 ,"/man/a_url"));
-    $this->assertTrue(CAYLRobots::url_permitted(<<<EOD
+    $this->assertTrue(AmberRobots::url_permitted(<<<EOD
 User-agent: *
 Disallow: /man
 
 EOD
 ,"/foo"));
-    $this->assertTrue(CAYLRobots::url_permitted(<<<EOD
+    $this->assertTrue(AmberRobots::url_permitted(<<<EOD
 User-agent: *
 Disallow: 
 
@@ -66,7 +66,7 @@ Connection: Keep-alive
 
 EOD
 ;
-    $headers = CAYLNetworkUtils::extract_headers($raw);
+    $headers = AmberNetworkUtils::extract_headers($raw);
     $this->assertEquals($headers["Content-Type"],"text/plain");
   }
 
@@ -85,29 +85,29 @@ Connection: Keep-alive
 
 EOD
 ;
-    $headers = CAYLNetworkUtils::extract_headers($raw);
+    $headers = AmberNetworkUtils::extract_headers($raw);
     $this->assertEquals($headers["Content-Type"],"text/html");
   }
 
   public function testMimeTypeChecking(){
-    $this->assertTrue(CAYLNetworkUtils::is_html_mime_type("text/html"));    
-    $this->assertFalse(CAYLNetworkUtils::is_html_mime_type("image/jpg"));    
-    $this->assertTrue(CAYLNetworkUtils::is_html_mime_type("application/xhtml+xml"));    
+    $this->assertTrue(AmberNetworkUtils::is_html_mime_type("text/html"));    
+    $this->assertFalse(AmberNetworkUtils::is_html_mime_type("image/jpg"));    
+    $this->assertTrue(AmberNetworkUtils::is_html_mime_type("application/xhtml+xml"));    
   }
 
 }
 
 
-class CAYLAssetHelperTest extends \PHPUnit_Framework_TestCase {
+class AmberAssetHelperTest extends \PHPUnit_Framework_TestCase {
 
   public function provider() {
-    return array(array(new CAYLAssetHelper(new CAYLStorage())));
+    return array(array(new AmberAssetHelper(new AmberStorage())));
   }
 
   /**
    * @dataProvider provider
    */
-  public function testNullParse(CAYLAssetHelper $a)
+  public function testNullParse(AmberAssetHelper $a)
   {
     $result = $a->extract_assets("");
     $this->assertTrue(empty($result));
@@ -116,7 +116,7 @@ class CAYLAssetHelperTest extends \PHPUnit_Framework_TestCase {
   /**
    * @dataProvider provider
    */
-  public function testBogusHTMLParse(CAYLAssetHelper $a)
+  public function testBogusHTMLParse(AmberAssetHelper $a)
   {
     $result = $a->extract_assets("<SDFSD>SDFfalsdhf>la<sasdfasdfasdf<DFSFd");
     $this->assertTrue(empty($result));
@@ -125,7 +125,7 @@ class CAYLAssetHelperTest extends \PHPUnit_Framework_TestCase {
   /**
    * @dataProvider provider
    */
-  public function testBaseRewrite(CAYLAssetHelper $a)
+  public function testBaseRewrite(AmberAssetHelper $a)
   {
     $result = $a->rewrite_base_tag('<head><base href="http://tinyurl.com"/></head><body><img src="../peacock.png">And the band played on....</body>');
     $this->assertEquals($result,'<head></head><body><img src="../peacock.png">And the band played on....</body>');
@@ -134,7 +134,7 @@ class CAYLAssetHelperTest extends \PHPUnit_Framework_TestCase {
   /**
    * @dataProvider provider
    */
-  public function testBaseRewrite2(CAYLAssetHelper $a)
+  public function testBaseRewrite2(AmberAssetHelper $a)
   {
     $result = $a->rewrite_base_tag('<head><base    href=\'http://tinyurl.com\'></head><body><img src="../peacock.png">And the band played on....</body>');
     $this->assertEquals($result,'<head></head><body><img src="../peacock.png">And the band played on....</body>');
@@ -143,7 +143,7 @@ class CAYLAssetHelperTest extends \PHPUnit_Framework_TestCase {
   /**
    * @dataProvider provider
    */
-  public function testBaseRewrite3(CAYLAssetHelper $a)
+  public function testBaseRewrite3(AmberAssetHelper $a)
   {
     $result = $a->rewrite_base_tag('<head><base    href=\'http://tinyurl.com\' ></head><body><img src="../peacock.png">And the band played on....</body>');
     $this->assertEquals($result,'<head></head><body><img src="../peacock.png">And the band played on....</body>');
@@ -152,7 +152,7 @@ class CAYLAssetHelperTest extends \PHPUnit_Framework_TestCase {
   /**
    * @dataProvider provider
    */
-  public function testOneImage(CAYLAssetHelper $a)
+  public function testOneImage(AmberAssetHelper $a)
   {
     $s = <<<EOF
 <body><img src="../peacock.png">And the band played on....</body>
@@ -166,7 +166,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testTwoImages(CAYLAssetHelper $a)
+  public function testTwoImages(AmberAssetHelper $a)
   {
     $s = <<<EOF
 <body><img src="../peacock.png">And the band played on....And the <img src="http://band.com/band.jpg"/> said to the
@@ -182,7 +182,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testStylesheet(CAYLAssetHelper $a)
+  public function testStylesheet(AmberAssetHelper $a)
   {
     $s = <<<EOF
 <head><link href="banana.css" rel="stylesheet" type="text.css"></head>
@@ -198,7 +198,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testStylesheetMixedCase(CAYLAssetHelper $a)
+  public function testStylesheetMixedCase(AmberAssetHelper $a)
   {
     $s = <<<EOF
 <head><link href="banana.css" rel="Stylesheet" type="text.css"></head>
@@ -214,7 +214,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testJavascript(CAYLAssetHelper $a)
+  public function testJavascript(AmberAssetHelper $a)
   {
     $s = <<<EOF
 <head><script src="banana.js" ></head>
@@ -231,7 +231,7 @@ EOF;
    * @dataProvider provider
    *
    */
-  public function testJavascriptInBody(CAYLAssetHelper $a)
+  public function testJavascriptInBody(AmberAssetHelper $a)
   {
     $s = <<<EOF
 <body>
@@ -248,7 +248,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testAsyncJavascript(CAYLAssetHelper $a)
+  public function testAsyncJavascript(AmberAssetHelper $a)
   {
     $s = <<<EOF
 <head><script async src="banana.js" ></head>
@@ -264,7 +264,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testMix(CAYLAssetHelper $a)
+  public function testMix(AmberAssetHelper $a)
   {
     $s = <<<EOF
 <head><link href="banana.css" rel="stylesheet" type="text.css"><script src="banana.js" type="text/javascript"></head><body><img src="../peacock.png">And the band played on....And the <img src="http://band.com/band.jpg"/> said to the
@@ -284,7 +284,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testExpandReferencesSimple(CAYLAssetHelper $a)
+  public function testExpandReferencesSimple(AmberAssetHelper $a)
   {
     $url = "http://example.com";
     $assets = array("banana.jpg", 'scripts/ban.js');
@@ -296,7 +296,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testExpandReferencesExternal(CAYLAssetHelper $a)
+  public function testExpandReferencesExternal(AmberAssetHelper $a)
   {
     $url = "http://example.com";
     $assets = array("banana.jpg", 'scripts/ban.js', 'http://bananas.com/fruit');
@@ -310,7 +310,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testExpandReferencesMix(CAYLAssetHelper $a)
+  public function testExpandReferencesMix(AmberAssetHelper $a)
   {
     $url = "http://example.com";
     $assets = array("banana.jpg", 'scripts/ban.js', 'http://example.com/example.jpg', 'http://othersite.org/frank/james.css', '//example.com/funky.jpg', '/abs.css');
@@ -327,7 +327,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testExpandReferencesWithQuery(CAYLAssetHelper $a)
+  public function testExpandReferencesWithQuery(AmberAssetHelper $a)
   {
     $url = "http://example.com";
     $assets = array("banana.jpg", 'scripts/?h=x', 'http://example.com/data/?q=fruit', 'http://othersite.org/frank/james.css', '//example.com/funky.jpg', '/abs.css');
@@ -344,7 +344,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testExpandReferencesWithAbsolutePaths(CAYLAssetHelper $a)
+  public function testExpandReferencesWithAbsolutePaths(AmberAssetHelper $a)
   {
     $url = "http://example.com/fruit/cake";
     $assets = array("banana.jpg", 'scripts/?h=x', 'http://example.com/data/?q=fruit', 'http://othersite.org/frank/james.css', '//example.com/funky.jpg', '/abs.css');
@@ -361,7 +361,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testExpandReferencesThatGoUp(CAYLAssetHelper $a)
+  public function testExpandReferencesThatGoUp(AmberAssetHelper $a)
   {
     $url = "http://img.xuite.net/_v_1.0.32/personal/photo/fix.css";
     $assets = array("../common.css");
@@ -373,7 +373,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testExpandReferencesWithHTMLBaseTag(CAYLAssetHelper $a)
+  public function testExpandReferencesWithHTMLBaseTag(AmberAssetHelper $a)
   {
     $url = "http://example.com/fruit/cake";
     $assets = array("banana.jpg", 'scripts/?h=x', 'http://example.com/data/?q=fruit', 'http://othersite.org/frank/james.css', '//example.com/funky.jpg', '/abs.css');
@@ -391,22 +391,22 @@ EOF;
   {
     $this->assertEquals(
       "dir1/common.css",
-      CAYLNetworkUtils::full_relative_path("dir1","common.css"));
+      AmberNetworkUtils::full_relative_path("dir1","common.css"));
     $this->assertEquals(
       "dir1/bananas/common.css",
-      CAYLNetworkUtils::full_relative_path("dir1","bananas/common.css"));
+      AmberNetworkUtils::full_relative_path("dir1","bananas/common.css"));
     $this->assertEquals(
       "dir1/common.css",
-      CAYLNetworkUtils::full_relative_path("dir1","bananas/../common.css"));
+      AmberNetworkUtils::full_relative_path("dir1","bananas/../common.css"));
     $this->assertEquals(
       "dir1/common.css",
-      CAYLNetworkUtils::full_relative_path("dir1/dir2","../common.css"));
+      AmberNetworkUtils::full_relative_path("dir1/dir2","../common.css"));
     $this->assertEquals(
       "_v_1.0.32/personal/common.css",
-      CAYLNetworkUtils::full_relative_path("_v_1.0.32/personal/photo","../common.css"));
+      AmberNetworkUtils::full_relative_path("_v_1.0.32/personal/photo","../common.css"));
     $this->assertEquals(
       "/persian/news/newsitem/article/typo3conf/ext/kj_imagelightbox2/res/lightbox2.04/js/prototype.js",
-      CAYLNetworkUtils::full_relative_path("/persian/news/newsitem/article","typo3conf/ext/kj_imagelightbox2/res/lightbox2.04/js/prototype.js"));
+      AmberNetworkUtils::full_relative_path("/persian/news/newsitem/article","typo3conf/ext/kj_imagelightbox2/res/lightbox2.04/js/prototype.js"));
 
   }
 
@@ -414,26 +414,26 @@ EOF;
   {
     $this->assertEquals(
       "common.css",
-      CAYLNetworkUtils::clean_up_path("../common.css"));
+      AmberNetworkUtils::clean_up_path("../common.css"));
     $this->assertEquals(
       "_v_1.0.32/personal/common.css",
-      CAYLNetworkUtils::clean_up_path("_v_1.0.32/personal/common.css"));
+      AmberNetworkUtils::clean_up_path("_v_1.0.32/personal/common.css"));
     $this->assertEquals(
       "_v_1.0.32/personal/common.css",
-      CAYLNetworkUtils::clean_up_path("_v_1.0.32/personal/photo/../common.css"));
+      AmberNetworkUtils::clean_up_path("_v_1.0.32/personal/photo/../common.css"));
     $this->assertEquals(
       "_v_1.0.32/common.css",
-      CAYLNetworkUtils::clean_up_path("_v_1.0.32/personal/photo/../../common.css"));
+      AmberNetworkUtils::clean_up_path("_v_1.0.32/personal/photo/../../common.css"));
     $this->assertEquals(
       "common.css",
-      CAYLNetworkUtils::clean_up_path("_v_1.0.32/personal/photo/../../../../common.css"));
+      AmberNetworkUtils::clean_up_path("_v_1.0.32/personal/photo/../../../../common.css"));
   }
 
 
   /**
    * @dataProvider provider
    */
-  public function testExpandReferencesThatGoAboveRoot(CAYLAssetHelper $a)
+  public function testExpandReferencesThatGoAboveRoot(AmberAssetHelper $a)
   {
     $url = "http://example.com/fruit/cake";
     $assets = array("../../../banana.jpg", 'scripts/?h=x');
@@ -447,7 +447,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testRewriteLinks(CAYLAssetHelper $a)
+  public function testRewriteLinks(AmberAssetHelper $a)
   {
     $body = "Now is the <script> .styling:  url('time'); </script> for all good <img src='men.jpg'/> to come to the aid of the party";
     $assets = array("time" => array("url" => 'http://example.com/time'), 'men.jpg' => array('url' => 'http://example.com/men.jpg', 'body' => 'somebinaerystuff'));
@@ -459,7 +459,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testIgnoreImagesWithInlineData(CAYLAssetHelper $a) {
+  public function testIgnoreImagesWithInlineData(AmberAssetHelper $a) {
     $s = <<<EOF
 <head><link href="banana.css" rel="stylesheet" type="text.css"><script src="banana.js" type="text/javascript"></head><body><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAAASCAMAAAA62ONUAAAB41BMVEVOapxPaJ1QaJ0AnuMAnuMAnuMAnuMAnuMtMnctMnctMnctMnctMncqL3AAnuMAnuMAnuMkRIgAnuMoP4QnOHpScaQtMnc+UY83VZFYeadAVJIrMHMtMncAnuMdTpAsMXQZV5goPYItMncAnuMtMncAmt4AnuMqL3EtMndOaJ4rMHItMncAmNoqL3AAneIAnuMtMncqL28AnuMtMncAltcAnuMtMncAnuMqL3EAlNUsMXYsMHQtMnctMnctMnctMncrMHItMncAAAAbVpgcVZguSYw8T40iXKB/l78YYKMFkdbKzN1MXZZjdaemvtlYcaZXcaZHW5YrSIyaosKIo8c3RYYzS40cWp9JXJZFWpaRnsFJZJ0vOn5gdKdPaJ4mTpJof69GW5acqsk+UI5CWZUDmN1BWZVtga8yVpYpV5pmfq4VZ6o0S4yz2e7h8vrw+f0nQIV9pswPeb4/WpciTZJEWpVVYJe/x9sxQ4W+x9uzu9Oyu9PK1OSnrsstOX5VaJ5acqYOfMHL1ORCUY4RdrvX2OU2TY0cW6A5To1LZJ0ZYaZ+j7gqOX4WaK0Iis+Im8AGkNUhVJm9v9R2jLcDl9wqL28XaK0Rdbrl5e4Ub7QLg8gqL3Dy8vYAldYtMnf///8AnuNA03DVAAAAQ3RSTlP8/v6ImHBkTF9vaoKX62pKkrCCiM3Wj5629o++iBDcs/6XoFA/tUDbcP7HUMjuoTB/74Ag3GBAkNzvobVgkBAwyIAAQngpRwAAAo9JREFUeNqV0mVv3EAQBuCTyswcZuWYjWd7pDIzp8wMYWzaMB3k0Ofx/NSu75KDNB/SV9burK19ZM/aBsXYtbqGhYWF83WNUgQ2HEVWCnNBiRxqWKTVXMge8G9U0TBUUqQPr8jKr1QqHbWKP40r7xMRVK1DFSPQwSEbQ+JuQRUVANnLlnZO5zCk6agqTDneNZnKUS5742rvxaXpWDqXy37sKjJC0pPEo+2ihJyMoh+de5Kedh3sKApYo+sCYo31RLXBsc9mPv7m5eij3sy1mX4zs5SYi+fNEwVG1UBQQUMZOVVHDSOogb8F/ILqRYHVMp5CBVS0hT6ZhbwYH7w9nLk+Zxbz5eSKohUVWWMpKiHoQFWoVo6sbHv6bCzPpsdjK+tvlYqEoqbKGoKTs3NOdkMTcRfqmq7vtL7Ia3s7s5QxK7L028ImEj+s7ssSSDJInWwfehU2K/Wd9QooXkQhInHotYOMyCm2hWj23fTz/ol8Eclnhl/H30/G0t+ZsuHYYkQUfTL6+2F3ImMp94bGR9LWaf+XcniZiNKjD8yBgS7THBrM30/0EctPqIw7QHwQwgYF3EGejGbwGcS7y4o0RSy5O7cy5qXuK/mem3OzUesPFKsUnsI87SNHmHyGwa5tFGBjWQFn1mIWZ2cum4lzPfGR2WVLnVeqFGqFIO11OQK0mcIQJhc1s7GtrCjJqeWCc/bM6em+1KJVZ1GCf5X95PDRppLiIndZYcx8ijnlpL+uRYCI9eQghVtpC2+4DNpKfJh4qFAg0oQYS+UKUi57dx47FVirBHg+WOsgw1XrDvABagvyrNGVCovf046rcTatc8bkK5WF7q496dUi0rLd4/HsaPHDenG0lcqgQUYQqvMXuNS61rudHXMAAAAASUVORK5CYII=">And the band played on....And the <img src="http://band.com/band.jpg"/> said to the
 <a href="leader.html">leader</a>.</body>
@@ -477,7 +477,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testIgnoreExcludedAssetPaths(CAYLAssetHelper $a) {
+  public function testIgnoreExcludedAssetPaths(AmberAssetHelper $a) {
     $s = <<<EOF
 <head><link href="banana.css" rel="stylesheet" type="text.css"><script src="banana.js" type="text/javascript"></head><body><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAAASCAMAAAA62ONUAAAB41BMVEVOapxPaJ1QaJ0AnuMAnuMAnuMAnuMAnuMtMnctMnctMnctMnctMncqL3AAnuMAnuMAnuMkRIgAnuMoP4QnOHpScaQtMnc+UY83VZFYeadAVJIrMHMtMncAnuMdTpAsMXQZV5goPYItMncAnuMtMncAmt4AnuMqL3EtMndOaJ4rMHItMncAmNoqL3AAneIAnuMtMncqL28AnuMtMncAltcAnuMtMncAnuMqL3EAlNUsMXYsMHQtMnctMnctMnctMncrMHItMncAAAAbVpgcVZguSYw8T40iXKB/l78YYKMFkdbKzN1MXZZjdaemvtlYcaZXcaZHW5YrSIyaosKIo8c3RYYzS40cWp9JXJZFWpaRnsFJZJ0vOn5gdKdPaJ4mTpJof69GW5acqsk+UI5CWZUDmN1BWZVtga8yVpYpV5pmfq4VZ6o0S4yz2e7h8vrw+f0nQIV9pswPeb4/WpciTZJEWpVVYJe/x9sxQ4W+x9uzu9Oyu9PK1OSnrsstOX5VaJ5acqYOfMHL1ORCUY4RdrvX2OU2TY0cW6A5To1LZJ0ZYaZ+j7gqOX4WaK0Iis+Im8AGkNUhVJm9v9R2jLcDl9wqL28XaK0Rdbrl5e4Ub7QLg8gqL3Dy8vYAldYtMnf///8AnuNA03DVAAAAQ3RSTlP8/v6ImHBkTF9vaoKX62pKkrCCiM3Wj5629o++iBDcs/6XoFA/tUDbcP7HUMjuoTB/74Ag3GBAkNzvobVgkBAwyIAAQngpRwAAAo9JREFUeNqV0mVv3EAQBuCTyswcZuWYjWd7pDIzp8wMYWzaMB3k0Ofx/NSu75KDNB/SV9burK19ZM/aBsXYtbqGhYWF83WNUgQ2HEVWCnNBiRxqWKTVXMge8G9U0TBUUqQPr8jKr1QqHbWKP40r7xMRVK1DFSPQwSEbQ+JuQRUVANnLlnZO5zCk6agqTDneNZnKUS5742rvxaXpWDqXy37sKjJC0pPEo+2ihJyMoh+de5Kedh3sKApYo+sCYo31RLXBsc9mPv7m5eij3sy1mX4zs5SYi+fNEwVG1UBQQUMZOVVHDSOogb8F/ILqRYHVMp5CBVS0hT6ZhbwYH7w9nLk+Zxbz5eSKohUVWWMpKiHoQFWoVo6sbHv6bCzPpsdjK+tvlYqEoqbKGoKTs3NOdkMTcRfqmq7vtL7Ia3s7s5QxK7L028ImEj+s7ssSSDJInWwfehU2K/Wd9QooXkQhInHotYOMyCm2hWj23fTz/ol8Eclnhl/H30/G0t+ZsuHYYkQUfTL6+2F3ImMp94bGR9LWaf+XcniZiNKjD8yBgS7THBrM30/0EctPqIw7QHwQwgYF3EGejGbwGcS7y4o0RSy5O7cy5qXuK/mem3OzUesPFKsUnsI87SNHmHyGwa5tFGBjWQFn1mIWZ2cum4lzPfGR2WVLnVeqFGqFIO11OQK0mcIQJhc1s7GtrCjJqeWCc/bM6em+1KJVZ1GCf5X95PDRppLiIndZYcx8ijnlpL+uRYCI9eQghVtpC2+4DNpKfJh4qFAg0oQYS+UKUi57dx47FVirBHg+WOsgw1XrDvABagvyrNGVCovf046rcTatc8bkK5WF7q496dUi0rLd4/HsaPHDenG0lcqgQUYQqvMXuNS61rudHXMAAAAASUVORK5CYII=">And the band played on....And the <img src="http://band.com/band.jpg"/> said to the
 <a href="leader.html">leader</a>.<script>function url(link); </script></body>
@@ -497,7 +497,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testImagesWithSpacesInURL(CAYLAssetHelper $a) {
+  public function testImagesWithSpacesInURL(AmberAssetHelper $a) {
     $s = <<<EOF
 <head><link href=" banana.css" rel="stylesheet" type="text.css"><script src=" banana.js " type="text/javascript"></head><body><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAAASCAMAAAA62ONUAAAB41BMVEVOapxPaJ1QaJ0AnuMAnuMAnuMAnuMAnuMtMnctMnctMnctMnctMncqL3AAnuMAnuMAnuMkRIgAnuMoP4QnOHpScaQtMnc+UY83VZFYeadAVJIrMHMtMncAnuMdTpAsMXQZV5goPYItMncAnuMtMncAmt4AnuMqL3EtMndOaJ4rMHItMncAmNoqL3AAneIAnuMtMncqL28AnuMtMncAltcAnuMtMncAnuMqL3EAlNUsMXYsMHQtMnctMnctMnctMncrMHItMncAAAAbVpgcVZguSYw8T40iXKB/l78YYKMFkdbKzN1MXZZjdaemvtlYcaZXcaZHW5YrSIyaosKIo8c3RYYzS40cWp9JXJZFWpaRnsFJZJ0vOn5gdKdPaJ4mTpJof69GW5acqsk+UI5CWZUDmN1BWZVtga8yVpYpV5pmfq4VZ6o0S4yz2e7h8vrw+f0nQIV9pswPeb4/WpciTZJEWpVVYJe/x9sxQ4W+x9uzu9Oyu9PK1OSnrsstOX5VaJ5acqYOfMHL1ORCUY4RdrvX2OU2TY0cW6A5To1LZJ0ZYaZ+j7gqOX4WaK0Iis+Im8AGkNUhVJm9v9R2jLcDl9wqL28XaK0Rdbrl5e4Ub7QLg8gqL3Dy8vYAldYtMnf///8AnuNA03DVAAAAQ3RSTlP8/v6ImHBkTF9vaoKX62pKkrCCiM3Wj5629o++iBDcs/6XoFA/tUDbcP7HUMjuoTB/74Ag3GBAkNzvobVgkBAwyIAAQngpRwAAAo9JREFUeNqV0mVv3EAQBuCTyswcZuWYjWd7pDIzp8wMYWzaMB3k0Ofx/NSu75KDNB/SV9burK19ZM/aBsXYtbqGhYWF83WNUgQ2HEVWCnNBiRxqWKTVXMge8G9U0TBUUqQPr8jKr1QqHbWKP40r7xMRVK1DFSPQwSEbQ+JuQRUVANnLlnZO5zCk6agqTDneNZnKUS5742rvxaXpWDqXy37sKjJC0pPEo+2ihJyMoh+de5Kedh3sKApYo+sCYo31RLXBsc9mPv7m5eij3sy1mX4zs5SYi+fNEwVG1UBQQUMZOVVHDSOogb8F/ILqRYHVMp5CBVS0hT6ZhbwYH7w9nLk+Zxbz5eSKohUVWWMpKiHoQFWoVo6sbHv6bCzPpsdjK+tvlYqEoqbKGoKTs3NOdkMTcRfqmq7vtL7Ia3s7s5QxK7L028ImEj+s7ssSSDJInWwfehU2K/Wd9QooXkQhInHotYOMyCm2hWj23fTz/ol8Eclnhl/H30/G0t+ZsuHYYkQUfTL6+2F3ImMp94bGR9LWaf+XcniZiNKjD8yBgS7THBrM30/0EctPqIw7QHwQwgYF3EGejGbwGcS7y4o0RSy5O7cy5qXuK/mem3OzUesPFKsUnsI87SNHmHyGwa5tFGBjWQFn1mIWZ2cum4lzPfGR2WVLnVeqFGqFIO11OQK0mcIQJhc1s7GtrCjJqeWCc/bM6em+1KJVZ1GCf5X95PDRppLiIndZYcx8ijnlpL+uRYCI9eQghVtpC2+4DNpKfJh4qFAg0oQYS+UKUi57dx47FVirBHg+WOsgw1XrDvABagvyrNGVCovf046rcTatc8bkK5WF7q496dUi0rLd4/HsaPHDenG0lcqgQUYQqvMXuNS61rudHXMAAAAASUVORK5CYII=">And the band played on....And the <img src="http://band.com/band.jpg"/> said to the
 <a href="leader.html">leader</a>.</body>
@@ -514,7 +514,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testImagesWithQuerystring(CAYLAssetHelper $a) {
+  public function testImagesWithQuerystring(AmberAssetHelper $a) {
     $s = <<<EOF
 <head><link href="banana.css" rel="stylesheet" type="text.css"><script src="banana.js?eatmyshorts=1" type="text/javascript"></head><body><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAAASCAMAAAA62ONUAAAB41BMVEVOapxPaJ1QaJ0AnuMAnuMAnuMAnuMAnuMtMnctMnctMnctMnctMncqL3AAnuMAnuMAnuMkRIgAnuMoP4QnOHpScaQtMnc+UY83VZFYeadAVJIrMHMtMncAnuMdTpAsMXQZV5goPYItMncAnuMtMncAmt4AnuMqL3EtMndOaJ4rMHItMncAmNoqL3AAneIAnuMtMncqL28AnuMtMncAltcAnuMtMncAnuMqL3EAlNUsMXYsMHQtMnctMnctMnctMncrMHItMncAAAAbVpgcVZguSYw8T40iXKB/l78YYKMFkdbKzN1MXZZjdaemvtlYcaZXcaZHW5YrSIyaosKIo8c3RYYzS40cWp9JXJZFWpaRnsFJZJ0vOn5gdKdPaJ4mTpJof69GW5acqsk+UI5CWZUDmN1BWZVtga8yVpYpV5pmfq4VZ6o0S4yz2e7h8vrw+f0nQIV9pswPeb4/WpciTZJEWpVVYJe/x9sxQ4W+x9uzu9Oyu9PK1OSnrsstOX5VaJ5acqYOfMHL1ORCUY4RdrvX2OU2TY0cW6A5To1LZJ0ZYaZ+j7gqOX4WaK0Iis+Im8AGkNUhVJm9v9R2jLcDl9wqL28XaK0Rdbrl5e4Ub7QLg8gqL3Dy8vYAldYtMnf///8AnuNA03DVAAAAQ3RSTlP8/v6ImHBkTF9vaoKX62pKkrCCiM3Wj5629o++iBDcs/6XoFA/tUDbcP7HUMjuoTB/74Ag3GBAkNzvobVgkBAwyIAAQngpRwAAAo9JREFUeNqV0mVv3EAQBuCTyswcZuWYjWd7pDIzp8wMYWzaMB3k0Ofx/NSu75KDNB/SV9burK19ZM/aBsXYtbqGhYWF83WNUgQ2HEVWCnNBiRxqWKTVXMge8G9U0TBUUqQPr8jKr1QqHbWKP40r7xMRVK1DFSPQwSEbQ+JuQRUVANnLlnZO5zCk6agqTDneNZnKUS5742rvxaXpWDqXy37sKjJC0pPEo+2ihJyMoh+de5Kedh3sKApYo+sCYo31RLXBsc9mPv7m5eij3sy1mX4zs5SYi+fNEwVG1UBQQUMZOVVHDSOogb8F/ILqRYHVMp5CBVS0hT6ZhbwYH7w9nLk+Zxbz5eSKohUVWWMpKiHoQFWoVo6sbHv6bCzPpsdjK+tvlYqEoqbKGoKTs3NOdkMTcRfqmq7vtL7Ia3s7s5QxK7L028ImEj+s7ssSSDJInWwfehU2K/Wd9QooXkQhInHotYOMyCm2hWj23fTz/ol8Eclnhl/H30/G0t+ZsuHYYkQUfTL6+2F3ImMp94bGR9LWaf+XcniZiNKjD8yBgS7THBrM30/0EctPqIw7QHwQwgYF3EGejGbwGcS7y4o0RSy5O7cy5qXuK/mem3OzUesPFKsUnsI87SNHmHyGwa5tFGBjWQFn1mIWZ2cum4lzPfGR2WVLnVeqFGqFIO11OQK0mcIQJhc1s7GtrCjJqeWCc/bM6em+1KJVZ1GCf5X95PDRppLiIndZYcx8ijnlpL+uRYCI9eQghVtpC2+4DNpKfJh4qFAg0oQYS+UKUi57dx47FVirBHg+WOsgw1XrDvABagvyrNGVCovf046rcTatc8bkK5WF7q496dUi0rLd4/HsaPHDenG0lcqgQUYQqvMXuNS61rudHXMAAAAASUVORK5CYII=">And the band played on....And the <img src="http://band.com/band.jpg"/> said to the
 <a href="leader.html">leader</a>.</body>
@@ -531,7 +531,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testExtractBaseTag(CAYLAssetHelper $a) {
+  public function testExtractBaseTag(AmberAssetHelper $a) {
     $s = <<<EOF
 <head>  <base href="http://www.roozonline.com/" />
 <link href="banana.css" rel="stylesheet" type="text.css"><script src="banana.js?eatmyshorts=1" type="text/javascript"></head><body><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEUAAAASCAMAAAA62ONUAAAB41BMVEVOapxPaJ1QaJ0AnuMAnuMAnuMAnuMAnuMtMnctMnctMnctMnctMncqL3AAnuMAnuMAnuMkRIgAnuMoP4QnOHpScaQtMnc+UY83VZFYeadAVJIrMHMtMncAnuMdTpAsMXQZV5goPYItMncAnuMtMncAmt4AnuMqL3EtMndOaJ4rMHItMncAmNoqL3AAneIAnuMtMncqL28AnuMtMncAltcAnuMtMncAnuMqL3EAlNUsMXYsMHQtMnctMnctMnctMncrMHItMncAAAAbVpgcVZguSYw8T40iXKB/l78YYKMFkdbKzN1MXZZjdaemvtlYcaZXcaZHW5YrSIyaosKIo8c3RYYzS40cWp9JXJZFWpaRnsFJZJ0vOn5gdKdPaJ4mTpJof69GW5acqsk+UI5CWZUDmN1BWZVtga8yVpYpV5pmfq4VZ6o0S4yz2e7h8vrw+f0nQIV9pswPeb4/WpciTZJEWpVVYJe/x9sxQ4W+x9uzu9Oyu9PK1OSnrsstOX5VaJ5acqYOfMHL1ORCUY4RdrvX2OU2TY0cW6A5To1LZJ0ZYaZ+j7gqOX4WaK0Iis+Im8AGkNUhVJm9v9R2jLcDl9wqL28XaK0Rdbrl5e4Ub7QLg8gqL3Dy8vYAldYtMnf///8AnuNA03DVAAAAQ3RSTlP8/v6ImHBkTF9vaoKX62pKkrCCiM3Wj5629o++iBDcs/6XoFA/tUDbcP7HUMjuoTB/74Ag3GBAkNzvobVgkBAwyIAAQngpRwAAAo9JREFUeNqV0mVv3EAQBuCTyswcZuWYjWd7pDIzp8wMYWzaMB3k0Ofx/NSu75KDNB/SV9burK19ZM/aBsXYtbqGhYWF83WNUgQ2HEVWCnNBiRxqWKTVXMge8G9U0TBUUqQPr8jKr1QqHbWKP40r7xMRVK1DFSPQwSEbQ+JuQRUVANnLlnZO5zCk6agqTDneNZnKUS5742rvxaXpWDqXy37sKjJC0pPEo+2ihJyMoh+de5Kedh3sKApYo+sCYo31RLXBsc9mPv7m5eij3sy1mX4zs5SYi+fNEwVG1UBQQUMZOVVHDSOogb8F/ILqRYHVMp5CBVS0hT6ZhbwYH7w9nLk+Zxbz5eSKohUVWWMpKiHoQFWoVo6sbHv6bCzPpsdjK+tvlYqEoqbKGoKTs3NOdkMTcRfqmq7vtL7Ia3s7s5QxK7L028ImEj+s7ssSSDJInWwfehU2K/Wd9QooXkQhInHotYOMyCm2hWj23fTz/ol8Eclnhl/H30/G0t+ZsuHYYkQUfTL6+2F3ImMp94bGR9LWaf+XcniZiNKjD8yBgS7THBrM30/0EctPqIw7QHwQwgYF3EGejGbwGcS7y4o0RSy5O7cy5qXuK/mem3OzUesPFKsUnsI87SNHmHyGwa5tFGBjWQFn1mIWZ2cum4lzPfGR2WVLnVeqFGqFIO11OQK0mcIQJhc1s7GtrCjJqeWCc/bM6em+1KJVZ1GCf5X95PDRppLiIndZYcx8ijnlpL+uRYCI9eQghVtpC2+4DNpKfJh4qFAg0oQYS+UKUi57dx47FVirBHg+WOsgw1XrDvABagvyrNGVCovf046rcTatc8bkK5WF7q496dUi0rLd4/HsaPHDenG0lcqgQUYQqvMXuNS61rudHXMAAAAASUVORK5CYII=">And the band played on....And the <img src="http://band.com/band.jpg"/> said to the
@@ -545,7 +545,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testCSSAssets(CAYLAssetHelper $a) {
+  public function testCSSAssets(AmberAssetHelper $a) {
     $s = <<<EOF
 @charset "utf-8";
 @import "../common.css";
@@ -595,7 +595,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testWatermarkBanner(CAYLAssetHelper $a)
+  public function testWatermarkBanner(AmberAssetHelper $a)
   {
     $s = <<<EOF
 <html><head><script src="banana.js" ></head>
@@ -614,7 +614,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testWatermarkBannerOtherCase(CAYLAssetHelper $a)
+  public function testWatermarkBannerOtherCase(AmberAssetHelper $a)
   {
     $s = <<<EOF
 <html><head><script src="banana.js" ></head>
@@ -633,7 +633,7 @@ EOF;
   /**
    * @dataProvider provider
    */
-  public function testWatermarkBannerNoBody(CAYLAssetHelper $a)
+  public function testWatermarkBannerNoBody(AmberAssetHelper $a)
   {
     $s = <<<EOF
 <html><head><script src="banana.js" ></head>

@@ -4,30 +4,30 @@
 /**
  * Implements hook_uninstall().
  */
-function cayl_uninstall() {
-  variable_del('cayl_enabled');
-  variable_del('cayl_max_file');
-  variable_del('cayl_max_disk');
-  variable_del('cayl_storage_location');
-  variable_del('cayl_update_strategy');
-  variable_del('cayl_excluded_sites');
-  variable_del('cayl_excluded_formats');
-  variable_del('cayl_available_action');
-  variable_del('cayl_available_action_hover');
-  variable_del('cayl_unavailable_action');
-  variable_del('cayl_unavailable_action_hover');
-  variable_del('cayl_permitted_fields');
-  variable_del('cayl_country_id');
-  variable_del('cayl_country_proxy');
-  variable_del('cayl_country_available_action');
-  variable_del('cayl_country_available_action_hover');
-  variable_del('cayl_country_unavailable_action');
-  variable_del('cayl_country_unavailable_action_hover');
+function amber_uninstall() {
+  variable_del('amber_enabled');
+  variable_del('amber_max_file');
+  variable_del('amber_max_disk');
+  variable_del('amber_storage_location');
+  variable_del('amber_update_strategy');
+  variable_del('amber_excluded_sites');
+  variable_del('amber_excluded_formats');
+  variable_del('amber_available_action');
+  variable_del('amber_available_action_hover');
+  variable_del('amber_unavailable_action');
+  variable_del('amber_unavailable_action_hover');
+  variable_del('amber_permitted_fields');
+  variable_del('amber_country_id');
+  variable_del('amber_country_proxy');
+  variable_del('amber_country_available_action');
+  variable_del('amber_country_available_action_hover');
+  variable_del('amber_country_unavailable_action');
+  variable_del('amber_country_unavailable_action_hover');
 }
 
-function cayl_schema() {
+function amber_schema() {
 
-  $schema['cayl_check'] = array(
+  $schema['amber_check'] = array(
     'description' => 'Stores a list of URLs with their current status',
     'fields' => array(
       'id' => array(
@@ -64,7 +64,7 @@ function cayl_schema() {
     'primary key' => array('id'),
   );
 
-  $schema['cayl_cache'] = array(
+  $schema['amber_cache'] = array(
     'description' => 'Stores a metadata about cache entries',
     'fields' => array(
       'id' => array(
@@ -102,7 +102,7 @@ function cayl_schema() {
     'primary key' => array('id'),
   );
 
-  $schema['cayl_activity'] = array(
+  $schema['amber_activity'] = array(
     'description' => 'Stores information about cache viewing activity',
     'fields' => array(
       'id' => array(
@@ -127,14 +127,14 @@ function cayl_schema() {
 }
 
 /**
- * Add "message" column to cayl_check table
+ * Add "message" column to amber_check table
  */
-function cayl_update_7100()
+function amber_update_7100()
 {
   $spec = array(
         'type' => 'varchar',
         'length' => 2000,
         'description' => 'More details about the check or cache results'
       );
-  db_add_field('cayl_check','message',$spec);
+  db_add_field('amber_check','message',$spec);
 }

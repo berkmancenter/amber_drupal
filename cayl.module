@@ -1,44 +1,44 @@
 <?php
 
-define("CAYL_ACTION_NONE",0);
-define("CAYL_ACTION_HOVER",1);
-define("CAYL_ACTION_POPUP",2);
-define("CAYL_ACTION_CACHE",3);
-define("CAYL_STATUS_UP","up");
-define("CAYL_STATUS_DOWN","down");
+define("AMBER_ACTION_NONE",0);
+define("AMBER_ACTION_HOVER",1);
+define("AMBER_ACTION_POPUP",2);
+define("AMBER_ACTION_CACHE",3);
+define("AMBER_STATUS_UP","up");
+define("AMBER_STATUS_DOWN","down");
 
-define("CAYL_QUEUE_CACHE", "cayl_cache");
-define("CAYL_QUEUE_CHECK_NEW", "cayl_check_new");
-define("CAYL_QUEUE_CHECK_EXISTING","cayl_check_existing");
+define("AMBER_QUEUE_CACHE", "amber_cache");
+define("AMBER_QUEUE_CHECK_NEW", "amber_check_new");
+define("AMBER_QUEUE_CHECK_EXISTING","amber_check_existing");
 
-define("CAYL_VAR_LAST_CHECK_RUN","cayl_last_check_run");
-define("CAYL_VAR_LAST_CACHE_RUN","cayl_last_cache_run");
+define("AMBER_VAR_LAST_CHECK_RUN","amber_last_check_run");
+define("AMBER_VAR_LAST_CACHE_RUN","amber_last_cache_run");
 
-module_load_include('inc', 'cayl', 'cayl.batch');
+module_load_include('inc', 'amber', 'amber.batch');
 
 /**
- * Get an initialized CAYLStorage module
- * @return CAYLStorage
+ * Get an initialized AmberStorage module
+ * @return AmberStorage
  */
-function cayl_get_storage() {
+function amber_get_storage() {
   $storage = &drupal_static(__FUNCTION__);
   if (!isset($storage)) {
     $file_path = join(DIRECTORY_SEPARATOR,
-      array(DRUPAL_ROOT, variable_get('cayl_storage_location', 'sites/default/files/cayl')));
-    $storage = new CAYLStorage($file_path);
+      array(DRUPAL_ROOT, variable_get('amber_storage_location', 'sites/default/files/amber')));
+    $storage = new AmberStorage($file_path);
   }
   return $storage;
 }
 
 /**
- * Return an initialized CAYLFetcher module
- * @return ICAYLFetcher
+ * Return an initialized AmberFetcher module
+ * @return IAmberFetcher
  */
-function cayl_get_fetcher() {
+function amber_get_fetcher() {
   $fetcher = &drupal_static(__FUNCTION__);
   if (!isset($fetcher)) {
-    $fetcher = new CAYLFetcher(cayl_get_storage(), array(
-      'cayl_max_file' => variable_get('cayl_max_file',1000),
+    $fetcher = new AmberFetcher(amber_get_storage(), array(
+      'amber_max_file' => variable_get('amber_max_file',1000),
       'header_text' => t("This is a cached page"),
     ));
   }
@@ -46,26 +46,26 @@ function cayl_get_fetcher() {
 }
 
 /**
- * Return an initialized CAYLChecker module
- * @return ICAYLChecker
+ * Return an initialized AmberChecker module
+ * @return IAmberChecker
  */
-function cayl_get_checker() {
+function amber_get_checker() {
   $checker = &drupal_static(__FUNCTION__);
   if (!isset($checker)) {
-    $checker = new CAYLChecker();
+    $checker = new AmberChecker();
   }
   return $checker;
 }
 
 /**
- * Return an initialized CAYLStatus module
- * @return ICAYLStatus
+ * Return an initialized AmberStatus module
+ * @return IAmberStatus
  */
-function cayl_get_status() {
+function amber_get_status() {
   $status = &drupal_static(__FUNCTION__);
   if (!isset($status)) {
     $db = Database::getConnection();
-    $status = new CAYLStatus($db);
+    $status = new AmberStatus($db);
   }
   return $status;
 }
@@ -73,10 +73,10 @@ function cayl_get_status() {
 /**
  * Implements hook_init()
  */
-function cayl_init() {
-  if (variable_get('cayl_enabled', 1)) {
+function amber_init() {
+  if (variable_get('amber_enabled', 1)) {
     drupal_add_js(array(
-      'cayl' => array(
+      'amber' => array(
         'name' => variable_get('site_name',t('This site')),
       )), 'setting');
   }
@@ -85,9 +85,9 @@ function cayl_init() {
 /**
  *  Implements hook_permission()
 **/
-function cayl_permission()
+function amber_permission()
 {
-  return array('administer cayl' => array(
+  return array('administer amber' => array(
       'title' => t('Administer Amber'),
       'description' => t('Adminster Amber storage and display of site captures'),
     )
@@ -97,80 +97,80 @@ function cayl_permission()
 /**
  * Implements hook_menu().
  */
-function cayl_menu() {
+function amber_menu() {
   $items = array();
-  $items['admin/config/content/cayl'] = array(
+  $items['admin/config/content/amber'] = array(
     'title' => 'Amber',
     'description' => 'Configuration for the Amber module',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('cayl_config_form'),
-    'access arguments' => array('administer cayl'),
+    'page arguments' => array('amber_config_form'),
+    'access arguments' => array('administer amber'),
     'type' => MENU_NORMAL_ITEM,
-    'file' => 'cayl.admin.inc',
+    'file' => 'amber.admin.inc',
   );
-  $items['admin/reports/cayl'] = array(
+  $items['admin/reports/amber'] = array(
     'title' => 'Amber Dashboard',
     'description' => 'Amber Dashboard',
-    'file' => 'cayl.pages.inc',
+    'file' => 'amber.pages.inc',
     'page callback' => array('drupal_get_form'),
-    'page arguments' => array('cayl_dashboard_summary_form'),
-    'access arguments' => array('administer cayl'),
+    'page arguments' => array('amber_dashboard_summary_form'),
+    'access arguments' => array('administer amber'),
     'type' => MENU_NORMAL_ITEM,
   );
-  $items['admin/reports/cayl/summary'] = array(
+  $items['admin/reports/amber/summary'] = array(
     'title' => 'Summary',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
   );
-  $items['admin/reports/cayl/detail'] = array(
+  $items['admin/reports/amber/detail'] = array(
     'title' => 'Detail',
     'type' => MENU_LOCAL_TASK,
-    'file' => 'cayl.pages.inc',
+    'file' => 'amber.pages.inc',
     'page callback' => array('drupal_get_form'),
-    'page arguments' => array('cayl_dashboard_detail_form'),
-    'access arguments' => array('administer cayl'),
+    'page arguments' => array('amber_dashboard_detail_form'),
+    'access arguments' => array('administer amber'),
     'weight' => 2,
   );
-  $items['admin/reports/cayl/delete'] = array(
+  $items['admin/reports/amber/delete'] = array(
     'title' => 'Delete',
     'description' => 'Delete a capture from storage',
-    'file' => 'cayl.pages.inc',
-    'page callback' => array('cayl_dashboard_delete_item'),
-    'access arguments' => array('administer cayl'),
+    'file' => 'amber.pages.inc',
+    'page callback' => array('amber_dashboard_delete_item'),
+    'access arguments' => array('administer amber'),
     'type' => MENU_CALLBACK,
   );
-  $items['admin/reports/cayl/blacklist'] = array(
+  $items['admin/reports/amber/blacklist'] = array(
     'title' => 'Exclude',
     'description' => 'Exclude a site from being cached',
-    'file' => 'cayl.pages.inc',
-    'page callback' => array('cayl_dashboard_blacklist_site'),
-    'access arguments' => array('administer cayl'),
+    'file' => 'amber.pages.inc',
+    'page callback' => array('amber_dashboard_blacklist_site'),
+    'access arguments' => array('administer amber'),
     'type' => MENU_CALLBACK,
   );
 
-  $items['cayl/cache'] = array(
-    'title' => 'CAYL Cache',
+  $items['amber/cache'] = array(
+    'title' => 'Amber Cache',
     'description' => 'Retrieve items from the cache',
-    'page callback' => 'cayl_retrieve_cache_item',
+    'page callback' => 'amber_retrieve_cache_item',
     'access callback' => true,
-    'delivery callback' => 'cayl_deliver_cache_item',
+    'delivery callback' => 'amber_deliver_cache_item',
     'type' => MENU_CALLBACK,
   );
-  $items['cayl/cache/%/assets'] = array(
-    'title' => 'CAYL Cache Assets',
+  $items['amber/cache/%/assets'] = array(
+    'title' => 'Amber Cache Assets',
     'description' => 'Retrieve assets related to an item from the cache',
-    'page callback' => 'cayl_retrieve_cache_asset',
+    'page callback' => 'amber_retrieve_cache_asset',
     'page arguments' => array(2),
     'access callback' => true,
-    'delivery callback' => 'cayl_deliver_cache_item',
+    'delivery callback' => 'amber_deliver_cache_item',
     'type' => MENU_CALLBACK,
   );
   $items['node/%/cache'] = array(
     'title' => 'Cache links now',
-    'page callback' => 'cayl_cache_node_now',
+    'page callback' => 'amber_cache_node_now',
     'page arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
-    'access arguments' => array('administer cayl'),
+    'access arguments' => array('administer amber'),
     'weight' => 20,
   );
 
@@ -183,36 +183,36 @@ function cayl_menu() {
  * @param bool $country true if we should be using the country-specific behavior settings
  * @return null|string
  */
-function _cayl_get_behavior($status, $country = false) {
+function _amber_get_behavior($status, $country = false) {
   $result = $status ? "up" : "down";
 
   $c = $country ? "country_" : "";
   if ($status) {
-    $action = variable_get("cayl_${c}available_action", CAYL_ACTION_NONE);
+    $action = variable_get("amber_${c}available_action", AMBER_ACTION_NONE);
     switch ($action) {
-      case CAYL_ACTION_NONE:
+      case AMBER_ACTION_NONE:
         $result = NULL;
         break;
-      case CAYL_ACTION_HOVER:
-        $result .= " hover:" . variable_get("cayl_${c}available_action_hover", 2);
+      case AMBER_ACTION_HOVER:
+        $result .= " hover:" . variable_get("amber_${c}available_action_hover", 2);
         break;
-      case CAYL_ACTION_POPUP:
+      case AMBER_ACTION_POPUP:
         $result .= " popup";
         break;
       }
   } else {
-    $action = variable_get("cayl_${c}unavailable_action", CAYL_ACTION_NONE);
+    $action = variable_get("amber_${c}unavailable_action", AMBER_ACTION_NONE);
     switch ($action) {
-      case CAYL_ACTION_NONE:
+      case AMBER_ACTION_NONE:
         $result = NULL;
         break;
-      case CAYL_ACTION_HOVER:
-        $result .= " hover:" . variable_get("cayl_${c}unavailable_action_hover", 2);
+      case AMBER_ACTION_HOVER:
+        $result .= " hover:" . variable_get("amber_${c}unavailable_action_hover", 2);
         break;
-      case CAYL_ACTION_POPUP:
+      case AMBER_ACTION_POPUP:
         $result .= " popup";
         break;
-      case CAYL_ACTION_CACHE:
+      case AMBER_ACTION_CACHE:
         $result .= " cache";
         break;
       }
@@ -223,10 +223,10 @@ function _cayl_get_behavior($status, $country = false) {
 
 /**
  * Build the data- attributes to be added to the anchor tag, given saved metadata
- * @param array $summaries array dictionary from the CAYL Status module
+ * @param array $summaries array dictionary from the Amber Status module
  * @return array attributes to be added to the link
  */
-function _cayl_build_link_attributes($summaries) {
+function _amber_build_link_attributes($summaries) {
   $result = array();
   // Assume that we only have one cache of the data. This would need to change if we start tracking multiple caches
   if (isset($summaries['default']['location'],$summaries['default']['date'],$summaries['default']['size']) &&
@@ -239,20 +239,20 @@ function _cayl_build_link_attributes($summaries) {
   $default_status = isset($summaries['default']['status']) ? $summaries['default']['status'] : null;
   // Add default behavior
   if (!is_null($default_status)) {
-    $behavior = _cayl_get_behavior($default_status);
+    $behavior = _amber_get_behavior($default_status);
     if ($behavior) {
-      $result['data-cayl-behavior'] = $behavior;
+      $result['data-amber-behavior'] = $behavior;
     }
   }
 
   // See if we have country-specific behavior
-  if ($country = variable_get('cayl_country_id','')) {
+  if ($country = variable_get('amber_country_id','')) {
     $country_status = isset($summaries[$country]['status']) ? $summaries[$country]['status'] : $default_status;
     if (!is_null($country_status)) {
-      $country_behavior = _cayl_get_behavior($country_status, true);
+      $country_behavior = _amber_get_behavior($country_status, true);
       // Add country-specific behavior only if it is different than the default behavior
-      if ($country_behavior && ($country_behavior != $result['data-cayl-behavior'])) {
-        $result['data-cayl-behavior'] .= ",${country} ${country_behavior}";
+      if ($country_behavior && ($country_behavior != $result['data-amber-behavior'])) {
+        $result['data-amber-behavior'] .= ",${country} ${country_behavior}";
       }
     }
   }
@@ -261,11 +261,11 @@ function _cayl_build_link_attributes($summaries) {
 }
 
 /**
- * Lookup a URL using the CAYLStorage class, while caching for the duration of the page load
+ * Lookup a URL using the AmberStorage class, while caching for the duration of the page load
  */
-function _cayl_lookup_url($url) {
-  $status = cayl_get_status();
-  return _cayl_build_link_attributes($status->get_summary($url));
+function _amber_lookup_url($url) {
+  $status = amber_get_status();
+  return _amber_build_link_attributes($status->get_summary($url));
 }
 
 /**
@@ -273,10 +273,10 @@ function _cayl_lookup_url($url) {
  *
  * Rewrite all cached external links with data-* attributes describing the information in the cache
  */
-function cayl_preprocess_link(&$variables) {
+function amber_preprocess_link(&$variables) {
   /* If it is an external link, check if cache exists, and add data-* attributes as necessary. */
-  if (variable_get('cayl_enabled', 1) && url_is_external($variables['path'])) {
-    $attributes = _cayl_lookup_url($variables['path']);
+  if (variable_get('amber_enabled', 1) && url_is_external($variables['path'])) {
+    $attributes = _amber_lookup_url($variables['path']);
     if (!empty($attributes)) {
       if (!isset($variables['options'])) {
         $variables['options'] = array();
@@ -292,12 +292,12 @@ function cayl_preprocess_link(&$variables) {
 /**
  * Implements hook_filter_info().
  */
-function cayl_filter_info() {
-  $filters['filter_cayl'] = array(
-    'title' => t('CAYL Filter'),
+function amber_filter_info() {
+  $filters['filter_amber'] = array(
+    'title' => t('Amber Filter'),
     'description' => t('Annotate all external links with information about the their local cached copies'),
-    'process callback'  => '_cayl_filter_process',
-    'tips callback' => '_cayl_filter_tips',
+    'process callback'  => '_amber_filter_process',
+    'tips callback' => '_amber_filter_tips',
     'weight' => 50
   );
   return $filters;
@@ -308,8 +308,8 @@ function cayl_filter_info() {
  * @param $matches
  * @return string
  */
-function _cayl_filter_callback($matches) {
-  $data = _cayl_lookup_url($matches[1]);
+function _amber_filter_callback($matches) {
+  $data = _amber_lookup_url($matches[1]);
   $result = $matches[0];
   foreach ($data as $key => $value) {
     $result .= " $key=\"$value\"" ;
@@ -318,40 +318,40 @@ function _cayl_filter_callback($matches) {
 }
 
 /**
- * CAYL filter process callback.
+ * Amber filter process callback.
  *
  * Find all external links and annotate then with data-* attributes describing the information in the cache.
  * Note: This treats all absolute URLs as external links.
  */
-function _cayl_filter_process($text, $filter, $format) {
-  if (variable_get('cayl_enabled', 1)) {
+function _amber_filter_process($text, $filter, $format) {
+  if (variable_get('amber_enabled', 1)) {
     $re = '/href=["\'](http[^\v()<>{}\[\]]+)[\'"]/';
-    $text = preg_replace_callback($re, '_cayl_filter_callback', $text);
+    $text = preg_replace_callback($re, '_amber_filter_callback', $text);
   }
   return $text;
 }
 
 
 /**
- * Filter tips callback for CAYL filter.
+ * Filter tips callback for Amber filter.
  */
-function _cayl_filter_tips($filter, $format, $long = FALSE) {
+function _amber_filter_tips($filter, $format, $long = FALSE) {
   if (!$long) {
     // This string will be shown in the content add/edit form
     return t('Annotate all external links with information about the their local cached copies');
   }
   else {
     //TODO: Get help content to display here
-    return t('Annotate all external links with information about the their local cached copies. Then add some more information about the CAYL project and links to other stuff.');
+    return t('Annotate all external links with information about the their local cached copies. Then add some more information about the Amber project and links to other stuff.');
   }
 }
 
 /**
  * Menu callback hook for caching a page immediately
  */
-function cayl_cache_node_now($nid) {
+function amber_cache_node_now($nid) {
   $node = node_load($nid);
-  cayl_cache_node($node,true);
+  amber_cache_node($node,true);
   drupal_goto('node/' . $nid);
 }
 
@@ -360,29 +360,29 @@ function cayl_cache_node_now($nid) {
  * or cache them immediately
  * @param $node object to scan for links to cache
  */
-function cayl_cache_node($node, $immediately = false) {
-  module_load_include('inc', 'cayl', 'cayl.extract');
-  $links = _cayl_extract_node_links($node);
+function amber_cache_node($node, $immediately = false) {
+  module_load_include('inc', 'amber', 'amber.extract');
+  $links = _amber_extract_node_links($node);
   if ($immediately) {
     foreach ($links as $url) {
-      if (cayl_cache_link($url, $immediately)) {
+      if (amber_cache_link($url, $immediately)) {
         drupal_set_message(t("Sucessfully cached: @url.", array('@url' => $url)), 'status');
       } else {
         drupal_set_message(t("Could not cache: @url.", array('@url' => $url)), 'warning');
       }
     }      
   } else {
-    cayl_enqueue_check_links($links);
+    amber_enqueue_check_links($links);
   }
 }
 
 /**
  * Implements hook_entity_update
  */
-function cayl_entity_update($entity, $type) {
+function amber_entity_update($entity, $type) {
   if ("node" == $type) {
     if (NODE_PUBLISHED == $entity->status) {
-      cayl_cache_node($entity);
+      amber_cache_node($entity);
     }
   }
 }
@@ -390,10 +390,10 @@ function cayl_entity_update($entity, $type) {
 /**
  * Implements hook_entity_insert
  */
-function cayl_entity_insert($entity, $type) {
+function amber_entity_insert($entity, $type) {
   if ("node" == $type) {
     if (NODE_PUBLISHED == $entity->status) {
-      cayl_cache_node($entity);
+      amber_cache_node($entity);
     }
   }
 }
@@ -403,11 +403,11 @@ function cayl_entity_insert($entity, $type) {
  * @param $id string identifying the item to return
  * @return null|string
  */
-function cayl_retrieve_cache_item($id) {
-  $storage = cayl_get_storage();
+function amber_retrieve_cache_item($id) {
+  $storage = amber_get_storage();
   $data = $storage->get($id);
   $metadata = $storage->get_metadata($id);
-  $status = cayl_get_status();
+  $status = amber_get_status();
   $status->save_view($id);
   return ($data && $metadata) ? array('data' => $data, 'metadata' => $metadata) : MENU_NOT_FOUND;
 }
@@ -417,10 +417,10 @@ function cayl_retrieve_cache_item($id) {
  * @param $id string identifying the item to return
  * @return null|string
  */
-function cayl_retrieve_cache_asset() {
+function amber_retrieve_cache_asset() {
   $args = func_get_args();
   $id = array_shift($args);
-  $storage = cayl_get_storage();
+  $storage = amber_get_storage();
   $d = $storage->get_asset($id, join('/',$args) . ($_SERVER['QUERY_STRING'] ? '?' . $_SERVER['QUERY_STRING'] : ''));
   if ($d) {
     $data['data'] = $d;
@@ -438,9 +438,9 @@ function cayl_retrieve_cache_asset() {
 
 /**
  * Display the data returned from the cache without any Drupal doodads
- * @param $data string or error code returned from cayl_retrieve_cache_item to be displayed
+ * @param $data string or error code returned from amber_retrieve_cache_item to be displayed
  */
-function cayl_deliver_cache_item($data) {
+function amber_deliver_cache_item($data) {
   if (is_int($data) && $data == MENU_NOT_FOUND) {
     drupal_deliver_html_page(MENU_NOT_FOUND);
   } else {
@@ -455,12 +455,12 @@ function cayl_deliver_cache_item($data) {
 /**
  * Delete the contents of the cache
  */
-function cayl_clear_cache() {
-  $storage = cayl_get_storage();
+function amber_clear_cache() {
+  $storage = amber_get_storage();
   $storage->clear_cache();
-  $status = cayl_get_status();
+  $status = amber_get_status();
   $status->delete_all();
-  foreach (array(CAYL_QUEUE_CACHE, CAYL_QUEUE_CHECK_EXISTING, CAYL_QUEUE_CHECK_NEW) as $queue_name) {
+  foreach (array(AMBER_QUEUE_CACHE, AMBER_QUEUE_CHECK_EXISTING, AMBER_QUEUE_CHECK_NEW) as $queue_name) {
     $queue = DrupalQueue::get($queue_name);
     if ($queue) {
       $queue->deleteQueue();
@@ -468,10 +468,10 @@ function cayl_clear_cache() {
   }
 }
 
-function cayl_delete_item($id) {
-  $storage = cayl_get_storage();
+function amber_delete_item($id) {
+  $storage = amber_get_storage();
   $storage->clear_cache_item($id);
-  $status = cayl_get_status();
+  $status = amber_get_status();
   $status->delete($id);
   //TODO: Delete the item from the queue (if possible)
 }
@@ -480,7 +480,7 @@ function cayl_delete_item($id) {
  * Cache all nodes
  * @return number of nodes queued for caching
  */
-function cayl_cache_all() {
+function amber_cache_all() {
   $count = 0;
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'node')
@@ -491,7 +491,7 @@ function cayl_cache_all() {
     foreach ($nids as $nid) {
       $node = node_load($nid, NULL, TRUE);
       if ($node) {
-        cayl_cache_node($node);
+        amber_cache_node($node);
         $count++;
       }
     }

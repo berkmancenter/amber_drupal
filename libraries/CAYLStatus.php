@@ -6,9 +6,9 @@
  * Time: 4:06 PM
  */
 
-interface iCAYLStatus {
-  public function get_check($url, $source = 'cayl');
-  public function get_cache($url, $source = 'cayl');
+interface iAmberStatus {
+  public function get_check($url, $source = 'amber');
+  public function get_cache($url, $source = 'amber');
   public function get_summary($url);
   public function get_cache_size();
   public function save_check(array $data);
@@ -20,7 +20,7 @@ interface iCAYLStatus {
   public function delete($id);
 }
 
-class CAYLStatus implements iCAYLStatus {
+class AmberStatus implements iAmberStatus {
 
   public function __construct(PDO $db) {
     $this->db = $db;
@@ -29,15 +29,15 @@ class CAYLStatus implements iCAYLStatus {
   /**
    * Get information for a URL about it's most recent check
    * @param $url string to lookup
-   * @param $source string with the name of the source of the check (e.g. 'cayl', 'herdict')
+   * @param $source string with the name of the source of the check (e.g. 'amber', 'herdict')
    * @return array|mixed
    */
-  public function get_check($url, $source = 'cayl') {
-    return $this->get_item($url, 'cayl_check');
+  public function get_check($url, $source = 'amber') {
+    return $this->get_item($url, 'amber_check');
   }
 
-  public function get_cache($url, $source = 'cayl') {
-    return $this->get_item($url, 'cayl_cache');
+  public function get_cache($url, $source = 'amber') {
+    return $this->get_item($url, 'amber_cache');
   }
 
   private function get_item($url, $table) {
@@ -51,7 +51,7 @@ class CAYLStatus implements iCAYLStatus {
   public function get_summary($url) {
     $query = $this->db->prepare(
       ' SELECT ca.location, ca.date, ch.status, ca.size ' .
-      ' FROM cayl_cache ca, cayl_check ch ' .
+      ' FROM amber_cache ca, amber_check ch ' .
       ' WHERE ca.url = :url AND ca.id = ch.id');
     $query->execute(array('url' => $url));
     $result = ($query->rowCount() == 1) ? $query->fetch(PDO::FETCH_ASSOC) : array();
@@ -79,14 +79,14 @@ class CAYLStatus implements iCAYLStatus {
 
     if (!isset($data['id'])) {
       $data['id'] = md5($data['url']);
-      //TODO: Remove duplication of this with CAYLStorage
+      //TODO: Remove duplication of this with AmberStorage
     }
-    $count_query = $this->db->prepare("SELECT COUNT(id) FROM cayl_check WHERE id = :id");
+    $count_query = $this->db->prepare("SELECT COUNT(id) FROM amber_check WHERE id = :id");
     $count_query->execute(array('id' => $data['id']));
     $result = $count_query->fetchColumn();
 
     if ($result) {
-      $updateQuery = $this->db->prepare('UPDATE cayl_check ' .
+      $updateQuery = $this->db->prepare('UPDATE amber_check ' .
                                         'SET last_checked = :last_checked, ' .
                                         'next_check = :next_check, ' .
                                         'status = :status, ' .
@@ -94,7 +94,7 @@ class CAYLStatus implements iCAYLStatus {
                                         'message = :message ' .
                                         'WHERE id = :id');
     } else {
-      $updateQuery = $this->db->prepare('INSERT into cayl_check ' .
+      $updateQuery = $this->db->prepare('INSERT into amber_check ' .
                                         '(id, url, status, last_checked, next_check, message) ' .
                                         'VALUES(:id, :url, :status, :last_checked, :next_check, :message)');
     }
@@ -115,11 +115,11 @@ class CAYLStatus implements iCAYLStatus {
         return false;
       }
     }
-    $count_query = $this->db->prepare("SELECT COUNT(id) FROM cayl_cache WHERE id = :id");
+    $count_query = $this->db->prepare("SELECT COUNT(id) FROM amber_cache WHERE id = :id");
     $count_query->execute(array('id' => $data['id']));
     $result = $count_query->fetchColumn();
     if ($result) {
-      $updateQuery = $this->db->prepare('UPDATE cayl_cache ' .
+      $updateQuery = $this->db->prepare('UPDATE amber_cache ' .
                                         'SET url = :url, ' .
                                         'location = :location, ' .
                                         'date = :date, ' .
@@ -127,7 +127,7 @@ class CAYLStatus implements iCAYLStatus {
                                         'size = :size ' .
                                         'WHERE id = :id');
     } else {
-      $updateQuery = $this->db->prepare('INSERT into cayl_cache ' .
+      $updateQuery = $this->db->prepare('INSERT into amber_cache ' .
                                         '(id, url, location, date, type, size) ' .
                                         'VALUES(:id, :url, :location, :date, :type, :size)');
     }
@@ -142,7 +142,7 @@ class CAYLStatus implements iCAYLStatus {
    */
   public function get_urls_to_check() {
     $result = array();
-    $query = $this->db->prepare('SELECT url FROM cayl_check WHERE next_check < :time ORDER BY next_check ASC');
+    $query = $this->db->prepare('SELECT url FROM amber_check WHERE next_check < :time ORDER BY next_check ASC');
     if ($query->execute(array('time' => time()))) {
       $result = $query->fetchAll(PDO::FETCH_COLUMN, 0);
       $query->closeCursor();
@@ -153,17 +153,17 @@ class CAYLStatus implements iCAYLStatus {
   }
 
   public function save_view($id) {
-    $count_query = $this->db->prepare("SELECT COUNT(id) FROM cayl_activity WHERE id = :id");
+    $count_query = $this->db->prepare("SELECT COUNT(id) FROM amber_activity WHERE id = :id");
     $count_query->execute(array('id' => $id));
     $result = $count_query->fetchColumn();
 
     if ($result) {
-      $updateQuery = $this->db->prepare('UPDATE cayl_activity ' .
+      $updateQuery = $this->db->prepare('UPDATE amber_activity ' .
                                         'SET views = views + 1, ' .
                                         'date = :date ' .
                                         'WHERE id = :id');
     } else {
-      $updateQuery = $this->db->prepare('INSERT into cayl_activity ' .
+      $updateQuery = $this->db->prepare('INSERT into amber_activity ' .
                                         '(id, views, date) ' .
                                         'VALUES(:id, 1, :date)');
     }
@@ -176,7 +176,7 @@ class CAYLStatus implements iCAYLStatus {
    * @return string
    */
   public function get_cache_size() {
-    $query = $this->db->prepare('SELECT sum(size) FROM cayl_cache');
+    $query = $this->db->prepare('SELECT sum(size) FROM amber_cache');
     $query->execute();
     $result = $query->fetchColumn();
     $query->closeCursor();
@@ -192,8 +192,8 @@ class CAYLStatus implements iCAYLStatus {
     $current_size = $this->get_cache_size();
     if ($current_size > $max_disk) {
       $query = $this->db->prepare(
-        'SELECT cc.id, cc.url, size FROM cayl_cache cc ' .
-        'LEFT JOIN cayl_activity ca ON cc.id = ca.id ' .
+        'SELECT cc.id, cc.url, size FROM amber_cache cc ' .
+        'LEFT JOIN amber_activity ca ON cc.id = ca.id ' .
         'ORDER BY greatest(IFNULL(ca.date,0),cc.date) ASC');
       $query->execute();
       $size_needed = $current_size - $max_disk;
@@ -212,8 +212,8 @@ class CAYLStatus implements iCAYLStatus {
    * Delete all status information. Do NOT delete activity data.
    */
   public function delete_all() {
-    $this->db->prepare("TRUNCATE cayl_cache")->execute();
-    $this->db->prepare("TRUNCATE cayl_check")->execute();
+    $this->db->prepare("TRUNCATE amber_cache")->execute();
+    $this->db->prepare("TRUNCATE amber_check")->execute();
   }
 
   /**
@@ -221,7 +221,7 @@ class CAYLStatus implements iCAYLStatus {
    * @param $id
    */
   public function delete($id) {
-    foreach (array('cayl_cache', 'cayl_check') as $table) {
+    foreach (array('amber_cache', 'amber_check') as $table) {
       $this->db->prepare("DELETE FROM $table WHERE id = :id")->execute(array('id' => $id));
     }
   }

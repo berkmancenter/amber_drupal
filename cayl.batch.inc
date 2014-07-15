@@ -6,12 +6,12 @@
 /**
  * Implements hook_cron
  */
-function cayl_cron() {
-  if (variable_get('cayl_enabled', 1)) {
-    $status_service = cayl_get_status();
+function amber_cron() {
+  if (variable_get('amber_enabled', 1)) {
+    $status_service = amber_get_status();
     $urls = $status_service->get_urls_to_check();
     if ($urls) {
-      cayl_enqueue_check_links($urls, CAYL_QUEUE_CHECK_EXISTING);
+      amber_enqueue_check_links($urls, AMBER_QUEUE_CHECK_EXISTING);
     }
   }
 }
@@ -34,7 +34,7 @@ function exists_in_queue($queue, $url) {
  * new links (which we want to check soon) don't get stuck behind a backlog of existing links to recheck
  * @param $links array of URLs to be cached
  */
-function cayl_enqueue_check_links($links, $queue_name = CAYL_QUEUE_CHECK_NEW) {
+function amber_enqueue_check_links($links, $queue_name = AMBER_QUEUE_CHECK_NEW) {
   $queue = DrupalQueue::get($queue_name);
   $queue->createQueue();
   foreach ($links as $link) {
@@ -47,13 +47,13 @@ function cayl_enqueue_check_links($links, $queue_name = CAYL_QUEUE_CHECK_NEW) {
 /**
  * Implements hook_cron_queue_info
  */
-function cayl_cron_queue_info() {
+function amber_cron_queue_info() {
   return array(
-    CAYL_QUEUE_CHECK_NEW  => array(
-      'worker callback' => 'cayl_process_check_queue',
+    AMBER_QUEUE_CHECK_NEW  => array(
+      'worker callback' => 'amber_process_check_queue',
     ),
-    CAYL_QUEUE_CHECK_EXISTING => array(
-      'worker callback' => 'cayl_process_check_queue',
+    AMBER_QUEUE_CHECK_EXISTING => array(
+      'worker callback' => 'amber_process_check_queue',
     ),
   );
 }
@@ -62,7 +62,7 @@ function cayl_cron_queue_info() {
  * Setup a batch (for use with the Batch API) to scan all nodes on the site for links to cache
  * @return array|null
  */
-function cayl_batch_scan_all_setup() {
+function amber_batch_scan_all_setup() {
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'node')->propertyCondition('status', 1);
   $result = $query->execute();
@@ -70,13 +70,13 @@ function cayl_batch_scan_all_setup() {
     $operations = array();
     $nids = array_keys($result['node']);
     foreach ($nids as $nid) {
-      $operations[] = array('cayl_batch_scan_process', array($nid));
+      $operations[] = array('amber_batch_scan_process', array($nid));
     }
   }
   if (!empty($operations)) {
     $batch = array(
       'operations' => $operations,
-      'finished' => 'cayl_batch_scan_all_finished',
+      'finished' => 'amber_batch_scan_all_finished',
     );
     return $batch;
   } else {
@@ -89,10 +89,10 @@ function cayl_batch_scan_all_setup() {
  * @param $nid string if of the node to scan
  * @param $context
  */
-function cayl_batch_scan_process($nid, $context) {
+function amber_batch_scan_process($nid, $context) {
   $node = node_load($nid, NULL, TRUE);
   if ($node) {
-    cayl_cache_node($node);
+    amber_cache_node($node);
     $context['results'][] = $node->nid . ' : ' . check_plain($node->title);
   }
   $context['message'] = t('Scanned node "@title"', array('@title' => $node->title));
@@ -104,7 +104,7 @@ function cayl_batch_scan_process($nid, $context) {
  * @param $results
  * @param $operations
  */
-function cayl_batch_scan_all_finished($success, $results, $operations) {
+function amber_batch_scan_all_finished($success, $results, $operations) {
   if ($success) {
     drupal_set_message(t('@count nodes scanned', array('@count' => count($results))));
   } else {
@@ -118,19 +118,19 @@ function cayl_batch_scan_all_finished($success, $results, $operations) {
  * Rather than adding URLs to the batch, we add items containing the name of a queue which holds an item to be cached,
  * @return array|null
  */
-function cayl_batch_cache_all_setup() {
-  foreach (array(CAYL_QUEUE_CHECK_NEW, CAYL_QUEUE_CHECK_EXISTING) as $queue_name) {
+function amber_batch_cache_all_setup() {
+  foreach (array(AMBER_QUEUE_CHECK_NEW, AMBER_QUEUE_CHECK_EXISTING) as $queue_name) {
     $queue = DrupalQueue::get($queue_name);
     $queue->createQueue();
     $queue_size = $queue->numberOfItems();
     for ($i = 0; $i < $queue_size; $i++) {
-      $operations[] = array('cayl_batch_cache_process', array($queue_name));
+      $operations[] = array('amber_batch_cache_process', array($queue_name));
     }
   }
   if (!empty($operations)) {
     $batch = array(
       'operations' => $operations,
-      'finished' => 'cayl_batch_cache_all_finished',
+      'finished' => 'amber_batch_cache_all_finished',
     );
     return $batch;
   } else {
@@ -143,7 +143,7 @@ function cayl_batch_cache_all_setup() {
  * @param $item name of the queue from which to pull an object to be checked
  * @param $context
  */
-function cayl_batch_cache_process($queue_name, $context) {
+function amber_batch_cache_process($queue_name, $context) {
   $queue = DrupalQueue::get($queue_name);
   $queue->createQueue();
   if ($queue->numberOfItems() == 0) {
@@ -154,7 +154,7 @@ function cayl_batch_cache_process($queue_name, $context) {
     return;
   }
   $url = $item->data;
-  cayl_process_check_queue($url, true);
+  amber_process_check_queue($url, true);
   $queue->deleteItem($item);
   $context['results'][] = $url;
   $context['message'] = t('Processed URL "@url"', array('@url' => $url));
@@ -166,7 +166,7 @@ function cayl_batch_cache_process($queue_name, $context) {
  * @param $results
  * @param $operations
  */
-function cayl_batch_cache_all_finished($success, $results, $operations) {
+function amber_batch_cache_all_finished($success, $results, $operations) {
   if ($success) {
     $count = count($results);
     if ($count == 1)
@@ -185,26 +185,26 @@ function cayl_batch_cache_all_finished($success, $results, $operations) {
  * Process an item in the queue to be checked and cached
  * @param $item string url of the item to be checked
  */
-function cayl_process_check_queue($item, $force = false) {
+function amber_process_check_queue($item, $force = false) {
   try {
-    cayl_cache_link($item,true);
-    variable_set(CAYL_VAR_LAST_CHECK_RUN,time());
+    amber_cache_link($item,true);
+    variable_set(AMBER_VAR_LAST_CHECK_RUN,time());
   } catch (Exception $e) {
     // If there is an error, log the error, and then continue. Otherwise the bad item will not be removed from the queue
-    watchdog('cayl', "Error checking @url : @msg ", array('@url' => $item, '@msg' => $e->getMessage()), WATCHDOG_NOTICE);
+    watchdog('amber', "Error checking @url : @msg ", array('@url' => $item, '@msg' => $e->getMessage()), WATCHDOG_NOTICE);
   }
 }
 
 /**
  * Check and cache a link
  **/
-function cayl_cache_link($item, $force = false) {
+function amber_cache_link($item, $force = false) {
   $start = time();
-  watchdog('cayl', "Checking and caching: @url ", array('@url' => $item), WATCHDOG_DEBUG);
+  watchdog('amber', "Checking and caching: @url ", array('@url' => $item), WATCHDOG_DEBUG);
 
-  $checker = cayl_get_checker();
-  $status = cayl_get_status();
-  $fetcher = cayl_get_fetcher();
+  $checker = amber_get_checker();
+  $status = amber_get_status();
+  $fetcher = amber_get_fetcher();
 
   /* Check whether the site is up */
   $last_check = $status->get_check($item);
@@ -215,12 +215,12 @@ function cayl_cache_link($item, $force = false) {
 
     /* Now cache the item if we should */
     $existing_cache = $status->get_cache($item);
-    if ($update['status'] && (!variable_get('cayl_update_strategy',0) || !$existing_cache)) {
+    if ($update['status'] && (!variable_get('amber_update_strategy',0) || !$existing_cache)) {
       $cache_metadata = array();
       try {
         $cache_metadata = $fetcher->fetch($item);
       } catch (RuntimeException $re) {
-        watchdog('cayl', "Did not cache: @url: @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_NOTICE);
+        watchdog('amber', "Did not cache: @url: @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_NOTICE);
         $update['message'] = $re->getMessage();
         $status->save_check($update);        
         return false;
@@ -231,8 +231,8 @@ function cayl_cache_link($item, $force = false) {
         /* TODO: Ideally we would clear the cache only once per cron job */
         cache_clear_all('*', 'cache_filter',TRUE);
         cache_clear_all('*', 'cache_field',TRUE);
-        cayl_disk_space_purge();
-        watchdog('cayl', "Cached: @url in @seconds seconds", array('@url' => $item, '@seconds' => time() - $start), WATCHDOG_DEBUG);
+        amber_disk_space_purge();
+        watchdog('amber', "Cached: @url in @seconds seconds", array('@url' => $item, '@seconds' => time() - $start), WATCHDOG_DEBUG);
         return true;
       }
     }
@@ -245,15 +245,15 @@ function cayl_cache_link($item, $force = false) {
 /**
  * If the total disk space usage is over the configured limit, delete enough items to bring it under
  */
-function cayl_disk_space_purge() {
-  $status = cayl_get_status();
-  $purge = $status->get_items_to_purge(variable_get('cayl_max_disk',1000) * 1024 * 1024);
+function amber_disk_space_purge() {
+  $status = amber_get_status();
+  $purge = $status->get_items_to_purge(variable_get('amber_max_disk',1000) * 1024 * 1024);
   if ($purge) {
-    $storage = cayl_get_storage();
+    $storage = amber_get_storage();
     foreach ($purge as $item) {
       $storage->clear_cache_item($item['id']);
       $status->delete($item['id']);
-      watchdog('cayl', "Deleting to stay under disk space limits: @url", array('@url' => $item['url']), WATCHDOG_NOTICE);
+      watchdog('amber', "Deleting to stay under disk space limits: @url", array('@url' => $item['url']), WATCHDOG_NOTICE);
     }
   }
 }

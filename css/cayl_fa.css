@@ -1,27 +1,27 @@
-.cayl-interstitial .cayl-cached, 
-.cayl-interstitial .cayl-live {    
+.amber-interstitial .amber-cached, 
+.amber-interstitial .amber-live {    
   float: right;
 }
 
-.cayl-cached {
+.amber-cached {
   margin-right: 0;
   margin-left: 25px;
 }                    
                    
-.cayl-interstitial .cayl-cached a, 
-.cayl-interstitial .cayl-live a
+.amber-interstitial .amber-cached a, 
+.amber-interstitial .amber-live a
 {                                                                        
   background: url(../images/Arrow-Large-Left.png) left bottom no-repeat;      
   text-align: right;
 }             
               
-.cayl-hover.cayl-up {
+.amber-hover.amber-up {
   padding-right: 0;
   border-top-left-radius: 4px; 
   border-bottom-left-radius: 4px; 
 } 
 
-.cayl-hover.cayl-up .cayl-text {
+.amber-hover.amber-up .amber-text {
   border-radius: 0 4px 4px 0; 
   padding: 0 36px 0 8px;
   background: #34495e url(../images/Checkmark-Small.png) right center no-repeat;   
@@ -29,21 +29,21 @@
   float: right;
 }                          
 
-.cayl-hover.cayl-up a.cayl-live {
+.amber-hover.amber-up a.amber-live {
   border-radius: 4px 0 0 4px; 
 }
 
-.cayl-hover.cayl-up .cayl-arrow {
+.amber-hover.amber-up .amber-arrow {
   right: 20px;
 }
                         
-.cayl-hover.cayl-down .cayl-arrow {
+.amber-hover.amber-down .amber-arrow {
   right: 60px;
 }
                         
-.cayl-hover.cayl-up a,
-.cayl-hover.cayl-down a.cayl-live,
-.cayl-hover.cayl-down a.cayl-cache {
+.amber-hover.amber-up a,
+.amber-hover.amber-down a.amber-live,
+.amber-hover.amber-down a.amber-cache {
   background:  #5b88b3 url(../images/Arrow-Small-Left.png) 8px center no-repeat;
   padding: 0 12px 0 32px;
 }                               

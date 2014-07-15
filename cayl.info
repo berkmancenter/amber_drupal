@@ -1,15 +1,15 @@
 name = Cache As You Link
-description = Configurations settings example for the CAYL functionality
-package = CAYL
+description = Configurations settings example for the Amber functionality
+package = Amber
 core = 7.x
 
-files[] = libraries/CAYLStorage.php
-files[] = libraries/CAYLFetcher.php
-files[] = libraries/CAYLChecker.php
-files[] = libraries/CAYLStatus.php
-files[] = cayl.test
-files[] = cayl.extract.inc
-files[] = cayl.drush.inc
-scripts[] = js/cayl.js
-stylesheets[all][] = css/cayl.css
-configure = admin/config/content/cayl
+files[] = libraries/AmberStorage.php
+files[] = libraries/AmberFetcher.php
+files[] = libraries/AmberChecker.php
+files[] = libraries/AmberStatus.php
+files[] = amber.test
+files[] = amber.extract.inc
+files[] = amber.drush.inc
+scripts[] = js/amber.js
+stylesheets[all][] = css/amber.css
+configure = admin/config/content/amber

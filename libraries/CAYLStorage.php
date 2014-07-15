@@ -9,15 +9,15 @@
  *  "type" : MIME-TYPE,
  *  "cache":
  *   {
- *     "cayl" : {
+ *     "amber" : {
  *        "date" : "2014-02-11T10:22:46Z",
- *        "location" : "/CAYL_PREFIX/cache/ID",
+ *        "location" : "/AMBER_PREFIX/cache/ID",
  *      },
  *      [...additional cache sources go here...]
  *    }
  *  "status" :
  *   {
- *      "cayl" : {
+ *      "amber" : {
  *        "default" : "up",
  *        "IR" : "down"
  *      }.
@@ -25,14 +25,14 @@
  *    }
  * }
  *
- * TODO: Resolve distinction between this (CAYLStorage) as a single implementation of the storage functionality,
+ * TODO: Resolve distinction between this (AmberStorage) as a single implementation of the storage functionality,
  * and its role as managing references to all stored data. As designed, references to other copies of the stored
  * data are mixed in with the metadata for THIS copy of the stored data (on disk, locally).
  *
  *
  */
 
-interface iCAYLStorage {
+interface iAmberStorage {
   function get($id);
   function get_asset($id, $path);
   function get_metadata($key);
@@ -41,16 +41,16 @@ interface iCAYLStorage {
   function clear_cache();
 }
 
-class CAYLStorage implements iCAYLStorage {
+class AmberStorage implements iAmberStorage {
 
   /* The default ISO8601 date string formatter doesn't include the colons in the time-zone component, which
      is incompatible with javascript's date.parse() function in at least some implementations (Safari, definitely) */
   var $ISO8601_FORMAT = 'Y-m-d\TH:i:sP';
 
-  function __construct($file_root = '/private/tmp/cayl/cache') {
+  function __construct($file_root = '/private/tmp/amber/cache') {
     $this->file_root = $file_root;
-    $this->url_prefix = 'CAYL';
-    $this->name = 'cayl'; // Used to identify the metadata that belongs to this implementation of iCAYLStorage
+    $this->url_prefix = 'Amber';
+    $this->name = 'amber'; // Used to identify the metadata that belongs to this implementation of iAmberStorage
   }
 
 

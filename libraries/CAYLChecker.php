@@ -1,11 +1,11 @@
 <?php
 
-interface iCAYLChecker {
+interface iAmberChecker {
   public function up($url);
   public function check($last_check, $force = false);
 }
 
-class CAYLChecker implements iCAYLChecker {
+class AmberChecker implements iAmberChecker {
 
   /**
    * Check to see if a given URL is available (if it returns 200 status code)
@@ -13,7 +13,7 @@ class CAYLChecker implements iCAYLChecker {
    */
   public function up($url) {
 
-    $item = CAYLNetworkUtils::open_url($url,  array(CURLOPT_FAILONERROR => FALSE));
+    $item = AmberNetworkUtils::open_url($url,  array(CURLOPT_FAILONERROR => FALSE));
     if (isset($item['info']['http_code'])) {
       return ($item['info']['http_code'] == 200);
     } else {
@@ -38,7 +38,7 @@ class CAYLChecker implements iCAYLChecker {
     }
 
     $date = new DateTime();
-    if (!CAYLRobots::robots_allowed($url)) {
+    if (!AmberRobots::robots_allowed($url)) {
       /* If blocked by robots.txt, schedule next check for 6 months out */
       $next = $date->add(new DateInterval("P6M"))->getTimestamp();
       $status = isset($last_check['status']) ? $last_check['status'] : NULL;

@@ -2,19 +2,19 @@
 
 //TODO: Namespace
 
-interface iCAYLFetcher {
+interface iAmberFetcher {
   public function fetch($url);
 }
 
-class CAYLFetcher implements iCAYLFetcher {
+class AmberFetcher implements iAmberFetcher {
 
   /**
-   * @param $storage CAYLStorage that will be used to save the item
+   * @param $storage AmberStorage that will be used to save the item
    */
-  function __construct(iCAYLStorage $storage, array $options) {
+  function __construct(iAmberStorage $storage, array $options) {
     $this->storage = $storage;
-    $this->assetHelper = new CAYLAssetHelper($storage);
-    $this->maxFileSize = isset($options['cayl_max_file']) ? $options['cayl_max_file'] : 1000;
+    $this->assetHelper = new AmberAssetHelper($storage);
+    $this->maxFileSize = isset($options['amber_max_file']) ? $options['amber_max_file'] : 1000;
     $this->headerText = isset($options['header_text']) ? $options['header_text'] : "This is a cached page";
   }
 
@@ -30,12 +30,12 @@ class CAYLFetcher implements iCAYLFetcher {
     }
 
     // Check the robots.txt
-    if (!CAYLRobots::robots_allowed($url)) {
+    if (!AmberRobots::robots_allowed($url)) {
       throw new RuntimeException("Blocked by robots.txt");
     }
 
     // Send a GET request
-    $root_item = CAYLNetworkUtils::open_url($url);
+    $root_item = AmberNetworkUtils::open_url($url);
 
     // Decide whether the item should be cached
     if (!$this->cacheable_item($root_item)) {
@@ -46,7 +46,7 @@ class CAYLFetcher implements iCAYLFetcher {
     // Get other assets
     if (isset($root_item['headers']['Content-Type']) &&
         ($content_type = $root_item['headers']['Content-Type']) &&
-        CAYLNetworkUtils::is_html_mime_type($content_type)) {
+        AmberNetworkUtils::is_html_mime_type($content_type)) {
 
       $body = $root_item['body'];
 
@@ -83,8 +83,8 @@ class CAYLFetcher implements iCAYLFetcher {
         'id' => $storage_metadata['id'],
         'url' => $storage_metadata['url'],
         'type' => isset($storage_metadata['type']) ? $storage_metadata['type'] : 'application/octet-stream',
-        'date' => strtotime($storage_metadata['cache']['cayl']['date']),
-        'location' => $storage_metadata['cache']['cayl']['location'],
+        'date' => strtotime($storage_metadata['cache']['amber']['date']),
+        'location' => $storage_metadata['cache']['amber']['location'],
         'size' => $size,
       );
     } else {
@@ -165,7 +165,7 @@ class CAYLFetcher implements iCAYLFetcher {
     $result = array();
     /* Commented out code is the one-asset-at-a-time version */
     // foreach ($assets as $key => $asset) {
-    //   $f = CAYLNetworkUtils::open_url($asset['url'], array(CURLOPT_REFERER => $url));
+    //   $f = AmberNetworkUtils::open_url($asset['url'], array(CURLOPT_REFERER => $url));
     //   if ($f) {
     //     $result[$key] = array_merge($f,$asset);
     //   }
@@ -176,7 +176,7 @@ class CAYLFetcher implements iCAYLFetcher {
       $urls[] = $asset['url'];
       $keys[$asset['url']] = $key;
     }
-    $response = CAYLNetworkUtils::open_multi_url($urls, array(CURLOPT_REFERER => $url));
+    $response = AmberNetworkUtils::open_multi_url($urls, array(CURLOPT_REFERER => $url));
     foreach ($assets as $key => $asset) {
       if (is_array($response[$asset['url']])) {
         $result[$key] = array_merge($response[$asset['url']],$asset);        
@@ -187,9 +187,9 @@ class CAYLFetcher implements iCAYLFetcher {
 
 }
 
-class CAYLAssetHelper {
+class AmberAssetHelper {
 
-  function __construct(iCAYLStorage $storage) {
+  function __construct(iAmberStorage $storage) {
     $this->storage = $storage;
   }
 
@@ -311,7 +311,7 @@ class CAYLAssetHelper {
                 $result[$asset]['url'] = $html_base . $asset_path;
                 continue;
               } else {
-                $asset_path = CAYLNetworkUtils::full_relative_path(join('/',$path_array), $asset_path);
+                $asset_path = AmberNetworkUtils::full_relative_path(join('/',$path_array), $asset_path);
               }
             }
             $asset_path = preg_replace("/^\\//","", $asset_path); /* Remove leading '/' */
@@ -448,7 +448,7 @@ EOD;
 
 }
 
-class CAYLNetworkUtils {
+class AmberNetworkUtils {
 
   private static function curl_installed() {
     return in_array("curl", get_loaded_extensions());
@@ -457,7 +457,7 @@ class CAYLNetworkUtils {
   public static function full_relative_path($base, $url) {
     $dict = parse_url($url);
     if (isset($dict['path'])) {
-      $result = CAYLNetworkUtils::clean_up_path(join('/',array($base,$dict['path'])));
+      $result = AmberNetworkUtils::clean_up_path(join('/',array($base,$dict['path'])));
     } else {
       $result = $base;  
     }
@@ -534,7 +534,7 @@ class CAYLNetworkUtils {
    * @return array of dictionaries of header information and a stream to the contents of the URL
    */
   public static function open_multi_url($urls, $additional_options = array()) {
-    if (CAYLNetworkUtils::curl_installed()) {
+    if (AmberNetworkUtils::curl_installed()) {
       $result = array();
       try {
         $options = array(
@@ -591,7 +591,7 @@ class CAYLNetworkUtils {
           $header_size = $response_info['header_size'];
           $header = substr($data, 0, $header_size-1);
           $body = substr($data, $header_size);
-          $headers = CAYLNetworkUtils::extract_headers($header);
+          $headers = AmberNetworkUtils::extract_headers($header);
           $result[$url] = array("headers" => $headers, "body" => $body, "info" => $response_info);
           curl_multi_remove_handle($multi, $channel); 
         }
@@ -616,7 +616,7 @@ class CAYLNetworkUtils {
    * @return array dictionary of header information and a stream to the contents of the URL
    */
   public static function open_url($url, $additional_options = array()) {
-    $result = CAYLNetworkUtils::open_multi_url(array($url), $additional_options);    
+    $result = AmberNetworkUtils::open_multi_url(array($url), $additional_options);    
     if (count($result) == 1) {
       return array_pop($result);
     } else {
@@ -626,7 +626,7 @@ class CAYLNetworkUtils {
 
 }
 
-class CAYLRobots {
+class AmberRobots {
   /**
    * Is the URL allowed by the robots.txt file.
    * @param $robots
@@ -648,10 +648,10 @@ class CAYLRobots {
     $p = parse_url($url);
     $p['path'] = "robots.txt";
     $robots_url = $p['scheme'] . "://" . $p['host'] . (isset($p['port']) ? ":" . $p['port'] : '') . '/robots.txt';
-    $data = CAYLNetworkUtils::open_url($robots_url, array(CURLOPT_FAILONERROR => FALSE));
+    $data = AmberNetworkUtils::open_url($robots_url, array(CURLOPT_FAILONERROR => FALSE));
     if (isset($data['info']['http_code']) && ($data['info']['http_code'] == 200)) {
       $body = $data['body'];
-      return (!$body || CAYLRobots::url_permitted($body, $url));
+      return (!$body || AmberRobots::url_permitted($body, $url));
     } else {
       return true;
     }

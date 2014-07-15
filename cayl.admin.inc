@@ -1,129 +1,129 @@
 <?php
 
 
-function cayl_config_form($form, &$form_state) {
-  $form['cayl_enabled'] = array(
+function amber_config_form($form, &$form_state) {
+  $form['amber_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable Amber'),
-    '#default_value' => variable_get('cayl_enabled', 1),
+    '#default_value' => variable_get('amber_enabled', 1),
     '#description' => t('Enable all functionality, including the preservation of new captures and notifications to site visitors. Disabling this will not remove existing captures.'),
   );
-  $form['cayl_cache'] = array(
+  $form['amber_cache'] = array(
     '#type' => 'fieldset',
     '#title' => t('Storage Settings'),
     '#description' => t("Control how Amber stores captures"),
   );
-  $form['cayl_cache']['cayl_max_file'] = array(
+  $form['amber_cache']['amber_max_file'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum file size (kB)'),
     '#size' => 10,
-    '#default_value' => variable_get('cayl_max_file', '1000'),
+    '#default_value' => variable_get('amber_max_file', '1000'),
     '#description' => t('Amber will store captures up to a specified size. Links to pages that exceed this size will not be preserved.'),
   );
-  $form['cayl_cache']['cayl_max_disk'] = array(
+  $form['amber_cache']['amber_max_disk'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum disk usage (MB)'),
     '#size' => 10,
-    '#default_value' => variable_get('cayl_max_disk', '1000'),
+    '#default_value' => variable_get('amber_max_disk', '1000'),
     '#description' => t('The maximum amount of disk space to be used for all cached items. If this disk space usage is exceeded, old items will be removed from the cache'),
   );
-  $form['cayl_cache']['cayl_storage_location'] = array(
+  $form['amber_cache']['amber_storage_location'] = array(
     '#type' => 'textfield',
     '#title' => t('Storage location'),
-    '#default_value' => variable_get('cayl_storage_location', 'sites/default/files/cayl'),
+    '#default_value' => variable_get('amber_storage_location', 'sites/default/files/amber'),
     '#description' => t('Path to the location where captures are stored on disk, relative to the Drupal root'),
   );
 
-  $form['cayl_cache']['advanced'] = array(
+  $form['amber_cache']['advanced'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
 
-  $form['cayl_cache']['advanced']['cayl_update_strategy'] = array(
+  $form['amber_cache']['advanced']['amber_update_strategy'] = array(
     '#type' => 'select',
     '#title' => t('Update strategy for captures'),
     '#options' => array (
       0 => t('Update captures periodically'),
       1 => t('Do not update captures'),
     ),
-    '#default_value' => variable_get('cayl_update_strategy', 0),
+    '#default_value' => variable_get('amber_update_strategy', 0),
     '#description' => t('Select "Do not update" if you want to preserve links at the time the content is published. Otherwise, link storage will be periodically updated.'),
   );
 
-  $form['cayl_cache']['advanced']['cayl_excluded_sites'] = array(
+  $form['amber_cache']['advanced']['amber_excluded_sites'] = array(
     '#type' => 'textarea',
     '#title' => t('Excluded sites'),
-    '#default_value' => variable_get('cayl_excluded_sites', ''),
+    '#default_value' => variable_get('amber_excluded_sites', ''),
     '#description' => t('A list of hostnames or IP addresses, separated by line. Amber will not preserve any link containing an excluded site.'),
   );
 
-  $form['cayl_cache']['advanced']['cayl_excluded_formats'] = array(
+  $form['amber_cache']['advanced']['amber_excluded_formats'] = array(
     '#type' => 'textarea',
     '#title' => t('Excluded file formats'),
-    '#default_value' => variable_get('cayl_excluded_formats', ''),
+    '#default_value' => variable_get('amber_excluded_formats', ''),
     '#description' => t('A list of of MIME types, separated by line. Amber will not preserve any link containing an excluded MIME type.'),
   );
 
-  $form['cayl_delivery'] = array(
+  $form['amber_delivery'] = array(
     '#type' => 'fieldset',
     '#title' => t('Amber Delivery'),
     '#description' => t("Settings that control the user experience"),
   );
 
-  $form['cayl_delivery']['cayl_available_action'] = array(
+  $form['amber_delivery']['amber_available_action'] = array(
     '#type' => 'select',
     '#title' => t('Available links'),
     '#options' => array (
-      CAYL_ACTION_NONE => t('None'),
-      CAYL_ACTION_HOVER => t('Hover'),
-      CAYL_ACTION_POPUP => t('Link to popup'),
+      AMBER_ACTION_NONE => t('None'),
+      AMBER_ACTION_HOVER => t('Hover'),
+      AMBER_ACTION_POPUP => t('Link to popup'),
     ),
-    '#default_value' => variable_get('cayl_available_action', 0),
+    '#default_value' => variable_get('amber_available_action', 0),
     '#description' => t('How a visitor to your site will experience links to pages that are currently available.'),
   );
 
-  $form['cayl_delivery']['cayl_available_action_hover'] = array(
+  $form['amber_delivery']['amber_available_action_hover'] = array(
     '#type' => 'textfield',
     '#title' => t('Hover delay (seconds)'),
     '#size' => 2,
-    '#default_value' => variable_get('cayl_available_action_hover', 2),
+    '#default_value' => variable_get('amber_available_action_hover', 2),
     '#description' => t('Delay before "Site Available" notification appears to a visitor on your site.'),
     '#states' => array(
       'visible' => array(
-        ':input[name="cayl_available_action"]' => array('value' => '1'),
+        ':input[name="amber_available_action"]' => array('value' => '1'),
       ),
      ),
   );
 
-  $form['cayl_delivery']['cayl_unavailable_action'] = array(
+  $form['amber_delivery']['amber_unavailable_action'] = array(
     '#type' => 'select',
     '#title' => t('Unavailable links'),
     '#options' => array (
-      CAYL_ACTION_NONE => t('None'),
-      CAYL_ACTION_HOVER => t('Hover'),
-      CAYL_ACTION_POPUP => t('Link to popup'),
-      CAYL_ACTION_CACHE => t('Link to cache'),
+      AMBER_ACTION_NONE => t('None'),
+      AMBER_ACTION_HOVER => t('Hover'),
+      AMBER_ACTION_POPUP => t('Link to popup'),
+      AMBER_ACTION_CACHE => t('Link to cache'),
     ),
-    '#default_value' => variable_get('cayl_unavailable_action', 1),
+    '#default_value' => variable_get('amber_unavailable_action', 1),
     '#description' => t('How a visitor to your site will experience links to pages that are currently unavailable.'),
   );
 
-  $form['cayl_delivery']['cayl_unavailable_action_hover'] = array(
+  $form['amber_delivery']['amber_unavailable_action_hover'] = array(
     '#type' => 'textfield',
     '#title' => t('Hover delay (seconds)'),
     '#size' => 2,
-    '#default_value' => variable_get('cayl_unavailable_action_hover', 2),
+    '#default_value' => variable_get('amber_unavailable_action_hover', 2),
     '#description' => t('Delay before "Site Unvailable" notification appears to a visitor on your site.'),
     '#states' => array(
       'visible' => array(
-        ':input[name="cayl_unavailable_action"]' => array('value' => '1'),
+        ':input[name="amber_unavailable_action"]' => array('value' => '1'),
       ),
      ),
   );
 
-  $form['cayl_country'] = array(
+  $form['amber_country'] = array(
     '#type' => 'fieldset',
     '#title' => t('Activity for a specific country'),
     '#description' => t("Customize the user experience for visitors from a specific country"),
@@ -131,101 +131,101 @@ function cayl_config_form($form, &$form_state) {
     '#collapsed' => TRUE,
   );
 
-  $form['cayl_country']['cayl_country_id'] = array(
+  $form['amber_country']['amber_country_id'] = array(
     '#type' => 'select',
     '#title' => t('Country'),
-    '#options' => array("" => "") + _cayl_get_countries(),
-    '#default_value' => variable_get('cayl_country_id', ""),
+    '#options' => array("" => "") + _amber_get_countries(),
+    '#default_value' => variable_get('amber_country_id', ""),
     '#description' => t('Visitors to your website with browser IP addresses originating in this country will experience specified behavior.'),
   );
 
-  $form['cayl_country']['cayl_country_proxy'] = array(
+  $form['amber_country']['amber_country_proxy'] = array(
     '#type' => 'textfield',
     '#title' => t('Proxy'),
-    '#default_value' => variable_get('cayl_country_proxy', ''),
+    '#default_value' => variable_get('amber_country_proxy', ''),
     '#description' => t('IP address or hostname of a proxy. Amber will use this proxy to test country-specific site availability.'),
     '#states' => array(
       'visible' => array(
-        ':input[name="cayl_country_id"]' => array('!value' => ''),
+        ':input[name="amber_country_id"]' => array('!value' => ''),
       ),
      ),
   );
 
-  $form['cayl_country']['cayl_country_available_action'] = array(
+  $form['amber_country']['amber_country_available_action'] = array(
     '#type' => 'select',
     '#title' => t('Available sites'),
     '#options' => array (
-      CAYL_ACTION_NONE => t('None'),
-      CAYL_ACTION_HOVER => t('Hover'),
-      CAYL_ACTION_POPUP => t('Link to popup'),
+      AMBER_ACTION_NONE => t('None'),
+      AMBER_ACTION_HOVER => t('Hover'),
+      AMBER_ACTION_POPUP => t('Link to popup'),
     ),
-    '#default_value' => variable_get('cayl_country_available_action', 0),
+    '#default_value' => variable_get('amber_country_available_action', 0),
     '#description' => t('How links that are available will appear to visitors to your site.'),
     '#states' => array(
       'visible' => array(
-        ':input[name="cayl_country_id"]' => array('!value' => ''),
+        ':input[name="amber_country_id"]' => array('!value' => ''),
       ),
      ),
   );
 
-  $form['cayl_country']['cayl_country_available_action_hover'] = array(
+  $form['amber_country']['amber_country_available_action_hover'] = array(
     '#type' => 'textfield',
     '#title' => t('Hover delay (seconds)'),
     '#size' => 2,
-    '#default_value' => variable_get('cayl_country_available_action_hover', 2),
+    '#default_value' => variable_get('amber_country_available_action_hover', 2),
     '#description' => t('Delay a visitor to your site will experience before notification appears.'),
     '#states' => array(
       'visible' => array(
-        ':input[name="cayl_country_id"]' => array('!value' => ''),
-        ':input[name="cayl_country_available_action"]' => array('value' => '1'),
+        ':input[name="amber_country_id"]' => array('!value' => ''),
+        ':input[name="amber_country_available_action"]' => array('value' => '1'),
       ),
      ),
   );
 
-  $form['cayl_country']['cayl_country_unavailable_action'] = array(
+  $form['amber_country']['amber_country_unavailable_action'] = array(
     '#type' => 'select',
     '#title' => t('Unavailable sites'),
     '#options' => array (
-      CAYL_ACTION_NONE => t('None'),
-      CAYL_ACTION_HOVER => t('Hover'),
-      CAYL_ACTION_POPUP => t('Link to popup'),
-      CAYL_ACTION_CACHE => t('Link to cache'),
+      AMBER_ACTION_NONE => t('None'),
+      AMBER_ACTION_HOVER => t('Hover'),
+      AMBER_ACTION_POPUP => t('Link to popup'),
+      AMBER_ACTION_CACHE => t('Link to cache'),
     ),
-    '#default_value' => variable_get('cayl_country_unavailable_action', 1),
+    '#default_value' => variable_get('amber_country_unavailable_action', 1),
     '#description' => t('How links that are available will appear to visitors to your site.'),
     '#states' => array(
       'visible' => array(
-        ':input[name="cayl_country_id"]' => array('!value' => ''),
+        ':input[name="amber_country_id"]' => array('!value' => ''),
       ),
      ),
   );
 
-  $form['cayl_country']['cayl_country_unavailable_action_hover'] = array(
+  $form['amber_country']['amber_country_unavailable_action_hover'] = array(
     '#type' => 'textfield',
     '#title' => t('Hover delay (seconds)'),
     '#size' => 2,
-    '#default_value' => variable_get('cayl_country_unavailable_action_hover', 2),
+    '#default_value' => variable_get('amber_country_unavailable_action_hover', 2),
     '#description' => t('Delay a visitor to your site will experience before notification appears.'),
     '#states' => array(
       'visible' => array(
-        ':input[name="cayl_country_id"]' => array('!value' => ''),
-        ':input[name="cayl_country_unavailable_action"]' => array('value' => '1'),
+        ':input[name="amber_country_id"]' => array('!value' => ''),
+        ':input[name="amber_country_unavailable_action"]' => array('value' => '1'),
       ),
      ),
   );
 
   $form = system_settings_form($form);
-  $form['#submit'][] = 'cayl_settings_submit';
+  $form['#submit'][] = 'amber_settings_submit';
   return $form;
 }
 
 /* Custom submit handler to flush filter cache after the settings are updated */
-function cayl_settings_submit($form, &$form_state) {
+function amber_settings_submit($form, &$form_state) {
   cache_clear_all('*', 'cache_filter',TRUE);
   cache_clear_all('*', 'cache_field',TRUE);
 }
 
-function _cayl_get_countries() {
+function _amber_get_countries() {
   if (function_exists("country_get_list")) {
     $countries = country_get_list(); // From Locale module
   } else {

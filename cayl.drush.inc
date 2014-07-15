@@ -2,25 +2,25 @@
 
 /**
  * @file
- * Drush interface to CAYL
+ * Drush interface to Amber
  */
 
 /**
  * Implements hook_drush_command().
  */
-function cayl_drush_command() {
+function amber_drush_command() {
   $commands = array();
 
-  $commands['cayl-scan'] = array(
+  $commands['amber-scan'] = array(
     'description' => 'Scans content for links to cache',
     'arguments' => array(
       'node' => 'The ID node of the scan, or \'all\'',
     ),
   );
-  $commands['cayl-clear-cache'] = array(
+  $commands['amber-clear-cache'] = array(
     'description' => 'Delete the contents of the cache',
   );
-  $commands['cayl-cache-url'] = array(
+  $commands['amber-cache-url'] = array(
     'description' => 'Cache a single URL',
     'arguments' => array(
       'url' => 'A URL to save to the cache',
@@ -28,7 +28,7 @@ function cayl_drush_command() {
     'aliases' => array('ccu'),
   );
 
-  $commands['cayl-check-up'] = array(
+  $commands['amber-check-up'] = array(
     'description' => 'Check a single URL to see if it is up',
     'arguments' => array(
       'url' => 'A URL to check',
@@ -36,14 +36,14 @@ function cayl_drush_command() {
     'aliases' => array('cup'),
   );
 
-  $commands['cayl-check-url'] = array(
+  $commands['amber-check-url'] = array(
     'description' => 'Run the availability check on a single URL',
     'arguments' => array(
       'url' => 'A URL to check',
     ),
   );
 
-  $commands['cayl-delete'] = array(
+  $commands['amber-delete'] = array(
     'description' => 'Delete an id from the cache',
     'arguments' => array(
       'id' => 'ID of URL to delete',
@@ -58,21 +58,21 @@ function cayl_drush_command() {
  * @param null $nid
  * @return bool
  */
-function drush_cayl_scan($nid = NULL) {
+function drush_amber_scan($nid = NULL) {
   if (!$nid) {
     drush_set_error(dt("Specify either a node ID to scan, or 'all'."));
     return FALSE;
   }
   if ($nid) {
     if ($nid == 'all') {
-      cayl_cache_all();
+      amber_cache_all();
     } else {
       $node = node_load($nid);
       if (!$node) {
         drush_set_error(dt("Could not load node"));
         return FALSE;
       }
-      cayl_cache_node($node);
+      amber_cache_node($node);
     }
     drush_print("Queued links for caching");
   }
@@ -81,14 +81,14 @@ function drush_cayl_scan($nid = NULL) {
 /**
  * Delete the entire cache
  */
-function drush_cayl_clear_cache() {
-  cayl_clear_cache();
+function drush_amber_clear_cache() {
+  amber_clear_cache();
   drush_print("Cache cleared");
 }
 
-function drush_cayl_cache_url($url) {
+function drush_amber_cache_url($url) {
   if ($url) {
-    cayl_process_cache_queue($url);
+    amber_process_cache_queue($url);
     drush_print("URL fetched");
   } else {
     drush_set_error(dt("Specify a URL to cache"));
@@ -96,9 +96,9 @@ function drush_cayl_cache_url($url) {
   }
 }
 
-function drush_cayl_check_up($url) {
+function drush_amber_check_up($url) {
   if ($url) {
-    $checker = cayl_get_checker();
+    $checker = amber_get_checker();
     if ($checker->up($url)) {
       drush_print("Up");
     } else {
@@ -110,9 +110,9 @@ function drush_cayl_check_up($url) {
   }
 }
 
-function drush_cayl_check_url($url) {
+function drush_amber_check_url($url) {
   if ($url) {
-    cayl_process_check_queue($url, true);
+    amber_process_check_queue($url, true);
     drush_print("URL checked");
   } else {
     drush_set_error(dt("Specify a URL to check"));
@@ -120,9 +120,9 @@ function drush_cayl_check_url($url) {
   }
 }
 
-function drush_cayl_delete_url($id) {
+function drush_amber_delete_url($id) {
   if ($id) {
-    cayl_delete_item($id);
+    amber_delete_item($id);
     drush_print("Item deleted");
   } else {
     drush_set_error(dt("Specify an ID to delete"));
