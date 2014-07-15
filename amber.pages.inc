@@ -112,9 +112,13 @@ function _amber_last_run($var) {
 
 function _amber_disk_usage() {
   $status = amber_get_status();
-  $formatted_max = format_size(variable_get('amber_max_disk', '1000') * 1024 * 1024);
+  $max_size = variable_get('amber_max_disk', '1000') * 1024 * 1024;
+  $formatted_max = format_size($max_size);
   $current_size = $status->get_cache_size();
-  $formatted_current_size = $current_size ? format_size($current_size) : t('None');
+  $formatted_current_size = $current_size ? format_size($current_size) : t('0 MB');
+  if ($current_size > (0.9 * $max_size)) {
+    drupal_set_message(t("You are approaching the maximum space allocated for the cache."),'warning',FALSE);
+  }
   return t('@current (of @max)', array('@current' => $formatted_current_size, '@max' => $formatted_max));
 }
 
