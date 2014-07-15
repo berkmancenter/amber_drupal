@@ -52,6 +52,7 @@ function amber_uninstall() {
   variable_del('amber_country_available_action_hover');
   variable_del('amber_country_unavailable_action');
   variable_del('amber_country_unavailable_action_hover');
+  variable_del('amber_content_scanned');
 }
 
 function amber_schema() {

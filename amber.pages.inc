@@ -31,6 +31,10 @@ function amber_dashboard_summary_form() {
     '#submit' => array('amber_dashboard_summary_form_cache')
   );
 
+  if (!variable_get('amber_content_scanned', 0) && (_amber_queue_size(AMBER_QUEUE_CHECK_NEW) == 0)) {
+    drupal_set_message(t('You should scan all existing content for links to preserve'),'warning',FALSE);
+  }
+
   return $build;
 }
 
@@ -130,6 +134,8 @@ function amber_dashboard_summary_form_clear($form, &$form_state) {
 }
 
 function amber_dashboard_summary_form_scan($form, &$form_state) {
+  drupal_get_messages(); /* Clear the 'You should scan for content' message */
+  variable_set('amber_content_scanned', 1);
   $scan_batch = amber_batch_scan_all_setup();
   if ($scan_batch) {
     batch_set($scan_batch);
