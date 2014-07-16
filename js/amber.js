@@ -274,12 +274,16 @@ var amber = {
       /* Give them some time, and then check if they've moved over the popup before closing popup */
       setTimeout(function() {
         if (!amber.hovering_on_popup) {
-          var hover = document.querySelectorAll(".amber-hover")[0];
-          if (typeof hover != typeof undefined)
-            hover.parentNode.removeChild(hover);
+          amber.clear_hover();
         }
       },100);
     }
+  },
+
+  clear_hover : function (e) {
+    var hover = document.querySelectorAll(".amber-hover")[0];
+    if (typeof hover != typeof undefined)
+      hover.parentNode.removeChild(hover);
   },
 
   /* Utility functions to provide support for IE8+ */
@@ -324,7 +328,6 @@ var amber = {
       };
   }
 
-
 };
 
 amber.util_ready(function($) {
@@ -338,6 +341,7 @@ amber.util_ready(function($) {
     amber.util_forEachElement("a[data-cache][data-amber-behavior*=hover]", function(e, i) {
       amber.util_addEventListener(e, 'mouseover', amber.start_link_hover);
       amber.util_addEventListener(e, 'mouseout', amber.end_link_hover);
+      amber.util_addEventListener(e, 'click', amber.clear_hover);
     });
 
     if (amber.country_specific_behavior_exists()) {
