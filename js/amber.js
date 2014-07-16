@@ -6,15 +6,21 @@ var amber = {
   rtl : false,
   translations : {
     en : {
-      interstitial_html :
-      '<div class="amber-interstitial"><a href="#" class="amber-close"></a><div class="amber-body"><div class="amber-status-text">This page may not be available</div><div class="amber-cache-text">{{NAME}} has a cache from {{DATE}}</div>' +
+      interstitial_html_up :
+      '<div class="amber-interstitial amber-up"><a href="#" class="amber-close"></a><div class="amber-body"><div class="amber-status-text">This page should be available</div><div class="amber-cache-text">{{NAME}} has a cache from {{DATE}}</div>' +
+      '<a class="amber-focus" href="{{CACHE}}">View the cache</a><div class="amber-iframe-container"><iframe src="{{LINK}}"/></div><a class="amber-original-link" href="{{LINK}}">Continue to the page</a></div><a class="amber-info" href="http://brk.mn/robustness" target="_blank">i</a></div>',
+      interstitial_html_down :
+      '<div class="amber-interstitial amber-down"><a href="#" class="amber-close"></a><div class="amber-body"><div class="amber-status-text">This page may not be available</div><div class="amber-cache-text">{{NAME}} has a cache from {{DATE}}</div>' +
       '<a class="amber-focus" href="{{CACHE}}">View the cache</a><div class="amber-iframe-container"><iframe src="{{LINK}}"/></div><a class="amber-original-link" href="{{LINK}}">Continue to the page</a></div><a class="amber-info" href="http://brk.mn/robustness" target="_blank">i</a></div>',
       hover_html_up   : '<div class="amber-hover amber-up"><a class="amber-info" href="http://brk.mn/robustness" target="_blank">i</a><div class="amber-text"><div class="amber-status-text">This page should be available</div><div class="amber-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="amber-links"><a href="{{CACHE}}">View the cache</a><a href="{{LINK}}" class="amber-focus">Continue to the page</a></div><div class="amber-arrow"></div></div>',
       hover_html_down : '<div class="amber-hover amber-down"><a class="amber-info" href="http://brk.mn/robustness" target="_blank">i</a><div class="amber-text"><div class="amber-status-text">This page may not be available</div><div class="amber-cache-text">{{NAME}} has a cache from {{DATE}}</div></div><div class="amber-links"><a href="{{CACHE}}" class="amber-focus">View the cache</a><a href="{{LINK}}">Continue to the page</a></div><div class="amber-arrow"></div></div>',
       this_site: "This site"     
     },
     fa : {    
-        interstitial_html :
+        interstitial_html_up :
+        '<div class="amber-interstitial"><a href="#" class="amber-close"></a><div class="amber-body"><div class="amber-status-text">این سایت ممکن است در دسترس</div><div class="amber-cache-text">{{NAME}} یک کش از {{DATE}}</div>' +
+        '<a class="amber-focus" href="{{CACHE}}">نمایش لینک های cache شده</a><div class="amber-iframe-container"><iframe src="{{LINK}}"/></div><a class="amber-original-link" href="{{LINK}}">نمایش لینک های فعال</a></div><a class="amber-info" href="http://brk.mn/robustness" target="_blank">i</a></div>',
+        interstitial_html_down :
         '<div class="amber-interstitial"><a href="#" class="amber-close"></a><div class="amber-body"><div class="amber-status-text">این سایت ممکن است در دسترس</div><div class="amber-cache-text">{{NAME}} یک کش از {{DATE}}</div>' +
         '<a class="amber-focus" href="{{CACHE}}">نمایش لینک های cache شده</a><div class="amber-iframe-container"><iframe src="{{LINK}}"/></div><a class="amber-original-link" href="{{LINK}}">نمایش لینک های فعال</a></div><a class="amber-info" href="http://brk.mn/robustness" target="_blank">i</a></div>',
         hover_html_up   : '<div class="amber-hover amber-up"><a class="amber-info" href="http://brk.mn/robustness" target="_blank">i</a><div class="amber-text"><div class="amber-status-text">این سایت باید در دسترس باشد</div><div class="amber-cache-text">{{NAME}} یک کش از {{DATE}}</div></div><div class="amber-links"><a href="{{CACHE}}">دیدن لینک خرید پستی</a><a href="{{LINK}}" class="amber-focus">دیدن لینک زنده</a></div><div class="amber-arrow"></div></div>',
@@ -174,7 +180,7 @@ var amber = {
       }
 
       var amberElement = document.createElement('div');
-      amberElement.innerHTML = amber.replace_args(amber.get_text('interstitial_html'), replacements);
+      amberElement.innerHTML = amber.replace_args(behavior.default.status == "up" ? amber.get_text('interstitial_html_up') : amber.get_text('interstitial_html_down'), replacements);
       document.body.appendChild(amberElement.firstChild);
 
       /* Center the window */

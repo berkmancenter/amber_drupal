@@ -16,13 +16,17 @@
   top: 200px;
   position: fixed;
   border-radius: 4px;
-  background: #34495e url(alert-large.png) center 30px no-repeat;
+  background-color: #34495e;
   color: white;
   font-family: Arial, sans-serif;      
   line-height: 28px;
   z-index: 999999;
 }                          
-            
+
+.amber-interstitial.amber-down {
+  background: #34495e url(alert-large.png) center 30px no-repeat;
+}
+
 .amber-interstitial a.amber-close {                                               
   float: right;
   display: block;                                                
@@ -139,11 +143,11 @@
   background-repeat: no-repeat;
 }
 
-.amber-up .amber-status-text {
+.amber-hover.amber-up .amber-status-text {
   background-image: url(check-small.png);
 }
 
-.amber-down .amber-status-text {
+.amber-hover.amber-down .amber-status-text {
   background-image: url(alert-small.png);
 }
 
