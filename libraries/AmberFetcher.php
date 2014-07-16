@@ -132,20 +132,6 @@ class AmberFetcher implements iAmberFetcher {
     return $assets;
   }
 
-  /**
-   * Change a file resource to have new contents. Current implementation creates a new temp file, and points the
-   * resource at that
-   * @param $resource resource to change contents of
-   * @param $text new contents
-   */
-  private function rewrite_file(&$resource, $text) {
-    $stream = fopen('php://temp','rw');
-    fwrite($stream, $text);
-    fclose($resource);
-    $resource = $stream;
-    rewind($resource);
-  }
-
   /** 
    * Tell if a file should be cached or not
    */
