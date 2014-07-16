@@ -16,6 +16,7 @@ class AmberFetcher implements iAmberFetcher {
     $this->assetHelper = new AmberAssetHelper($storage);
     $this->maxFileSize = isset($options['amber_max_file']) ? $options['amber_max_file'] : 1000;
     $this->headerText = isset($options['header_text']) ? $options['header_text'] : "This is a cached page";
+    $this->excludedContentTypes = isset($options['excluded_content_types']) ? $options['excluded_content_types'] : array();
   }
 
   /**
@@ -38,8 +39,8 @@ class AmberFetcher implements iAmberFetcher {
     $root_item = AmberNetworkUtils::open_url($url);
 
     // Decide whether the item should be cached
-    if (!$this->cacheable_item($root_item)) {
-      throw new RuntimeException("File size too large");
+    if (!$this->cacheable_item($root_item, $reason)) {
+      throw new RuntimeException($reason);
     }
 
     $size = $root_item['info']['size_download'];
@@ -145,12 +146,24 @@ class AmberFetcher implements iAmberFetcher {
     rewind($resource);
   }
 
-  private function cacheable_item($data) {
-
+  /** 
+   * Tell if a file should be cached or not
+   */
+  private function cacheable_item($data, &$reason) {    
+    $reason = "";
     if ($data['info']['size_download'] > ($this->maxFileSize * 1024)) {
-      return false;
+      $reason = "File size too large";
+      return FALSE;
     }
-    // TODO: Check for excluded content-type
+    if ($data['headers']['Content-Type'] && !empty($this->excludedContentTypes)) {
+      $content_type = $data['headers']['Content-Type'];
+      foreach ($this->excludedContentTypes as $exclude) {
+        if (strpos(strtolower($content_type), trim($exclude)) !== FALSE) {
+          $reason = "Content type not allowed";
+          return FALSE;  
+        }
+      }      
+    }
     return TRUE;
   }
 

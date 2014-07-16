@@ -40,6 +40,7 @@ function amber_get_fetcher() {
     $fetcher = new AmberFetcher(amber_get_storage(), array(
       'amber_max_file' => variable_get('amber_max_file',1000),
       'header_text' => t("This is a cached page"),
+      'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
     ));
   }
   return $fetcher;
