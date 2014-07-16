@@ -633,6 +633,9 @@ class AmberRobots {
    * @return bool
    */
   public static function url_permitted($robots, $url) {
+    /* Sanity check to ensure that this actually a robots.txt file */
+    if (!(preg_match("/User.*/", $robots) && preg_match("/Disallow:.*/", $robots)))
+      return true;
     require_once("robotstxtparser.php");
     $parser = new robotstxtparser($robots);
     return !$parser->isDisallowed($url);
@@ -651,9 +654,8 @@ class AmberRobots {
     if (isset($data['info']['http_code']) && ($data['info']['http_code'] == 200)) {
       $body = $data['body'];
       return (!$body || AmberRobots::url_permitted($body, $url));
-    } else {
-      return true;
-    }
+    } 
+    return true;
   }
 
 }
