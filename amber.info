@@ -1,5 +1,5 @@
-name = Cache As You Link
-description = Configurations settings example for the Amber functionality
+name = Amber
+description = Amber (need one-liner here)
 package = Amber
 core = 7.x
 
