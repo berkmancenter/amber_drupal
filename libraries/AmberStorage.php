@@ -49,7 +49,7 @@ class AmberStorage implements iAmberStorage {
 
   function __construct($file_root = '/private/tmp/amber/cache') {
     $this->file_root = $file_root;
-    $this->url_prefix = 'Amber';
+    $this->url_prefix = 'amber';
     $this->name = 'amber'; // Used to identify the metadata that belongs to this implementation of iAmberStorage
   }
 
