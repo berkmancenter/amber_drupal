@@ -234,11 +234,18 @@ var amber = {
   },
 
   calculate_hover_position : function (target, status) {
+    var edge_buffer = 15;
     var offset = amber.util_offset(target);
-    var result = {"left" : offset.left - 30, "top" : offset.top - 105}
+    var result = {"left" : offset.left - 30, "top" : offset.top - 100}
     if (amber.rtl) {
       var hover = document.querySelectorAll(".amber-hover")[0];
       result.left = result.left + target.offsetWidth - hover.offsetWidth;
+    }
+    if (result.left < edge_buffer) {
+      result.left = edge_buffer;
+    }
+    if (result.top < edge_buffer) {
+      result.top = edge_buffer;
     }
     return result;
   },
@@ -277,12 +284,14 @@ var amber = {
     if (amber.execute_action(behavior,"hover")) {
       clearTimeout(this.getAttribute("amber-timer"));
 
-      /* Give them some time, and then check if they've moved over the popup before closing popup */
+      /* Give them some time, and then check if they've moved over the popup before closing popup.
+         Add some special handling if the hover display is 0, to avoid wierdness */
+      var delay = behavior[amber.country] ? behavior[amber.country].delay : behavior.default.delay;
       setTimeout(function() {
         if (!amber.hovering_on_popup) {
           amber.clear_hover();
         }
-      },100);
+      }, Math.min(100,delay * 1000));
     }
   },
 
