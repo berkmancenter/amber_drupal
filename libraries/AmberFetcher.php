@@ -44,6 +44,9 @@ class AmberFetcher implements iAmberFetcher {
     }
 
     $size = $root_item['info']['size_download'];
+    if ($size == 0) {
+      throw new RuntimeException("Empty document"); 
+    }
     // Get other assets
     if (isset($root_item['headers']['Content-Type']) &&
         ($content_type = $root_item['headers']['Content-Type']) &&
@@ -346,7 +349,7 @@ class AmberAssetHelper {
           $result = str_replace($key,$p,$result,$count);
           if ($count == 0) {
             /* Try again if there were no matches, since the $key made have had its HTML
-               special characters decode when extracted by parsing the DOM */
+               special characters decoded when extracted by parsing the DOM */
             $result = str_replace(htmlspecialchars($key),$p,$result,$count);
           }
         }
