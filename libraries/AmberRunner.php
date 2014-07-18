@@ -30,6 +30,9 @@ function main($argc, $argv) {
     case "dequeue":
       dequeue();
       break;
+    case "check":
+      schedule_checks();
+      break;
     case "cache":
       if ($options["url"]) {
         cache($options["url"]);
@@ -45,7 +48,7 @@ function main($argc, $argv) {
 }
 
 function usage() {
-  print "Usage: $argc [--action=dequeue|cache|help] [--db=path_to_database] [--cache=path_to_cache] [--url=url_to_cache]\n";
+  print "Usage: $argc [--action=dequeue|cache|check|help] [--db=path_to_database] [--cache=path_to_cache] [--url=url_to_cache]\n";
 }
 
 /* Download a single URL and save it to the cache */
@@ -60,6 +63,8 @@ function cache($url) {
       $cache_metadata = $fetcher->fetch($url);
     } catch (RuntimeException $re) {
       error_log(sprintf("Did not cache (%s): %s", $url, $re->getMessage()));
+      $update['message'] = $re->getMessage();
+      $status->save_check($update);        
       return;
     }
     if ($cache_metadata) {
@@ -73,13 +78,7 @@ function cache($url) {
    To run until the queue is empty use the shell command: while php AmberRunner.php dequeue; do true ; done
 */
 function dequeue() {
-  global $db;
-  try {
-    $db_connection = new PDO('sqlite:' . $db);
-  } catch (PDOException $e) {
-    print "Error: Cannot open database: " . $e->getMessage();
-    return null;
-  }
+  $db_connection = get_database();
   $result = $db_connection->query('SELECT c.url FROM amber_queue c WHERE c.lock is NULL ORDER BY created ASC LIMIT 1');
   $row = $result->fetch();
   $result->closeCursor();
@@ -96,6 +95,29 @@ function dequeue() {
     print "No more items to cache\n";
     exit(1);
   }
+}
+
+/* Find all items that are due to be checked, and put them on the queue for checking */
+function schedule_checks() {
+  $db_connection = get_database();
+  $status_service = get_status();
+  $urls = $status_service->get_urls_to_check();
+  foreach ($urls as $url) {
+    $insert_query = $db_connection->prepare('INSERT OR IGNORE INTO amber_queue (url, created) VALUES(:url, :created)');
+    $insert_query->execute(array('url' => $url, 'created' => time()));
+  }
+  print "Scheduled " . count($urls) . " urls for checking\n";
+}
+
+function get_database() {
+  global $db;
+  try {
+    $db_connection = new PDO('sqlite:' . $db);
+  } catch (PDOException $e) {
+    print "Error: Cannot open database: " . $e->getMessage();
+    exit(1);
+  }
+  return $db_connection;
 }
 
 function get_storage() {
