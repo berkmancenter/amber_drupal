@@ -55,6 +55,65 @@ EOD
 
   }
 
+  public function testCyberRobotsParseNoBlankLineAtEnd() {
+    $this->assertFalse(AmberRobots::url_permitted(<<<EOD
+User-agent: *
+Disallow: /zittrain/
+EOD
+, "/zittrain/"));
+}
+  
+  public function testCyberRobotsParseMultipleUserAgents() {
+    $this->assertFalse(AmberRobots::url_permitted(<<<EOD
+User-agent: *
+Disallow: /zittrain/
+Disallow: /cite/
+Disallow: /opengovernment
+Disallow: /blogs
+
+# Spiders + MediaWiki = Bad
+User-agent: *
+Disallow: /blogsupport
+Disallow: /brooklaw
+Disallow: /cyberlaw2005/wiki
+EOD
+, "/zittrain/"));
+}
+
+  public function testCyberRobotsParseSomethingElseNotWorking() {
+    $this->assertFalse(AmberRobots::url_permitted(<<<EOD
+User-agent: *
+Disallow: /zittrain/
+Disallow: /cite/
+Disallow: /opengovernment
+Disallow: /blogs
+
+# Spiders + MediaWiki = Bad
+User-agent: *
+Disallow: /blogsupport
+Disallow: /brooklaw
+Disallow: /cyberlaw2005/wiki
+Disallow: /cyberone/wiki
+Disallow: /h2owiki
+Disallow: /iptheory
+Disallow: /jamaicavoices
+Disallow: /netizenship
+Disallow: /ocs_global
+Disallow: /ocs_intranet
+Disallow: /oni-RAs
+Disallow: /practical_lawyering
+Disallow: /publicmediaforge
+Disallow: /techwiki
+
+#allow cyber-search to get there
+User-agent: htdig/3.1.5 (wendy@eon.law.harvard.edu)
+Disallow: 
+Disallow: /msdoj/discuss/
+EOD
+, "/zittrain/"));
+  }
+
+
 
 }
 

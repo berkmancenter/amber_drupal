@@ -34,7 +34,7 @@ before_script:
   - php -d sendmail_path=`which true` `pear config-get php_dir`/drush/drush.php --yes core-quick-drupal --profile=testing --no-server --db-url=mysql://root:@127.0.0.1/amber --enable=simpletest amber
 
   # reference and enable travis_ci_drupal_module_example in build site
-  - ln -s $(readlink -e $(cd -)) amber/drupal/sites/all/modules/amber
+  - ln -s $(readlink -e $(cd -)) amber/drupal/sites/all/modules
   - cd amber/drupal
   - drush --yes pm-enable amber
 
