@@ -467,6 +467,7 @@ function amber_clear_cache() {
       $queue->deleteQueue();
     }
   }
+  db_delete('queue')->condition('data', '%amber_batch_cache_process%', 'LIKE')->execute();
 }
 
 function amber_delete_item($id) {
