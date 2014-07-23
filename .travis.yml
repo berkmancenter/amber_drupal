@@ -44,4 +44,4 @@ before_script:
 
 script:
   - drush test-run 'Amber, AmberWeb' --uri=http://127.0.0.1:8080
-  - phpunit sites/all/modules/amber/libraries
+  - phpunit sites/all/modules/amber
