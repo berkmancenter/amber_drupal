@@ -30,10 +30,13 @@ function amber_requirements($phase) {
  */
 function amber_uninstall() {
   require_once("libraries/AmberStorage.php");
-  $file_path = join(DIRECTORY_SEPARATOR,
-      array(DRUPAL_ROOT, variable_get('amber_storage_location', 'sites/default/files/amber')));
-  $storage = new AmberStorage($file_path);
-  $storage->clear_cache();
+  require_once("libraries/AmberStatus.php");
+  require_once("amber.module");
+  amber_clear_cache();
+  // $file_path = join(DIRECTORY_SEPARATOR,
+  //     array(DRUPAL_ROOT, variable_get('amber_storage_location', 'sites/default/files/amber')));
+  // $storage = new AmberStorage($file_path);
+  // $storage->clear_cache();
   variable_del('amber_enabled');
   variable_del('amber_max_file');
   variable_del('amber_max_disk');
