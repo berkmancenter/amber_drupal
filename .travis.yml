@@ -44,6 +44,5 @@ before_script:
 
 script:
   - pwd
-  - ls -l sites/all/modules/amber
+  - ls -l sites/all/modules
   - drush test-run 'Amber, AmberWeb' --uri=http://127.0.0.1:8080
-  - phpunit sites/all/modules/amber
