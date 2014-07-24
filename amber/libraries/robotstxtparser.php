@@ -74,6 +74,8 @@
 			// last line is ignored
 			$this->content .= "\n";
 
+			$this->contentArray = preg_split('//u',$this->content, -1, PREG_SPLIT_NO_EMPTY);
+
 			// set default state
 			$this->state = self::STATE_ZERO_POINT;
 
@@ -320,7 +322,12 @@
 		 */
 		protected function increment()
 		{
-			$this->current_char = mb_strtolower($this->content[$this->char_index]);
+			if (count($this->contentArray) > $this->char_index) {
+				$this->current_char = mb_strtolower($this->contentArray[$this->char_index]);	
+			} else {
+				$this->current_char = "\n";
+			}
+			
 			$this->current_word .= $this->current_char;
 			$this->current_word = trim($this->current_word);
 			$this->char_index++;
