@@ -43,6 +43,4 @@ before_script:
   - until netstat -an 2>/dev/null | grep '8080.*LISTEN'; do true; done
 
 script:
-  - pwd
-  - ls -l sites/all/modules
   - drush test-run 'Amber, AmberWeb' --uri=http://127.0.0.1:8080
