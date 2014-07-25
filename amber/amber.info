@@ -1,5 +1,5 @@
 name = Amber
-description = Amber (need one-liner here)
+description = Enables the preservation of content to which your website links.
 package = Amber
 core = 7.x
 
