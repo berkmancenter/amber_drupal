@@ -7,7 +7,7 @@ Amber Drupal module
 * PHP 5.3 or higher
 * cURL (To see if cURL is installed, go to Administartion->Reports->Status Report)
 
-## Installation Instructions ##
+## Installation ##
 
 __To be added__
 
