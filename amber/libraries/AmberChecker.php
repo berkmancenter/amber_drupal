@@ -74,7 +74,7 @@ class AmberChecker implements iAmberChecker {
    * @param $new_status bool with the current status of the URL
    * @return int with the unix timestamp of the date after which the url can be checked again
    */
-  private function next_check_date($status, $last_checked_timestamp, $next_check_timestamp, $new_status) {
+  public function next_check_date($status, $last_checked_timestamp, $next_check_timestamp, $new_status) {
     $date = new DateTime();
     if (is_null($status) || ($new_status != (bool)($status)) || is_null($last_checked_timestamp)) {
       $next_timestamp = $date->add(new DateInterval("P1D"))->getTimestamp();
