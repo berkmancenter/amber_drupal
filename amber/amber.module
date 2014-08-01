@@ -448,7 +448,6 @@ function amber_deliver_cache_item($data) {
     if (isset($data['metadata']['type'])) {
       drupal_add_http_header('Content-Type', $data['metadata']['type']);
     }
-    //TODO: Tack the filename onto the end of the URL (either when rendering, or as a redirect, if non-HTML)
     print($data['data']);
   }
 }
