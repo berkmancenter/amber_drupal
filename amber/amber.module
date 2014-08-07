@@ -12,7 +12,6 @@ define("AMBER_QUEUE_CHECK_NEW", "amber_check_new");
 define("AMBER_QUEUE_CHECK_EXISTING","amber_check_existing");
 
 define("AMBER_VAR_LAST_CHECK_RUN","amber_last_check_run");
-define("AMBER_VAR_LAST_CACHE_RUN","amber_last_cache_run");
 
 module_load_include('inc', 'amber', 'amber.batch');
 
