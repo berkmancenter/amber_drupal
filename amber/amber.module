@@ -430,7 +430,9 @@ function amber_retrieve_cache_asset() {
     switch ($extension) {
       case "css" : $data['metadata']['type'] = 'text/css'; break;
       case "jpg" : $data['metadata']['type'] = 'image/jpeg'; break;      
+      case "png" : $data['metadata']['type'] = 'image/png'; break;      
       case "svg" : $data['metadata']['type'] = 'image/svg+xml'; break;      
+      case "js" : $data['metadata']['type'] = 'application/javascript'; break;      
     }
   }
   return (isset($data)) ? $data : MENU_NOT_FOUND;

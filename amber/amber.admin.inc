@@ -139,17 +139,17 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('Visitors to your website with browser IP addresses originating in this country will experience specified behavior.'),
   );
 
-  $form['amber_country']['amber_country_proxy'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Proxy'),
-    '#default_value' => variable_get('amber_country_proxy', ''),
-    '#description' => t('IP address or hostname of a proxy. Amber will use this proxy to test country-specific site availability.'),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="amber_country_id"]' => array('!value' => ''),
-      ),
-     ),
-  );
+  // $form['amber_country']['amber_country_proxy'] = array(
+  //   '#type' => 'textfield',
+  //   '#title' => t('Proxy'),
+  //   '#default_value' => variable_get('amber_country_proxy', ''),
+  //   '#description' => t('IP address or hostname of a proxy. Amber will use this proxy to test country-specific site availability.'),
+  //   '#states' => array(
+  //     'visible' => array(
+  //       ':input[name="amber_country_id"]' => array('!value' => ''),
+  //     ),
+  //    ),
+  // );
 
   $form['amber_country']['amber_country_available_action'] = array(
     '#type' => 'select',
