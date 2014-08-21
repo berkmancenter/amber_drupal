@@ -154,31 +154,31 @@ EOT;
     $blacklist = array("yahoo.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake");
     $result = _amber_filter_links($links,$blacklist);
-    $this->assertEqual(count($result),3);
-    $this->assertEqual($result[1],"https://google.com");
+    $this->assertEqual(count($result['cache']),3);
+    $this->assertEqual($result['cache'][1],"https://google.com");
   }
 
   public function testAmberLinkFilter2() {
     $blacklist = array("yahoo.com","www.google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake");
     $result = _amber_filter_links($links,$blacklist);
-    $this->assertEqual(count($result),3);
-    $this->assertEqual($result[1],"https://google.com");
+    $this->assertEqual(count($result['cache']),3);
+    $this->assertEqual($result['cache'][1],"https://google.com");
   }
 
   public function testAmberLinkFilter3() {
     $blacklist = array("yahoo.com","google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake/www.yahoo.com");
     $result = _amber_filter_links($links, $blacklist);
-    $this->assertEqual(count($result),2);
-    $this->assertEqual($result[0],"http://www.yahoo.com");
+    $this->assertEqual(count($result['cache']),2);
+    $this->assertEqual($result['cache'][0],"http://www.yahoo.com");
   }
 
   public function testAmberLinkFilter4() {
     $blacklist = array("yahoo.com ","google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake/www.yahoo.com");
     $result = _amber_filter_links($links, $blacklist);
-    $this->assertEqual(count($result),2);
+    $this->assertEqual(count($result['cache']),2);
   }
 
 }

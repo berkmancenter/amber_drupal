@@ -60,7 +60,7 @@ function _amber_filter_links($links, $blacklist) {
   if (!$blacklist) {
     return $links;
   }
-  $result = array();
+  $result = array('cache' => array(), 'excluded' => array());
   foreach ($links as $link) {
     $host = parse_url($link,PHP_URL_HOST);
     if ($host) {
@@ -72,8 +72,10 @@ function _amber_filter_links($links, $blacklist) {
           $exclude = TRUE;
         }
       }
-      if (!$exclude) {
-        $result[] = $link;
+      if ($exclude) {
+        $result['excluded'][] = $link;
+      } else {
+          $result['cache'][] = $link;
       }
     }
   }

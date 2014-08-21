@@ -364,13 +364,16 @@ function amber_cache_node($node, $immediately = false) {
   module_load_include('inc', 'amber', 'amber.extract');
   $links = _amber_extract_node_links($node);
   if ($immediately) {
-    foreach ($links as $url) {
+    foreach ($links['cache'] as $url) {
       if (amber_cache_link($url, $immediately)) {
         drupal_set_message(t("Sucessfully cached: @url.", array('@url' => $url)), 'status');
       } else {
         drupal_set_message(t("Could not cache: @url.", array('@url' => $url)), 'warning');
       }
     }      
+    foreach ($links['excluded'] as $url) {
+      drupal_set_message(t("Did not cache excluded site: @url.", array('@url' => $url)), 'warning');
+    }
   } else {
     amber_enqueue_check_links($links);
   }
