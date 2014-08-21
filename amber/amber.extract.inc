@@ -186,6 +186,7 @@ function _amber_extract_node_links($node) {
   // Consider this if the current approach does not work
   //  $links = _linkchecker_extract_links(implode(' ', $text_items), $path);
   $links = _amber_extract_links(implode(' ', $text_items));
-  $links = _amber_filter_links($links, explode(PHP_EOL,variable_get("amber_excluded_sites","")));
+  global $base_url;
+  $links = _amber_filter_links($links, explode(PHP_EOL,variable_get("amber_excluded_sites",parse_url($base_url,PHP_URL_HOST))));
   return $links;
 }

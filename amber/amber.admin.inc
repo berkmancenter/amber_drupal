@@ -52,10 +52,11 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('Select "Do not update" if you want to preserve links at the time the content is published. Otherwise, link storage will be periodically updated.'),
   );
 
+  global $base_url;
   $form['amber_cache']['advanced']['amber_excluded_sites'] = array(
     '#type' => 'textarea',
     '#title' => t('Excluded sites'),
-    '#default_value' => variable_get('amber_excluded_sites', ''),
+    '#default_value' => variable_get('amber_excluded_sites', parse_url($base_url,PHP_URL_HOST)),
     '#description' => t('A list of hostnames or IP addresses, separated by line. Amber will not preserve any link containing an excluded site.'),
   );
 
