@@ -325,7 +325,7 @@ function _amber_filter_callback($matches) {
  */
 function _amber_filter_process($text, $filter, $format) {
   if (variable_get('amber_enabled', 1)) {
-    $re = '/href=["\'](http[^\v()<>{}\[\]]+)[\'"]/';
+    $re = '/href=["\'](http[^\v()<>{}\[\]]+)[\'"]/i';
     $text = preg_replace_callback($re, '_amber_filter_callback', $text);
   }
   return $text;

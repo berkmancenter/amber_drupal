@@ -91,7 +91,7 @@ function _amber_filter_links($links, $blacklist) {
  */
 function _amber_extract_links($text) {
   // TODO: Don't duplicate regexp with that defined in _amber_filter_process. Define it only once
-  $re = '/href=["\'](http[^\v()<>{}\[\]"\']+)[\'"]/';
+  $re = '/href=["\'](http[^\v()<>{}\[\]"\']+)[\'"]/i';
   $count = preg_match_all($re, $text, $matches);
   return $count ? $matches[1] : array();
 }
