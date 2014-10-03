@@ -38,7 +38,7 @@ function amber_get_fetcher() {
   if (!isset($fetcher)) {
     $fetcher = new AmberFetcher(amber_get_storage(), array(
       'amber_max_file' => variable_get('amber_max_file',1000),
-      'header_text' => t("This is a cached page"),
+      'header_text' => t("You are viewing an archive of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
       'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
     ));
   }
