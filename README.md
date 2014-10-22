@@ -1,5 +1,11 @@
 Amber Drupal module
 =================
+This is Amber, a Drupal module that provides an alternative route to information when content would otherwise be unavailable. Amber is useful for virtually any organization or individual that has an interest in preserving the content to which their website links.
+
+If you’d like to join the private beta, we welcome critiques and feedback as we progress through testing. As part of the beta, the Berkman Center will incorporate your suggestions to see what works, what doesn't, and what can be improved. You will also receive personal help and support from our devs in running Amber on your Drupal install.
+
+Indicate your interest by contacting amber@cyber.law.harvard.edu.
+
 
 ## System Requirements ##
 
@@ -9,6 +15,9 @@ Amber Drupal module
 
 ## Installation ##
 
-__To be added__
+__Instructions coming soon__
 
-[![Build Status](https://travis-ci.org/berkmancenter/robustness_drupal.png?branch=master)](https://travis-ci.org/berkmancenter/robustness_drupal)
+[![Build Status](https://travis-ci.org/berkmancenter/amber_drupal.png?branch=master)](https://travis-ci.org/berkmancenter/amber_drupal)
+
+## Help! ##
+The Berkman Center's devs are happy to help you get Amber up and running. Contact us directly with questions: amber@cyber.law.harvard.edu.
