@@ -11,11 +11,11 @@ Indicate your interest by contacting amber@cyber.law.harvard.edu.
 
 * Drupal 7.x
 * PHP 5.3 or higher
-* cURL (To see if cURL is installed, go to Administartion->Reports->Status Report)
+* cURL (To see if cURL is installed, go to Administration > Reports > Status Report)
 
 ## Installation ##
 
-__Instructions coming soon__
+For full installation instructions, as well as a guide for configurations and settings, see our Wiki on Github: https://github.com/berkmancenter/amber_drupal/wiki
 
 [![Build Status](https://travis-ci.org/berkmancenter/amber_drupal.png?branch=master)](https://travis-ci.org/berkmancenter/amber_drupal)
 
