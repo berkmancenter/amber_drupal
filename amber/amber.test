@@ -2,7 +2,8 @@
 
 class AmberTestCase extends DrupalUnitTestCase {
 
-  var $MOCK_METADATA = "/Amber/cache/0a137b375cc3881a70e186ce2172c8d1 2014-03-23T15:57:05+00:00";
+  var $MOCK_METADATA_CACHE = "/Amber/cache/0a137b375cc3881a70e186ce2172c8d1";
+  var $MOCK_METADATA_DATE = "2014-03-23T15:57:05+00:00";
 
   public static function getInfo() {
     return array(
@@ -39,14 +40,16 @@ class AmberTestCase extends DrupalUnitTestCase {
   public function testAmberLookup() {
     $result = _amber_lookup_url("http://google.com");
     $this->assertTrue(is_array($result));
-    $this->assertEqual($result['data-cache'],$this->MOCK_METADATA);
+    $this->assertEqual($result['data-versionurl'],$this->MOCK_METADATA_CACHE);
+    $this->assertEqual($result['data-versiondate'],$this->MOCK_METADATA_DATE);
   }
 
   public function testpreprocess_link() {
     $vars = array( 'text' => 'Test link', 'path' => 'http://www.google.com', 'options' => array( 'attributes' => array()) );
     amber_preprocess_link($vars);
     $this->assertTrue($vars['text']);
-    $this->assertEqual($vars['options']['attributes']['data-cache'],$this->MOCK_METADATA);
+    $this->assertEqual($vars['options']['attributes']['data-versionurl'],$this->MOCK_METADATA_CACHE);
+    $this->assertEqual($vars['options']['attributes']['data-versiondate'],$this->MOCK_METADATA_DATE);
   }
 
   public function testpreprocess_linkLocal() {
@@ -67,7 +70,8 @@ class AmberTestCase extends DrupalUnitTestCase {
     $vars = array( 'text' => 'Test link', 'path' => 'http://www.google.com', 'options' => array( 'attributes' => array('data-bogus' => 'Franky')) );
     amber_preprocess_link($vars);
     $this->assertTrue($vars['text']);
-    $this->assertTrue($vars['options']['attributes']['data-cache'] == $this->MOCK_METADATA);
+    $this->assertTrue($vars['options']['attributes']['data-versionurl'] == $this->MOCK_METADATA_CACHE);
+    $this->assertTrue($vars['options']['attributes']['data-versiondate'] == $this->MOCK_METADATA_DATE);
     $this->assertTrue($vars['options']['attributes']['data-bogus'] == "Franky");
   }
 
@@ -92,20 +96,20 @@ class AmberTestCase extends DrupalUnitTestCase {
   public function testAmberFilterSimpleReplaceSingleQuotes() {
     $text = "Hi there <a href='http://www.yahoo.com'>Yahoo</a>. Eat my donuts!";
     $result = _amber_filter_process($text,null,null);
-    $this->assertTrue(strpos($result,'data-cache') > 0);
+    $this->assertTrue(strpos($result,'data-versionurl') > 0);
   }
 
   public function testAmberFilterSimpleReplaceDoubleQuotes() {
     $text = "Hi there <a href=\"http://www.yahoo.com\">Yahoo</a>. Eat my donuts!";
     $result = _amber_filter_process($text,null,null);
-    $this->assertTrue(strpos($result,'data-cache') > 0);
-    $this->assertTrue(strpos($result,'data-cache') > 0);
+    $this->assertTrue(strpos($result,'data-versionurl') > 0);
+    $this->assertTrue(strpos($result,'data-versionurl') > 0);
   }
 
   public function testAmberFilterSimpleNoReplace() {
     $text = "Hi there <a href='node/1'>node links</a>. Eat my meatloaf!";
     $result = _amber_filter_process($text,null,null);
-    $this->assertFalse(strpos($result,'data-cache'));
+    $this->assertFalse(strpos($result,'data-versionurl'));
   }
 
 
@@ -248,7 +252,7 @@ class AmberWebTestCase extends DrupalWebTestCase {
     variable_set('amber_enabled', 0);
     $text = "Hi there <a href='http://www.yahoo.com'>node links</a>. Eat my meatloaf!";
     $result = _amber_filter_process($text,null,null);
-    $this->assertFalse(strpos($result,'data-cache'));
+    $this->assertFalse(strpos($result,'data-versionurl'));
   }
 
   public function testAmberAddCountryBehaviourDownCache() {
