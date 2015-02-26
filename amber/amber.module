@@ -383,7 +383,7 @@ function amber_cache_node($node, $immediately = false) {
       drupal_set_message(t("Did not cache excluded site: @url.", array('@url' => $url)), 'warning');
     }
   } else {
-    amber_enqueue_check_links($links);
+    amber_enqueue_check_links($links['cache']);
   }
 }
 
