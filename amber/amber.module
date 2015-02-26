@@ -417,7 +417,9 @@ function amber_entity_insert($entity, $type) {
  * @return array
  */
 function amber_retrieve_cache_item_frame($id) {
-  return array ('id' => $id);
+  $storage = amber_get_storage();
+  $metadata = $storage->get_metadata($id);
+  return $metadata ? array ('id' => $id, 'metadata' => $metadata) : MENU_NOT_FOUND;
 }
 
 /**
@@ -472,6 +474,9 @@ function amber_deliver_cache_item_frame($data) {
     $iframe_url = "../";
   }
   $iframe_url .= "../" . "cacheframe/${id}/";
+  if (isset($data['metadata']['cache']['amber']['date'])) {
+    drupal_add_http_header('Memento-Datetime', $data['metadata']['cache']['amber']['date']);
+  }
   print <<<EOF
 <html>
 <head>
@@ -499,6 +504,9 @@ function amber_deliver_cache_item($data) {
   } else {
     if (isset($data['metadata']['type'])) {
       drupal_add_http_header('Content-Type', $data['metadata']['type']);
+    }
+    if (isset($data['metadata']['cache']['amber']['date'])) {
+      drupal_add_http_header('Memento-Datetime', $data['metadata']['cache']['amber']['date']);
     }
     print($data['data']);
   }
