@@ -43,7 +43,7 @@ function amber_dashboard_detail_form() {
   $build = array();
   $header = array(
     array('data' => t('Site')),
-    array('data' => t('URL')),
+    array('data' => t('URL'), 'field' => 'url'),
     array('data' => t('Status'), 'field' => 'status'),
     array('data' => t('Last Checked'), 'field' => 'last_checked', 'sort' => 'desc'),
     array('data' => t('Date Preserved'), 'field' => 'ca.date'),
