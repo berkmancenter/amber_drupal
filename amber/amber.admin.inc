@@ -55,16 +55,16 @@ function amber_config_form($form, &$form_state) {
   global $base_url;
   $form['amber_cache']['advanced']['amber_excluded_sites'] = array(
     '#type' => 'textarea',
-    '#title' => t('Excluded sites'),
+    '#title' => t('Excluded URL patterns'),
     '#default_value' => variable_get('amber_excluded_sites', parse_url($base_url,PHP_URL_HOST)),
-    '#description' => t('A list of hostnames or IP addresses, separated by line. Amber will not preserve any link containing an excluded site.'),
+    '#description' => t('A list of URL patterns, one per line. Amber will not preserve any link that matches one of these patterns. Regular expressions may be used.'),
   );
 
   $form['amber_cache']['advanced']['amber_excluded_formats'] = array(
     '#type' => 'textarea',
     '#title' => t('Excluded file formats'),
     '#default_value' => variable_get('amber_excluded_formats', ''),
-    '#description' => t('A list of of MIME types, separated by line. Amber will not preserve any link containing an excluded MIME type.'),
+    '#description' => t('A list of of MIME types, one per line. Amber will not preserve any link containing an excluded MIME type.'),
   );
 
   $form['amber_delivery'] = array(

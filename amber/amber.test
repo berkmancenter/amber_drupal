@@ -185,6 +185,52 @@ EOT;
     $this->assertEqual(count($result['cache']),2);
   }
 
+  public function testAmberRegexpLinkFilter1() {
+    $blacklist = array("yahoo.com");
+    $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake");
+    $result = _amber_regexp_filter_links($links,$blacklist);
+    $this->assertEqual(count($result['cache']),2);
+    $this->assertEqual(count($result['excluded']),2);
+    $this->assertEqual($result['cache'][0],"https://google.com");
+  }
+
+  public function testAmberRegexpLinkFilter2() {
+    $blacklist = array("yahoo.com","www.google.com");
+    $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake");
+    $result = _amber_regexp_filter_links($links,$blacklist);
+    $this->assertEqual(count($result['cache']),2);
+    $this->assertEqual($result['cache'][0],"https://google.com");
+  }
+
+  public function testAmberRegexpLinkFilter3() {
+    $blacklist = array("yahoo.com","google.com");
+    $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake/www.yahoo.com");
+    $result = _amber_regexp_filter_links($links, $blacklist);
+    $this->assertEqual(count($result['cache']),0);
+  }
+
+  public function testAmberRegexpLinkFilter4() {
+    $blacklist = array("yahoo.com ","google.com");
+    $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake/www.yahoo.com");
+    $result = _amber_regexp_filter_links($links, $blacklist);
+    $this->assertEqual(count($result['cache']),0);
+  }
+
+  public function testAmberRegexpLinkFilter5() {
+    $blacklist = array("yahoo.com$","google.com");
+    $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.yahoo.com/fruitcake/");
+    $result = _amber_regexp_filter_links($links, $blacklist);
+    $this->assertEqual(count($result['cache']),1);
+    $this->assertEqual($result['cache'][0],"http://www.yahoo.com/fruitcake/");
+  }
+
+  public function testAmberRegexpLinkFilter6() {
+    $blacklist = array("com/exclude");
+    $links = array("http://www.yahoo.com", "https://google.com/exclude/blah", "http://yahoo.com/exclude-me", "http://www.yahoo.com/fruitcake/");
+    $result = _amber_regexp_filter_links($links, $blacklist);
+    $this->assertEqual(count($result['cache']),2);
+    $this->assertEqual($result['cache'][0],"http://www.yahoo.com");
+  }
 }
 
 class AmberWebTestCase extends DrupalWebTestCase {

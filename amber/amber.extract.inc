@@ -82,6 +82,38 @@ function _amber_filter_links($links, $blacklist) {
   return $result;
 }
 
+/**
+ * Filter links that are candidates for caching to exclude local links, or links to URLs on the blacklist
+ * @param $links array of links to check
+ * @param $blacklist array of regular expressions to exclude
+ */
+function _amber_regexp_filter_links($links, $blacklist) {
+  if (!$blacklist) {
+    return $links;
+  }
+  $result = array('cache' => array(), 'excluded' => array());
+  foreach ($links as $link) {
+    $exclude = FALSE;
+    foreach ($blacklist as $blacklistitem) {
+      $blacklistitem = trim($blacklistitem);
+      $blacklistitem = preg_replace("/https?:\\/\\//i", "", $blacklistitem);
+      $blacklistitem = str_replace("@", "\@", $blacklistitem); 
+      $blacklistitem = '@' . $blacklistitem . '@';
+      $cleanedlink = preg_replace("/https?:\\/\\//i", "", $link);
+      if (preg_match($blacklistitem, $cleanedlink)) {
+        $exclude = TRUE;
+      }
+    }
+    if ($exclude) {
+      $result['excluded'][] = $link;
+    } else {
+        $result['cache'][] = $link;
+    }
+  }
+  return $result;
+}
+
+
 
 /**
  * Extract links from the provided text
@@ -187,6 +219,6 @@ function _amber_extract_node_links($node) {
   //  $links = _linkchecker_extract_links(implode(' ', $text_items), $path);
   $links = _amber_extract_links(implode(' ', $text_items));
   global $base_url;
-  $links = _amber_filter_links($links, explode(PHP_EOL,variable_get("amber_excluded_sites",parse_url($base_url,PHP_URL_HOST))));
+  $links = _amber_regexp_filter_links($links, explode(PHP_EOL,variable_get("amber_excluded_sites",parse_url($base_url,PHP_URL_HOST))));
   return $links;
 }
