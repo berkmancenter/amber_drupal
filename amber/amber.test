@@ -231,6 +231,15 @@ EOT;
     $this->assertEqual(count($result['cache']),2);
     $this->assertEqual($result['cache'][0],"http://www.yahoo.com");
   }
+
+  public function testAmberRegexpLinkFilter7() {
+    $blacklist = array("com/exclude", "");
+    $links = array("http://www.yahoo.com", "https://google.com/exclude/blah", "http://yahoo.com/exclude-me", "http://www.yahoo.com/fruitcake/");
+    $result = _amber_regexp_filter_links($links, $blacklist);
+    $this->assertEqual(count($result['cache']),2);
+    $this->assertEqual($result['cache'][0],"http://www.yahoo.com");
+  }
+
 }
 
 class AmberWebTestCase extends DrupalWebTestCase {
