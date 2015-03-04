@@ -260,6 +260,8 @@ class AmberWebTestCase extends DrupalWebTestCase {
   function setUp() {
     drupal_load('module', 'amber');
     module_load_include('inc','amber','tests/MockAmberStorage');
+    global $_SERVER;
+    $_SERVER['SERVER_NAME'] = "amber.org";
     parent::setUp();
   }
 
