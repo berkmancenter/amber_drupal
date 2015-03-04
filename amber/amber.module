@@ -412,6 +412,16 @@ function amber_entity_insert($entity, $type) {
 }
 
 /**
+ * Convert a string representation of a date into RFC1123 format
+ */
+function amber_RFC1123_date($date_string) {
+  $storage = amber_get_storage();
+  $dt = DateTime::createFromFormat($storage->ISO8601_FORMAT, $date_string);
+  $result = $dt->format(DateTime::RFC1123);
+  return $result;
+}
+
+/**
  * Retrieve a cache item for display in an iframe. We only need to
  * pass through the ID of the item in this function.
  * @param  $id string identifying the item to return
@@ -474,9 +484,10 @@ function amber_deliver_cache_item_frame($data) {
   if ($uri && (strrpos($uri,"/") == (strlen($uri) - 1))) {
     $iframe_url = "../";
   }
-  $iframe_url .= "../" . "cacheframe/${id}/";
+  $iframe_url .= "../" . "cacheframe/${id}/";  
   if (isset($data['metadata']['cache']['amber']['date'])) {
-    drupal_add_http_header('Memento-Datetime', $data['metadata']['cache']['amber']['date']);
+    $memento_date = amber_RFC1123_date($data['metadata']['cache']['amber']['date']);
+    drupal_add_http_header('Memento-Datetime', $memento_date);
   }
   print <<<EOF
 <html>
@@ -507,7 +518,8 @@ function amber_deliver_cache_item($data) {
       drupal_add_http_header('Content-Type', $data['metadata']['type']);
     }
     if (isset($data['metadata']['cache']['amber']['date'])) {
-      drupal_add_http_header('Memento-Datetime', $data['metadata']['cache']['amber']['date']);
+      $memento_date = amber_RFC1123_date($data['metadata']['cache']['amber']['date']);
+      drupal_add_http_header('Memento-Datetime', $memento_date);
     }
     print($data['data']);
   }
