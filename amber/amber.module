@@ -422,29 +422,35 @@ function amber_RFC1123_date($date_string) {
 }
 
 /**
- * Retrieve a cache item for display in an iframe. We only need to
- * pass through the ID of the item in this function.
+ * Retrieve an item and its metadata from the cache in preparation for rendering
  * @param  $id string identifying the item to return
- * @return array
+ * @return array with information about the item, or MENU_NOT_FOUND if item not found
+ */
+function amber_retrieve_cache_item_data($id) {
+  $storage = amber_get_storage();
+  $data = $storage->get($id);
+  $metadata = $storage->get_metadata($id);
+  return ($data && $metadata) ? array('id' => $id, 'data' => $data, 'metadata' => $metadata) : MENU_NOT_FOUND;
+}
+
+/**
+ * Retrieve a cache item for display in an iframe. 
+ * @param  $id string identifying the item to return
+ * @return array with information about the item, or MENU_NOT_FOUND if item not found
  */
 function amber_retrieve_cache_item_frame($id) {
-  $storage = amber_get_storage();
-  $metadata = $storage->get_metadata($id);
-  return $metadata ? array ('id' => $id, 'metadata' => $metadata) : MENU_NOT_FOUND;
+  return amber_retrieve_cache_item_data($id);
 }
 
 /**
  * Retrieve an item from the cache for display
  * @param $id string identifying the item to return
- * @return null|array
+ * @return array with information about the item, or MENU_NOT_FOUND if item not found
  */
 function amber_retrieve_cache_item($id) {
-  $storage = amber_get_storage();
-  $data = $storage->get($id);
-  $metadata = $storage->get_metadata($id);
   $status = amber_get_status();
   $status->save_view($id);
-  return ($data && $metadata) ? array('data' => $data, 'metadata' => $metadata) : MENU_NOT_FOUND;
+  return amber_retrieve_cache_item_data($id);
 }
 
 /**
@@ -478,6 +484,11 @@ function amber_retrieve_cache_asset() {
  * @param $data string
  */
 function amber_deliver_cache_item_frame($data) {
+  /* If the document is a PDF, serve it directly rather than in an iframe. Browsers
+     will not render PDFs within sandboxed iframes. */
+  if (isset($data['metadata']['type']) && ($data['metadata']['type'] == 'application/pdf')) {
+    return amber_deliver_cache_item($data);
+  }
   $uri = request_uri();
   $id = $data['id'];
   $iframe_url = "";
