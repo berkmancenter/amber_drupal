@@ -274,7 +274,7 @@ class AmberAssetHelper {
      as part of the search-replace process.
   */
   public function filter_css_asset_names($val) {
-    return !in_array($val,array("link"));
+    return !in_array($val,array("link","/"));
   }
 
   /**
