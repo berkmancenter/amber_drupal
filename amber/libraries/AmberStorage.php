@@ -250,7 +250,7 @@ class AmberStorage implements iAmberStorage {
    */
   private function get_cache_metadata($id) {
     $path = realpath($this->get_cache_item_metadata_path($id));
-    if ($path === false) {
+    if (($path === false) || !file_exists($path)) {
       /* File does not exist. Do not log an error, since there are many cases in which this is expected */
       return array();
     }
