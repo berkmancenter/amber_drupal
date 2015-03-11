@@ -42,8 +42,8 @@ function amber_dashboard_detail_form() {
 
   $build = array();
   $header = array(
-    array('data' => t('Site')),
-    array('data' => t('URL'), 'field' => 'url'),
+    array('data' => t('Site'), 'field' => 'url_sort'),
+    array('data' => t('URL'), 'field' => 'url_sort'),
     array('data' => t('Status'), 'field' => 'status'),
     array('data' => t('Last Checked'), 'field' => 'last_checked', 'sort' => 'desc'),
     array('data' => t('Date Preserved'), 'field' => 'ca.date'),
@@ -205,9 +205,10 @@ function _amber_dashboard_detail_query() {
   $query = db_select('amber_check', 'c');
   $query->leftjoin('amber_cache', 'ca','ca.id = c.id');
   $query->leftJoin('amber_activity', 'a','ca.id = a.id');
-  $query = $query->fields('c', array('id', 'url','status','last_checked', 'message'));
+  $query = $query->fields('c', array('id', 'url', 'status','last_checked', 'message'));
   $query = $query->fields('ca', array('id', 'date', 'size', 'location'));
   $query = $query->fields('a', array('id', 'views', 'date'));
+  $query->addExpression('substring_index(c.url,\'://\',-1)', 'url_sort');
   return $query;
 }
 
