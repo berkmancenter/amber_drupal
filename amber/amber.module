@@ -501,6 +501,7 @@ function amber_deliver_cache_item_frame($data) {
     drupal_add_http_header('Memento-Datetime', $memento_date);
   }
   print <<<EOF
+<!DOCTYPE html>
 <html>
 <head>
 <title>Amber</title>
