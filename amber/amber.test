@@ -243,10 +243,12 @@ EOT;
   }
 
   public function testAmberRegexpLinkFilterInvalidExpression() {
-    error_log("_amber_regexp_filter_links: UNIT TESTS - Ignore a single error message following this line");
     $blacklist = array("*google.com");
     $links = array("http://www.yahoo.com");
+    $default_error_logging_level = error_reporting();
+    error_reporting(E_ALL ^ E_WARNING);
     $result = _amber_regexp_filter_links($links, $blacklist);
+    error_reporting($default_error_logging_level);
     $this->assertEqual(count($result['cache']),1);
     $this->assertEqual($result['cache'][0],"http://www.yahoo.com");
   }
