@@ -65,17 +65,19 @@ function amber_dashboard_detail_form() {
   while ($r = $result->fetchAssoc()) {
     $host = parse_url($r['url'],PHP_URL_HOST);
     $rows[] = array(
-      'site' => "$host (" . l('Blacklist', 'admin/reports/amber/blacklist/' . $host, array('query' => array('destination' => current_path()))) . ")",
-      'url' => l($r['url'], $r['url']),
-      'status' => $r['status'] ? t('Up') : t('Down'),
-      'last_checked' => isset($r['last_checked']) ? format_date($r['last_checked']) : "",
-      'date' => isset($r['date']) ? format_date($r['date']) : "",
-      'size' => isset($r['size']) ? format_size($r['size']) : (isset($r['message']) ? $r['message'] : ""),
-      'a.date' => isset($r['a_date']) ? format_date($r['a_date']) : "",
-      'views' => isset($r['views']) ? $r['views'] : "",
-      'view' => isset($r['size']) ? l('View', $r['location']) : "",
-      'delete' => isset($r['size']) ? l('Delete', 'admin/reports/amber/delete/' . $r['id'], array('query' => array('destination' => current_path()))) : "",
-    );
+      'data' => array(
+        'site' => "$host (" . l('Blacklist', 'admin/reports/amber/blacklist/' . $host, array('query' => array('destination' => current_path()))) . ")",
+        'url' => l($r['url'], $r['url']),
+        'status' => $r['status'] ? t('Up') : t('Down'),
+        'last_checked' => isset($r['last_checked']) ? format_date($r['last_checked']) : "",
+        'date' => isset($r['date']) ? format_date($r['date']) : "",
+        'size' => isset($r['size']) ? format_size($r['size']) : (isset($r['message']) ? $r['message'] : ""),
+        'a.date' => isset($r['a_date']) ? format_date($r['a_date']) : "",
+        'views' => isset($r['views']) ? $r['views'] : "",
+        'view' => isset($r['size']) ? l('View', $r['location']) : "",
+        'delete' => isset($r['size']) ? l('Delete', 'admin/reports/amber/delete/' . $r['id'], array('query' => array('destination' => current_path()))) : "",
+      ),
+      'data-url' => $r['url']);
   }
 
   // add the content
