@@ -2,7 +2,7 @@ name = Amber
 description = Enables the preservation of content to which your website links.
 package = Amber
 core = 7.x
-version = 1.1
+version = 1.2
 
 files[] = libraries/AmberStorage.php
 files[] = libraries/AmberFetcher.php
