@@ -222,7 +222,7 @@ function amber_config_form($form, &$form_state) {
   return $form;
 }
 
-/* Ensure that the user does not enter invalid regular expressions for exlcuded sites */
+/* Ensure that the user does not enter invalid regular expressions for excluded sites */
 function amber_settings_validate($form, &$form_state) {
   $excluded_sites = explode(PHP_EOL,$form_state['values']['amber_excluded_sites']);
   foreach ($excluded_sites as $site) {
