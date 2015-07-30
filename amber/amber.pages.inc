@@ -141,7 +141,7 @@ function _amber_disk_usage() {
 }
 
 function amber_dashboard_summary_form_clear($form, &$form_state) {
-  amber_clear_cache();
+  amber_delete_all();
   cache_clear_all('*', 'cache_filter',TRUE);
   cache_clear_all('*', 'cache_field',TRUE);
   drupal_set_message("All captures have been deleted");
