@@ -409,4 +409,20 @@ class AmberWebTestCase extends DrupalWebTestCase {
     $this->assertEqual($result['data-amber-behavior'],"down popup");
   }
 
+  public function testAmberAttributeAddingAbsoluteURL() {
+    $basic = array(
+      'default' => array(
+        'location' => 'http://example.com/cache/here',
+        'date' => 1395590225,
+        'size' => 0,
+        'status' => 0)
+    );
+    variable_set('amber_unavailable_action', AMBER_ACTION_POPUP);
+    $result = _amber_build_link_attributes($basic);
+    $this->assertEqual($result['data-amber-behavior'],"down popup");
+    $this->assertEqual($result['data-versionurl'],"http://example.com/cache/here");
+  }
+
+
+
 }
