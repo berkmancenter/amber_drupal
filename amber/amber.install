@@ -32,7 +32,7 @@ function amber_uninstall() {
   require_once("libraries/AmberStorage.php");
   require_once("libraries/AmberStatus.php");
   require_once("amber.module");
-  amber_clear_cache();
+  amber_delete_all();
   variable_del('amber_enabled');
   variable_del('amber_max_file');
   variable_del('amber_max_disk');
@@ -127,6 +127,15 @@ function amber_schema() {
         'type' => 'int',
         'description' => 'The size of the cached data, in bytes',
       ),
+      'provider' => array(
+        'type' => 'int',
+        'description' => 'The id of the storage provider being used',
+      ),
+      'provider_id' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'description' => 'The unique id for the cached data at the selected provider',
+      ),
     ),
     'primary key' => array('id'),
   );
@@ -152,6 +161,7 @@ function amber_schema() {
     ),
     'primary key' => array('id'),
   );
+
   return $schema;
 }
 
@@ -166,4 +176,20 @@ function amber_update_7100()
         'description' => 'More details about the check or cache results'
       );
   db_add_field('amber_check','message',$spec);
+}
+
+/**
+ * Add columns to support external storage providers
+ */
+function amber_update_7101()
+{
+  db_add_field('amber_cache','provider',array(
+        'type' => 'int',
+        'description' => 'The id of the storage provider being used',
+      ));
+  db_add_field('amber_cache','provider_id',array(
+        'type' => 'varchar',
+        'length' => 128,
+        'description' => 'The unique id for the cached data at the selected provider',
+      ));
 }

@@ -251,7 +251,7 @@ function amber_disk_space_purge() {
   if ($purge) {
     $storage = amber_get_storage();
     foreach ($purge as $item) {
-      $storage->clear_cache_item($item['id']);
+      $storage->delete($item['id']);
       $status->delete($item['id']);
       watchdog('amber', "Deleting to stay under disk space limits: @url", array('@url' => $item['url']), WATCHDOG_NOTICE);
     }

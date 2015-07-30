@@ -81,8 +81,8 @@ function drush_amber_scan($nid = NULL) {
 /**
  * Delete the entire cache
  */
-function drush_amber_clear_cache() {
-  amber_clear_cache();
+function drush_amber_delete_all() {
+  amber_delete_all();
   drush_print("Cache cleared");
 }
 
@@ -122,8 +122,11 @@ function drush_amber_check_url($url) {
 
 function drush_amber_delete_url($id) {
   if ($id) {
-    amber_delete_item($id);
-    drush_print("Item deleted");
+    if (amber_delete_item($id)) {
+      drush_print("Item deleted");      
+    } else {
+      drush_print("Could not delete item");      
+    }
   } else {
     drush_set_error(dt("Specify an ID to delete"));
     return FALSE;

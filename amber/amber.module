@@ -7,6 +7,11 @@ define("AMBER_ACTION_CACHE",3);
 define("AMBER_STATUS_UP","up");
 define("AMBER_STATUS_DOWN","down");
 
+define("AMBER_BACKEND_LOCAL",0);
+define("AMBER_BACKEND_PERMA",1);
+define("AMBER_BACKEND_INTERNET_ARCHIVE",2);
+define("AMBER_BACKEND_AMAZON_S3",3);
+
 define("AMBER_QUEUE_CACHE", "amber_cache");
 define("AMBER_QUEUE_CHECK_NEW", "amber_check_new");
 define("AMBER_QUEUE_CHECK_EXISTING","amber_check_existing");
@@ -22,9 +27,19 @@ module_load_include('inc', 'amber', 'amber.batch');
 function amber_get_storage() {
   $storage = &drupal_static(__FUNCTION__);
   if (!isset($storage)) {
-    $file_path = join(DIRECTORY_SEPARATOR,
-      array(DRUPAL_ROOT, variable_get('amber_storage_location', 'sites/default/files/amber')));
-    $storage = new AmberStorage($file_path);
+    switch (variable_get('amber_backend', 0)) {
+      case AMBER_BACKEND_LOCAL:    
+        $file_path = join(DIRECTORY_SEPARATOR,
+          array(DRUPAL_ROOT, variable_get('amber_storage_location', 'sites/default/files/amber')));
+        $storage = new AmberStorage($file_path);
+        break;
+      case AMBER_BACKEND_PERMA:
+        $storage = new PermaStorage(array(
+          'perma_api_key' => variable_get('amber_perma_apikey',''),
+          'perma_api_url' => variable_get('amber_perma_server_api_url', 'http://api.perma.cc',''),
+        ));
+        break;
+    }
   }
   return $storage;
 }
@@ -36,11 +51,22 @@ function amber_get_storage() {
 function amber_get_fetcher() {
   $fetcher = &drupal_static(__FUNCTION__);
   if (!isset($fetcher)) {
-    $fetcher = new AmberFetcher(amber_get_storage(), array(
-      'amber_max_file' => variable_get('amber_max_file',1000),
-      'header_text' => t("You are viewing an archive of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
-      'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
-    ));
+    switch (variable_get('amber_backend', 0)) {
+      case AMBER_BACKEND_LOCAL:
+        $fetcher = new AmberFetcher(amber_get_storage(), array(
+          'amber_max_file' => variable_get('amber_max_file',1000),
+          'header_text' => t("You are viewing an archive of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
+          'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
+        ));
+        break;
+      case AMBER_BACKEND_PERMA:
+        $fetcher = new PermaFetcher(amber_get_storage(), array(
+          'perma_api_key' => variable_get('amber_perma_apikey',''),
+          'perma_archive_url' => variable_get('amber_perma_server_url', 'http://perma.cc'),
+          'perma_api_url' => variable_get('amber_perma_server_api_url', 'http://api.perma.cc',''),
+        ));
+        break;
+    }
   }
   return $fetcher;
 }
@@ -539,9 +565,9 @@ function amber_deliver_cache_item($data) {
 /**
  * Delete the contents of the cache
  */
-function amber_clear_cache() {
+function amber_delete_all() {
   $storage = amber_get_storage();
-  $storage->clear_cache();
+  $storage->delete_all();
   $status = amber_get_status();
   $status->delete_all();
   foreach (array(AMBER_QUEUE_CACHE, AMBER_QUEUE_CHECK_EXISTING, AMBER_QUEUE_CHECK_NEW) as $queue_name) {
@@ -554,10 +580,15 @@ function amber_clear_cache() {
 }
 
 function amber_delete_item($id) {
-  $storage = amber_get_storage();
-  $storage->clear_cache_item($id);
   $status = amber_get_status();
-  $status->delete($id);
+  $storage = amber_get_storage();
+  $cache_metadata = $status->get_cache_by_id($id);
+  if ($storage->delete($cache_metadata)) {
+    $status->delete($id);    
+    return TRUE;
+  } else {
+    return FALSE;
+  }
   //TODO: Delete the item from the queue (if possible)
 }
 

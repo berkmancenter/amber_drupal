@@ -1,5 +1,7 @@
 <?php
 
+require_once 'AmberInterfaces.php';
+
 /**
  * The metadata is of the form:
  *
@@ -31,15 +33,6 @@
  *
  *
  */
-
-interface iAmberStorage {
-  function get($id);
-  function get_asset($id, $path);
-  function get_metadata($key);
-  function get_id($url);
-  function save($url, $root, array $headers = array(), array $assets = array());
-  function clear_cache();
-}
 
 class AmberStorage implements iAmberStorage {
 
@@ -171,13 +164,15 @@ class AmberStorage implements iAmberStorage {
   /**
    *  Delete the entire contents of the cache
    */
-  public function clear_cache() {
+  public function delete_all() {
     if ($this->file_root) {
       $this->rrmdir($this->file_root);
     }
+    return TRUE;
   }
 
-  public function clear_cache_item($id) {
+  public function delete($cache_metadata) {
+    $id = $cache_metadata['id'];
     $path = $this->get_cache_item_path($id);
     if ($path) {
       $dir = dirname($path);
@@ -185,6 +180,7 @@ class AmberStorage implements iAmberStorage {
         $this->rrmdir($dir);
       }
     }
+    return TRUE;
   }
 
   /**

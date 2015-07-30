@@ -7,18 +7,37 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('Enable Amber'),
     '#default_value' => variable_get('amber_enabled', 1),
     '#description' => t('Enable all functionality, including the preservation of new captures and notifications to site visitors. Disabling this will not remove existing captures.'),
-  );
+  ); 
   $form['amber_cache'] = array(
     '#type' => 'fieldset',
     '#title' => t('Storage Settings'),
     '#description' => t("Control how Amber stores captures"),
   );
+  $form['amber_cache']['amber_backend'] = array(
+    '#type' => 'select',
+    '#title' => t('Backend to use for storing captures'),
+    '#options' => array (
+      0 => t('Local'),
+      1 => t('Perma'),
+      2 => t('Internet Archive'),
+      3 => t('Amazon S3'),
+    ),
+    '#default_value' => variable_get('amber_backend', 0),
+    '#description' => t('Text TBD'),
+  );
+
+  /* Settings for Local storage strategy */
   $form['amber_cache']['amber_max_file'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum file size (kB)'),
     '#size' => 10,
     '#default_value' => variable_get('amber_max_file', '1000'),
     '#description' => t('Amber will store captures up to a specified size. Links to pages that exceed this size will not be preserved.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="amber_backend"]' => array('value' => '0'),
+      ),
+     ),    
   );
   $form['amber_cache']['amber_max_disk'] = array(
     '#type' => 'textfield',
@@ -26,12 +45,22 @@ function amber_config_form($form, &$form_state) {
     '#size' => 10,
     '#default_value' => variable_get('amber_max_disk', '1000'),
     '#description' => t('The maximum amount of disk space to be used for all cached items. If this disk space usage is exceeded, old items will be removed from the cache'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="amber_backend"]' => array('value' => '0'),
+      ),
+     ),    
   );
   $form['amber_cache']['amber_storage_location'] = array(
     '#type' => 'textfield',
     '#title' => t('Storage location'),
     '#default_value' => variable_get('amber_storage_location', 'sites/default/files/amber'),
     '#description' => t('Path to the location where captures are stored on disk, relative to the Drupal root'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="amber_backend"]' => array('value' => '0'),
+      ),
+     ),    
   );
 
   $form['amber_cache']['advanced'] = array(
@@ -39,6 +68,11 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('Advanced'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="amber_backend"]' => array('value' => '0'),
+      ),
+     ),    
   );
 
   $form['amber_cache']['advanced']['amber_update_strategy'] = array(
@@ -51,6 +85,56 @@ function amber_config_form($form, &$form_state) {
     '#default_value' => variable_get('amber_update_strategy', 0),
     '#description' => t('Select "Do not update" if you want to preserve links at the time the content is published. Otherwise, link storage will be periodically updated.'),
   );
+
+  /* Settings for Perma storage strategy */
+  $form['amber_cache']['amber_perma_apikey'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Perma API Key'),
+    '#size' => 50,
+    '#default_value' => variable_get('amber_perma_apikey', ''),
+    '#description' => t('Text TBD - Instructions on how to get a key'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="amber_backend"]' => array('value' => '1'),
+      ),
+     ),    
+  );
+  $form['amber_cache']['advanced_perma'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="amber_backend"]' => array('value' => '1'),
+      ),
+     ),    
+  );  
+  $form['amber_cache']['advanced_perma']['amber_perma_server_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Perma URL'),
+    '#size' => 30,
+    '#default_value' => variable_get('amber_perma_server', 'http://perma.cc'),
+    '#description' => t('Text TBD - Which Perma server to use. '),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="amber_backend"]' => array('value' => '1'),
+      ),
+     ),    
+  );
+  $form['amber_cache']['advanced_perma']['amber_perma_server_api_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Perma API URL'),
+    '#size' => 30,
+    '#default_value' => variable_get('amber_perma_server_api_url', 'http://api.perma.cc'),
+    '#description' => t('Text TBD - API endpoint for the Perma server. '),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="amber_backend"]' => array('value' => '1'),
+      ),
+     ),    
+  );
+
 
   global $base_url;
   $form['amber_cache']['advanced']['amber_excluded_sites'] = array(

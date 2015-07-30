@@ -38,6 +38,18 @@ function amber_dashboard_summary_form() {
   return $build;
 }
 
+function _amber_get_view_link($row) {
+  $p = isset($row['provider']) ? $row['provider'] : AMBER_BACKEND_LOCAL;
+  switch ($p) {
+    case AMBER_BACKEND_PERMA:
+      return l('View on Perma', $row['location']);
+      break;
+    case AMBER_BACKEND_LOCAL:
+      return isset($row['size']) ? l('View', $row['location']) : "";
+      break;
+  } 
+}
+
 function amber_dashboard_detail_form() {
 
   $build = array();
@@ -74,7 +86,7 @@ function amber_dashboard_detail_form() {
         'size' => isset($r['size']) ? format_size($r['size']) : (isset($r['message']) ? $r['message'] : ""),
         'a.date' => isset($r['a_date']) ? format_date($r['a_date']) : "",
         'views' => isset($r['views']) ? $r['views'] : "",
-        'view' => isset($r['size']) ? l('View', $r['location']) : "",
+        'view' => _amber_get_view_link($r),
         'delete' => isset($r['size']) ? l('Delete', 'admin/reports/amber/delete/' . $r['id'], array('query' => array('destination' => current_path()))) : "",
       ),
       'data-url' => $r['url']);
@@ -208,7 +220,7 @@ function _amber_dashboard_detail_query() {
   $query->leftjoin('amber_cache', 'ca','ca.id = c.id');
   $query->leftJoin('amber_activity', 'a','ca.id = a.id');
   $query = $query->fields('c', array('id', 'url', 'status','last_checked', 'message'));
-  $query = $query->fields('ca', array('id', 'date', 'size', 'location'));
+  $query = $query->fields('ca', array('id', 'date', 'size', 'location', 'provider'));
   $query = $query->fields('a', array('id', 'views', 'date'));
   $query->addExpression('substring_index(c.url,\'://\',-1)', 'url_sort');
   return $query;
@@ -220,8 +232,11 @@ function _amber_dashboard_detail_query() {
  */
 function amber_dashboard_delete_item($id) {
   if ($id) {
-    amber_delete_item($id);
-    drupal_set_message("Deleted record with id $id");
+    if (amber_delete_item($id)) {
+      drupal_set_message(t("Deleted record with id: @id.", array('@id' => $id)));
+    } else {
+      drupal_set_message(t("Could not delete record with id: @id.", array('@id' => $id)), 'warning');
+    }
   }
   drupal_goto(drupal_get_destination());
 }
