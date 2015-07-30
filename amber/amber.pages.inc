@@ -50,6 +50,18 @@ function _amber_get_view_link($row) {
   } 
 }
 
+function _amber_get_size_column($row) {
+  $size = isset($row['size']) ? format_size($row['size']) : (isset($row['message']) ? $row['message'] : "");
+  switch ($size) {
+    case AMBER_BACKEND_PERMA:
+      return "";
+      break;
+    case AMBER_BACKEND_LOCAL:
+      return $size;
+      break;
+  } 
+}
+
 function amber_dashboard_detail_form() {
 
   $build = array();
@@ -83,7 +95,7 @@ function amber_dashboard_detail_form() {
         'status' => $r['status'] ? t('Up') : t('Down'),
         'last_checked' => isset($r['last_checked']) ? format_date($r['last_checked']) : "",
         'date' => isset($r['date']) ? format_date($r['date']) : "",
-        'size' => isset($r['size']) ? format_size($r['size']) : (isset($r['message']) ? $r['message'] : ""),
+        'size' => _amber_get_size_column($r),
         'a.date' => isset($r['a_date']) ? format_date($r['a_date']) : "",
         'views' => isset($r['views']) ? $r['views'] : "",
         'view' => _amber_get_view_link($r),
