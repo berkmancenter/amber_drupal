@@ -347,19 +347,6 @@ class AmberWebTestCase extends DrupalWebTestCase {
     $this->assertEqual($result['data-amber-behavior'],"down popup");
   }
 
-  public function testAmberAttributeAddingZeroSize() {
-    $basic = array(
-      'default' => array(
-        'location' => '/cache/here',
-        'date' => 1395590225,
-        'size' => 0,
-        'status' => 0)
-    );
-    variable_set('amber_unavailable_action', AMBER_ACTION_POPUP);
-    $result = _amber_build_link_attributes($basic);
-    $this->assertTrue(empty($result));
-  }
-
   public function testAmberAttributeAddingCountry() {
     $basic = array(
       'default' => array(

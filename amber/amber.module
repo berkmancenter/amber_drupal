@@ -263,8 +263,7 @@ function _amber_get_behavior($status, $country = false) {
 function _amber_build_link_attributes($summaries) {
   $result = array();
   // Assume that we only have one cache of the data. This would need to change if we start tracking multiple caches
-  if (isset($summaries['default']['location'],$summaries['default']['date'],$summaries['default']['size']) &&
-      ($summaries['default']['size'] > 0)) {
+  if (isset($summaries['default']['location'],$summaries['default']['date'])) {
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
     $result['data-versionurl'] = $protocol . $_SERVER['SERVER_NAME'] . base_path() . $summaries['default']['location'];
     $result['data-versiondate'] = date('c',$summaries['default']['date']);
