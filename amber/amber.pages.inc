@@ -51,8 +51,9 @@ function _amber_get_view_link($row) {
 }
 
 function _amber_get_size_column($row) {
+  $p = isset($row['provider']) ? $row['provider'] : AMBER_BACKEND_LOCAL;
   $size = isset($row['size']) ? format_size($row['size']) : (isset($row['message']) ? $row['message'] : "");
-  switch ($size) {
+  switch ($p) {
     case AMBER_BACKEND_PERMA:
       return "";
       break;
