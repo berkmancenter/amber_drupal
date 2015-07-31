@@ -647,6 +647,10 @@ function amber_log_cache_view() {
  * adding a 404 header if necessary
  */
 function amber_deliver_cache_view_result($data) {
+  drupal_add_http_header('Cache-Control', "no-cache, must-revalidate");
+  drupal_add_http_header('Pragma', "no-cache");
+  drupal_add_http_header('Expires', 0);
+
   if (is_int($data) && $data == MENU_NOT_FOUND) {
     drupal_add_http_header('Status', '404 Not Found');
   }

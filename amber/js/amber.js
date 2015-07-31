@@ -192,16 +192,7 @@ var amber = {
         });
       }
       e.preventDefault();
-
-      /* Clicking on the cache link will log an event */
-      amber.util_forEachElement(".amber-cache-link", function(el, i) {
-        var href = encodeURIComponent(el.getAttribute("href"));
-        amber.util_addEventListener(el, 'click', function(e) {
-          var request = new XMLHttpRequest();
-          request.open('GET', '/amber/logcacheview?cache=' + href + '&t=' + new Date().getTime(), true);
-          request.send();
-        });
-      });
+      amber.attach_cache_view_event();
     }
   },
 
@@ -267,6 +258,8 @@ var amber = {
         hover.style.top = pos.top + "px";
         amber.util_addEventListener(hover, 'mouseover', amber.start_popup_hover);
         amber.util_addEventListener(hover, 'mouseout', amber.end_popup_hover_function(hover));
+  
+        amber.attach_cache_view_event();
       }, delay * 1000);
       this.setAttribute("amber-timer",timer);
     }
@@ -286,6 +279,24 @@ var amber = {
         }
       }, Math.min(100,delay * 1000));
     }
+  },
+
+  attach_cache_view_event : function() {
+    /* Clicking on the cache link will log an event */
+    amber.util_forEachElement(".amber-cache-link", function(el, i) {
+      var href = encodeURIComponent(el.getAttribute("href"));
+      amber.util_addEventListener(el, 'click', function(e) {
+        var request = new XMLHttpRequest();
+        request.onload = function() {
+          if (request.readyState === 4) {
+            window.location = decodeURIComponent(href);
+          }
+        };
+        request.open('GET', '/amber/logcacheview?cache=' + href + '&t=' + new Date().getTime(), true);
+        request.send();
+        e.preventDefault();
+      });
+    });    
   },
 
   clear_hover : function (e) {
