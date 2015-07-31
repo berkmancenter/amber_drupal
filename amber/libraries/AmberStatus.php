@@ -170,6 +170,29 @@ class AmberStatus implements iAmberStatus {
     return $result;
   }
 
+  /**
+   * Save the fact that a user viewed an externally hosted cache, based on the 
+   * URL of the cache (e.g. http://perma.cc/xxx)
+   * If the storage provider is the native, locally hosted one, do NOT record
+   * the view, since in that case we get more accurate data by tracking actual
+   * requests for the cache page itself
+   * @param  string $location URL of the eternally hosted cache
+   * @return boolean           true if the cache was found, false otherwise
+   */
+  public function save_view_for_external_cache_location($location) {
+    $prefix = $this->table_prefix;
+
+    $result = $this->db->select("SELECT id, provider FROM ${prefix}amber_cache WHERE location = %s", array($location));
+    if ($result['id']) {
+      if ($result['provider'] != 0) {
+        $this->save_view($result['id']);
+      }
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   public function save_view($id) {
     $prefix = $this->table_prefix;
 

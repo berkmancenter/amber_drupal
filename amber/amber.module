@@ -173,7 +173,6 @@ function amber_menu() {
     'access arguments' => array('administer amber'),
     'type' => MENU_CALLBACK,
   );
-
   $items['amber/cache'] = array(
     'title' => 'Amber Cache Frame',
     'description' => 'Display cached items within an iframe',
@@ -206,6 +205,14 @@ function amber_menu() {
     'type' => MENU_LOCAL_TASK,
     'access arguments' => array('administer amber'),
     'weight' => 20,
+  );
+  $items['amber/logcacheview'] = array(
+    'title' => 'Log cache view',    
+    'description' => 'Log that an externally stored cache has been clicked',
+    'page callback' => 'amber_log_cache_view',
+    'access callback' => true,
+    'delivery callback' => 'amber_deliver_cache_view_result',    
+    'type' => MENU_CALLBACK,
   );
 
   return $items;
@@ -617,3 +624,33 @@ function amber_cache_all() {
   }
   return $count;
 }
+
+/**
+ * Log that the user has clicked a link to view a cache item, but only if it's not being served
+ * from the local cache (since those are logged when the cache is actually viewed)
+ * @param  $url string with the URL of the cache
+ * @return none - this is a fire-and-forget call from the browser
+ */
+function amber_log_cache_view() {
+  if (isset($_GET['cache'])) {
+    $status = amber_get_status();
+    if ($status->save_view_for_external_cache_location($_GET['cache'])) {
+      return array();
+    } else {
+      return MENU_NOT_FOUND;
+    }
+  }
+}
+
+/**
+ * Return an empty result as a response from amber_log_cache_view,
+ * adding a 404 header if necessary
+ */
+function amber_deliver_cache_view_result($data) {
+  if (is_int($data) && $data == MENU_NOT_FOUND) {
+    drupal_add_http_header('Status', '404 Not Found');
+  }
+}
+
+
+
