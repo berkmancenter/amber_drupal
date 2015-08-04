@@ -39,6 +39,9 @@ function amber_get_storage() {
           'perma_api_url' => variable_get('amber_perma_server_api_url', 'http://api.perma.cc',''),
         ));
         break;
+      case AMBER_BACKEND_INTERNET_ARCHIVE:
+        $storage = new InternetArchiveStorage(array());
+        break;
     }
   }
   return $storage;
@@ -65,6 +68,9 @@ function amber_get_fetcher() {
           'perma_archive_url' => variable_get('amber_perma_server_url', 'http://perma.cc'),
           'perma_api_url' => variable_get('amber_perma_server_api_url', 'http://api.perma.cc',''),
         ));
+        break;
+      case AMBER_BACKEND_INTERNET_ARCHIVE:
+        $fetcher = new InternetArchiveFetcher(amber_get_storage(), array());
         break;
     }
   }
