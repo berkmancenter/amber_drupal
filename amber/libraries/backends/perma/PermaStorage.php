@@ -52,11 +52,11 @@ class PermaStorage implements iAmberStorage {
     );
 
     $perma_result = AmberNetworkUtils::open_single_url($api_endpoint, $curl_options);
-	if (isset($perma_result['info']['http_code']) && ($perma_result['info']['http_code'] == 204)) {
-		return TRUE;
-	} else {
-		return FALSE;
-	}
+  	if (isset($perma_result['info']['http_code']) && ($perma_result['info']['http_code'] == 204)) {
+  		return TRUE;
+  	} else {
+  		return FALSE;
+  	}
   }
 
 }
