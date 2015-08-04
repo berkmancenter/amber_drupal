@@ -67,9 +67,9 @@ class AmberNetworkUtils {
    */
   public static function extract_headers($raw_headers) {
     $headers = array();
-      if ($raw_headers) {
+    if ($raw_headers) {
       foreach (explode(PHP_EOL,$raw_headers) as $line) {
-        $header = explode(":",$line);
+        $header = explode(":",$line, 2);
         if (count($header) == 2) {
           if (strtolower($header[0]) == "content-type") {
             $header[0] = "Content-Type"; /* Fix up case if necessary */
