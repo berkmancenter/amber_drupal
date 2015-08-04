@@ -292,9 +292,10 @@ var amber = {
             window.location = decodeURIComponent(href);
           }
         };
-        request.open('GET', '/amber/logcacheview?cache=' + href + '&t=' + new Date().getTime(), true);
+        // Send synchronous notification, to ensure it's sent completely before the page unloads
+        // This would be a good place to use navigator.sendBeacon(), once it has more support
+        request.open('GET', '/amber/logcacheview?cache=' + href + '&t=' + new Date().getTime(), false);
         request.send();
-        e.preventDefault();
       });
     });    
   },
