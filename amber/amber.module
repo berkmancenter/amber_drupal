@@ -22,12 +22,15 @@ module_load_include('inc', 'amber', 'amber.batch');
 
 /**
  * Get an initialized AmberStorage module
+ * 
+ * @param int $engine require the selected engine, otherwise lookup in site config
  * @return AmberStorage
  */
-function amber_get_storage() {
+function amber_get_storage($engine = null) {
   $storage = &drupal_static(__FUNCTION__);
-  if (!isset($storage)) {
-    switch (variable_get('amber_backend', 0)) {
+  if (!isset($storage) || !is_null($engine)) {
+    $storage_id = is_null($engine) ? variable_get('amber_backend', 0) : $engine;
+    switch ($storage_id) {
       case AMBER_BACKEND_LOCAL:    
         $file_path = join(DIRECTORY_SEPARATOR,
           array(DRUPAL_ROOT, variable_get('amber_storage_location', 'sites/default/files/amber')));
@@ -45,6 +48,11 @@ function amber_get_storage() {
     }
   }
   return $storage;
+}
+
+function amber_get_storage_for_item($id) {
+  $item = amber_get_status()->get_cache_by_id($id);
+  return ($item) ? amber_get_storage($item['provider']) : null;
 }
 
 /**
@@ -469,7 +477,10 @@ function amber_RFC1123_date($date_string) {
  * @return array with information about the item, or MENU_NOT_FOUND if item not found
  */
 function amber_retrieve_cache_item_data($id) {
-  $storage = amber_get_storage();
+  $storage = amber_get_storage_for_item($id);
+  if (is_null($storage)) {
+    return MENU_NOT_FOUND;
+  }
   $data = $storage->get($id);
   $metadata = $storage->get_metadata($id);
   return ($data && $metadata) ? array('id' => $id, 'data' => $data, 'metadata' => $metadata) : MENU_NOT_FOUND;
@@ -503,7 +514,10 @@ function amber_retrieve_cache_item($id) {
 function amber_retrieve_cache_asset() {
   $args = func_get_args();
   $id = array_shift($args);
-  $storage = amber_get_storage();
+  $storage = amber_get_storage_for_item($id);
+  if (is_null($storage)) {
+    return MENU_NOT_FOUND;
+  }
   $d = $storage->get_asset($id, join('/',$args) . ($_SERVER['QUERY_STRING'] ? '?' . $_SERVER['QUERY_STRING'] : ''));
   if ($d) {
     $data['data'] = $d;
@@ -597,10 +611,10 @@ function amber_delete_all() {
 
 function amber_delete_item($id) {
   $status = amber_get_status();
-  $storage = amber_get_storage();
+  $storage = amber_get_storage_for_item($id);
   $cache_metadata = $status->get_cache_by_id($id);
-  if ($storage->delete($cache_metadata)) {
-    $status->delete($id);    
+  if (is_null($storage) || $storage->delete($cache_metadata)) {
+    $status->delete($id);
     return TRUE;
   } else {
     return FALSE;
