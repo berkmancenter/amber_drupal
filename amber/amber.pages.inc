@@ -104,7 +104,7 @@ function amber_dashboard_detail_form() {
         'a.date' => isset($r['a_date']) ? format_date($r['a_date']) : "",
         'views' => isset($r['views']) ? $r['views'] : "",
         'view' => _amber_get_view_link($r),
-        'delete' => isset($r['size']) ? l('Delete', 'admin/reports/amber/delete/' . $r['id'], array('query' => array('destination' => current_path()))) : "",
+        'delete' => l('Delete', 'admin/reports/amber/delete/' . $r['id'], array('query' => array('destination' => current_path()))),
       ),
       'data-url' => $r['url']);
   }
