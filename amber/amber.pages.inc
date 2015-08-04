@@ -44,6 +44,9 @@ function _amber_get_view_link($row) {
     case AMBER_BACKEND_PERMA:
       return l('View on Perma', $row['location']);
       break;
+    case AMBER_BACKEND_INTERNET_ARCHIVE:
+      return l('View on Internet Archive', $row['location']);
+      break;
     case AMBER_BACKEND_LOCAL:
       return isset($row['size']) ? l('View', $row['location']) : "";
       break;
@@ -55,6 +58,7 @@ function _amber_get_size_column($row) {
   $size = isset($row['size']) ? format_size($row['size']) : (isset($row['message']) ? $row['message'] : "");
   switch ($p) {
     case AMBER_BACKEND_PERMA:
+    case AMBER_BACKEND_INTERNET_ARCHIVE:
       return "";
       break;
     case AMBER_BACKEND_LOCAL:

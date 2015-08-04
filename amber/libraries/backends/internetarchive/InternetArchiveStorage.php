@@ -27,11 +27,13 @@ class InternetArchiveStorage implements iAmberStorage {
   }
   
   function delete_all() {
-  	throw new Exception("Not implemented for InternetArchiveStorage");  	
+    // Do nothing, since we can't delete from the Internet Archive
+    return TRUE;
   }
 
   function delete($cache_metadata) {
-    throw new Exception("Not implemented for InternetArchiveStorage");    
+    // Do nothing, since we can't delete from the Internet Archive
+    return TRUE;
   }
 
 }
