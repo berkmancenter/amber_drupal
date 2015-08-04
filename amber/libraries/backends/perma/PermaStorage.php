@@ -9,7 +9,6 @@ class PermaStorage implements iAmberStorage {
     $this->apiUrl = isset($options['perma_api_url']) ? $options['perma_api_url'] : "https://api.perma-stage.org";
   }
 
-
   function get($id) {
   	throw new Exception("Not implemented for PermaStorage");
   }
@@ -30,33 +29,14 @@ class PermaStorage implements iAmberStorage {
   	throw new Exception("Not implemented for PermaStorage");  	
   }
   
+  /* We do not attempt to delete Perma captures */
   function delete_all() {
-  	throw new Exception("Not implemented for PermaStorage");  	
+  	return TRUE;
   }
 
+  /* We do not attempt to delete Perma captures */
   function delete($cache_metadata) {
-    if (!$this->apiKey) {
-      throw new InvalidArgumentException("Missing required API key for accessing Perma");      
-    }
-
-    $api_endpoint = join("",array(
-    	$this->apiUrl,
-    	'/v1/archives/',
-    	$cache_metadata['provider_id'],
-    	'/?api_key=',
-    	$this->apiKey));
-
-    $curl_options = array(
-      CURLOPT_CUSTOMREQUEST => "DELETE",
-      CURLOPT_FOLLOWLOCATION => TRUE,
-    );
-
-    $perma_result = AmberNetworkUtils::open_single_url($api_endpoint, $curl_options);
-  	if (isset($perma_result['info']['http_code']) && ($perma_result['info']['http_code'] == 204)) {
-  		return TRUE;
-  	} else {
-  		return FALSE;
-  	}
+    return TRUE;
   }
 
 }
