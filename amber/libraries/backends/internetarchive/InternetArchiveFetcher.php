@@ -25,12 +25,11 @@ class InternetArchiveFetcher implements iAmberFetcher {
       $url));
 
     $curl_options = array(
-      // CURLOPT_FOLLOWLOCATION => TRUE,
       CURLOPT_VERBOSE => TRUE,
     );
 
     dpm($api_endpoint);
-    $ia_result = AmberNetworkUtils::open_single_url($api_endpoint, $curl_options);
+    $ia_result = AmberNetworkUtils::open_single_url($api_endpoint, $curl_options, FALSE);
     dpm($ia_result);
     /* Make sure that we got a valid response from the Archive */
     if (($ia_result === FALSE) || ($ia_result['body'] === FALSE)) {      

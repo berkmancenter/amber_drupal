@@ -212,7 +212,7 @@ class AmberNetworkUtils {
    * @param $url string of resource to download
    * @return array dictionary of header information and a stream to the contents of the URL
    */
-  public static function open_single_url($url, $additional_options = array()) {
+  public static function open_single_url($url, $additional_options = array(), $follow_redirects = TRUE) {
     $options = array(
       CURLOPT_FAILONERROR => TRUE,      /* Don't ignore HTTP errors */
       CURLOPT_FOLLOWLOCATION => FALSE,  /* Don't follow redirects */ 
@@ -256,7 +256,7 @@ class AmberNetworkUtils {
             $newurl = join("/",array(substr($original_url, 0, $last_slash), $newurl));
           }          
         }    
-      } while (--$max_redirects);      
+      } while ((--$max_redirects) && $follow_redirects);     
       curl_close($ch);
 
     } catch (RuntimeException $e) {
