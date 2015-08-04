@@ -114,7 +114,7 @@ function amber_config_form($form, &$form_state) {
     '#type' => 'textfield',
     '#title' => t('Perma URL'),
     '#size' => 30,
-    '#default_value' => variable_get('amber_perma_server', 'http://perma.cc'),
+    '#default_value' => variable_get('amber_perma_server_url', 'http://perma.cc'),
     '#description' => t('Text TBD - Which Perma server to use. '),
     '#states' => array(
       'visible' => array(
