@@ -1,7 +1,7 @@
 <?php
 
-require_once 'AmberInterfaces.php';
-require_once 'AmberNetworkUtils.php';
+require_once dirname( __FILE__ ) . '/../../AmberInterfaces.php';
+require_once dirname( __FILE__ ) . '/../../AmberNetworkUtils.php';
 
 class AmberFetcher implements iAmberFetcher {
 

@@ -1,6 +1,6 @@
 <?php
 
-require_once 'AmberInterfaces.php';
+require_once dirname( __FILE__ ) . '/../../AmberInterfaces.php';
 
 /**
  * The metadata is of the form:

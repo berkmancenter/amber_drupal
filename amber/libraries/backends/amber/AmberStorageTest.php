@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: jlicht
- * Date: 3/10/14
- * Time: 2:18 PM
- */
 
 require_once("AmberStorage.php");
 

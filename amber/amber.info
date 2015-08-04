@@ -6,10 +6,10 @@ version = 1.3
 
 files[] = libraries/AmberInterfaces.php
 files[] = libraries/AmberNetworkUtils.php
-files[] = libraries/AmberStorage.php
-files[] = libraries/AmberFetcher.php
 files[] = libraries/AmberChecker.php
 files[] = libraries/AmberStatus.php
+files[] = libraries/backends/amber/AmberStorage.php
+files[] = libraries/backends/amber/AmberFetcher.php
 files[] = libraries/backends/perma/PermaFetcher.php
 files[] = libraries/backends/perma/PermaFetcher.php
 files[] = libraries/backends/internetarchive/InternetArchiveFetcher.php

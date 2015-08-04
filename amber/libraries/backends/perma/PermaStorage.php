@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname( __FILE__ ) . '/../../AmberInterfaces.php';
+
 class PermaStorage implements iAmberStorage {
 
   function __construct(array $options) {
