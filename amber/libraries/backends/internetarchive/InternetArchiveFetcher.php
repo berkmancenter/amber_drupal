@@ -6,7 +6,7 @@ require_once dirname( __FILE__ ) . '/../../AmberNetworkUtils.php';
 class InternetArchiveFetcher implements iAmberFetcher {
 
   function __construct(iAmberStorage $storage, array $options) {
-    $this->archive_Url = "http://web.archive.org/";
+    $this->archiveUrl = "http://web.archive.org";
   }
 
   /**
@@ -20,17 +20,11 @@ class InternetArchiveFetcher implements iAmberFetcher {
     }
 
     $api_endpoint = join("",array(
-      $this->archive_Url,
-      "save/",
+      $this->archiveUrl,
+      "/save/",
       $url));
 
-    $curl_options = array(
-      CURLOPT_VERBOSE => TRUE,
-    );
-
-    dpm($api_endpoint);
-    $ia_result = AmberNetworkUtils::open_single_url($api_endpoint, $curl_options, FALSE);
-    dpm($ia_result);
+    $ia_result = AmberNetworkUtils::open_single_url($api_endpoint, array(), FALSE);
     /* Make sure that we got a valid response from the Archive */
     if (($ia_result === FALSE) || ($ia_result['body'] === FALSE)) {      
       throw new RuntimeException(join(":",array("Error submitting URL to the Internet Archive")));
@@ -44,7 +38,7 @@ class InternetArchiveFetcher implements iAmberFetcher {
         'url' => $url,
         'type' => '',
         'date' => time(),
-        'location' => join("/", array($this->archiveUrl, $location)),
+        'location' => $this->archiveUrl . $location,
         'size' => 0,
         'provider' => 2, /* Internet Archive */
         'provider_id' => $location,
