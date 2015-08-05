@@ -56,7 +56,7 @@ function amber_get_storage_by_id($storage_id) {
     case AMBER_BACKEND_PERMA:
       $storage = new PermaStorage(array(
         'perma_api_key' => variable_get('amber_perma_apikey',''),
-        'perma_api_url' => variable_get('amber_perma_server_api_url', 'http://api.perma.cc',''),
+        'perma_api_url' => variable_get('amber_perma_server_api_url', 'https://api.perma.cc'),
       ));
       break;
     case AMBER_BACKEND_INTERNET_ARCHIVE:
