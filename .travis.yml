@@ -45,7 +45,7 @@ before_script:
 script:
   - drush test-run 'Amber, AmberWeb' --uri=http://127.0.0.1:8080
   - cd sites/all/modules
-  - phpunit .
+  - phpunit --exclude-group ExternalInterfaces .
   
   
   
