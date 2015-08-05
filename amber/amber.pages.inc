@@ -58,9 +58,9 @@ function _amber_get_size_column($row) {
   $size = isset($row['size']) ? format_size($row['size']) : (isset($row['message']) ? $row['message'] : "");
   switch ($p) {
     case AMBER_BACKEND_PERMA:
-    case AMBER_BACKEND_INTERNET_ARCHIVE:
       return "";
       break;
+    case AMBER_BACKEND_INTERNET_ARCHIVE:
     case AMBER_BACKEND_LOCAL:
       return $size;
       break;
