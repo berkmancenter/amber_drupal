@@ -6,7 +6,8 @@ require_once dirname( __FILE__ ) . '/../amber/AmberStorage.php';
 class AmazonS3Storage extends AmberStorage implements iAmberStorage  {
 
 	public function __construct($options) {
-	  parent::__construct('s3://' . $options['bucket']);
+		$bucket = $options['bucket'];
+	  parent::__construct('s3://' . $bucket);
 	  $library = libraries_load('aws');
 	  if (!$library || !$library['loaded']) {
 	    throw new RuntimeException("AWS Library not available");
@@ -20,10 +21,19 @@ class AmazonS3Storage extends AmberStorage implements iAmberStorage  {
 	  	)));
 	  $this->aws->registerStreamWrapper();   
 	  
-	  /* Create bucket for storage, if it does not already exist */
-	  if (!$this->aws->doesBucketExist($options['bucket'])) {
-	  	mkdir($this->file_root);    	
+	  /* Create bucket for storage, if it does not already exist, 
+	     and confirm that we have write access to the selected bucket.
+	     We suppress warning messages here, knowing that if there is
+	     a problem the PutObject/DeleteObject calls will cause
+	     an exception to be thrown */
+	  if (!$this->aws->doesBucketExist($bucket)) {
+	  	@mkdir($this->file_root);    	
 	  }
+	  @$this->aws->PutObject(array("Bucket" => $bucket, 
+								  "Key" => "credentials_test", 
+								  "Body" => "It works"));
+	  @$this->aws->DeleteObject(array("Bucket" => $bucket, 
+								     "Key" => "credentials_test"));
 	}
 
 	public function provider_id() {

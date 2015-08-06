@@ -1,6 +1,5 @@
 <?php
 
-
 function amber_config_form($form, &$form_state) {
   $form['amber_enabled'] = array(
     '#type' => 'checkbox',
@@ -17,10 +16,10 @@ function amber_config_form($form, &$form_state) {
     '#type' => 'select',
     '#title' => t('Backend to use for storing captures'),
     '#options' => array (
-      0 => t('Local'),
-      1 => t('Perma'),
-      2 => t('Internet Archive'),
-      3 => t('Amazon S3'),
+      AMBER_BACKEND_LOCAL => t('Local'),
+      AMBER_BACKEND_PERMA => t('Perma'),
+      AMBER_BACKEND_INTERNET_ARCHIVE => t('Internet Archive'),
+      AMBER_BACKEND_AMAZON_S3 => t('Amazon S3'),
     ),
     '#default_value' => variable_get('amber_backend', 0),
     '#description' => t('Text TBD'),
@@ -165,7 +164,7 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('AWS Bucket'),
     '#size' => 50,
     '#default_value' => variable_get('amber_aws_bucket', ''),
-    '#description' => t('Text TBD - Instructions on what this is used for, and that it is unique'),
+    '#description' => t('Text TBD - Instructions on what this is used for, and that it must be unique'),
     '#states' => array(
       'visible' => array(
         ':input[name="amber_backend"]' => array('value' => '3'),
@@ -262,18 +261,6 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('Visitors to your website with browser IP addresses originating in this country will experience specified behavior.'),
   );
 
-  // $form['amber_country']['amber_country_proxy'] = array(
-  //   '#type' => 'textfield',
-  //   '#title' => t('Proxy'),
-  //   '#default_value' => variable_get('amber_country_proxy', ''),
-  //   '#description' => t('IP address or hostname of a proxy. Amber will use this proxy to test country-specific site availability.'),
-  //   '#states' => array(
-  //     'visible' => array(
-  //       ':input[name="amber_country_id"]' => array('!value' => ''),
-  //     ),
-  //    ),
-  // );
-
   $form['amber_country']['amber_country_available_action'] = array(
     '#type' => 'select',
     '#title' => t('Available sites'),
@@ -365,6 +352,38 @@ function amber_settings_validate($form, &$form_state) {
       }
     }
   }
+
+  if ($form_state['values']['amber_backend'] == AMBER_BACKEND_PERMA) {
+    foreach (array('amber_perma_apikey', 'amber_perma_server_url', 'amber_perma_server_api_url') as $field) {
+      if (empty($form_state['values'][$field])) {
+        form_set_error($field,"Required if using the Perma storage engine");
+      }      
+    }
+  }
+  if ($form_state['values']['amber_backend'] == AMBER_BACKEND_AMAZON_S3) {
+    foreach (array('amber_aws_access_key', 'amber_aws_secret_key', 'amber_aws_bucket') as $field) {
+      if (empty($form_state['values'][$field])) {
+        form_set_error($field,"Required if using the Amazon S3 storage engine");
+      }      
+    }
+    /* Validate the AWS settings */
+    try {
+      $storage = new AmazonS3Storage(array(
+          'access_key' => $form_state['values']['amber_aws_access_key'],
+          'secret_key' => $form_state['values']['amber_aws_secret_key'],
+          'bucket' => $form_state['values']['amber_aws_bucket'],
+        ));
+    } catch (\Aws\S3\Exception\S3Exception $e) {
+      foreach (array('amber_aws_access_key', 'amber_aws_secret_key', 'amber_aws_bucket') as $field) {
+        form_set_error($field);
+      }
+      drupal_set_message(t("There is a problem with the provided Amazon configuration. Check that
+        the access key and secret key are correct, and that they provide write access to the 
+        selected bucket. Ensure that that your bucket name is unique - it cannot have the same 
+        name as any other bucket in S3."), 'error');
+    } 
+  }
+
 }
 
 /* Custom submit handler to flush filter cache after the settings are updated */
