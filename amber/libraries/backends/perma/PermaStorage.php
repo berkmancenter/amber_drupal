@@ -19,6 +19,10 @@ class PermaStorage implements iAmberStorage {
     throw new Exception("Not implemented for PermaStorage");    
   }
 
+  public function build_asset_path($asset) {
+    throw new Exception("Not implemented for PermaStorage");    
+  }
+  
   public function get_metadata($key) {
     throw new Exception("Not implemented for PermaStorage");    
   }

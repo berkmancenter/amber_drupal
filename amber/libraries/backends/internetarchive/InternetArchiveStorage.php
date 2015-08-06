@@ -19,6 +19,10 @@ class InternetArchiveStorage implements iAmberStorage {
   	throw new Exception("Not implemented for InternetArchiveStorage");  	
   }
 
+  public function build_asset_path($asset) {
+    throw new Exception("Not implemented for InternetArchiveStorage");    
+  }
+  
   public function get_metadata($key) {
   	throw new Exception("Not implemented for InternetArchiveStorage");  	
   }
