@@ -1,0 +1,77 @@
+<?php
+
+require_once dirname( __FILE__ ) . '/../../AmberInterfaces.php';
+require_once dirname( __FILE__ ) . '/../amber/AmberStorage.php';
+
+class AmazonS3Storage extends AmberStorage implements iAmberStorage  {
+
+	public function __construct($options) {
+	  parent::__construct('s3://' . $options['bucket']);
+	  $library = libraries_load('aws');
+	  if (!$library || !$library['loaded']) {
+	    throw new RuntimeException("AWS Library not available");
+	  }
+	  $this->aws = new Aws\S3\S3Client(array(
+	  		'version' => 'latest',
+	  		'region' => 'us-east-1',
+	  		'credentials' => array(
+	  			'key' => $options['access_key'],
+	  			'secret' => $options['secret_key'],
+	  	)));
+	  $this->aws->registerStreamWrapper();   
+	  
+	  /* Create bucket for storage, if it does not already exist */
+	  if (!$this->aws->doesBucketExist($options['bucket'])) {
+	  	mkdir($this->file_root);    	
+	  }
+	}
+
+	public function provider_id() {
+	  	return 3;
+	}
+
+	/**
+	* Lookup metadata for a cached item based on ID or URL
+	* Overridden, since we don't need some of the checks in AmberStorage
+	* to prevent access outside the cache directory are unecessary
+	* @param $key string URL or an MD5 hash
+	* @return array
+	*/
+	public function get_metadata($key) {
+		/* Check if it's an ID */
+		if (strlen($key) == 32 && ctype_xdigit($key)) {
+		  return $this->get_cache_metadata($key);
+		} else {
+		  return $this->get_cache_metadata($this->url_hash($key));
+	   }
+	}
+
+	/**
+	* Get the metadata for a cached document as a dictionary
+	* Overridden, since we don't need some of the checks in AmberStorage
+	* to prevent access outside the cache directory are unecessary
+	* @param string $id cached document id
+	* @return array metadata
+	*/
+	protected function get_cache_metadata($id) {
+	  $path = $this->get_cache_item_metadata_path($id);
+	  if (($path === false) || !file_exists($path)) {
+	    /* File does not exist. Do not log an error, since there are many cases in which this is expected */
+	    return array();
+	  }
+	  try {
+	    $file = file_get_contents($path);
+	  } catch (Exception $e) {
+	    error_log(join(":", array(__FILE__, __METHOD__, "Could not read file", $path)));
+	    return array();
+	  }
+	  $result = json_decode($file,true);
+	  if (null == $result) {
+	    $result = array();
+	    error_log(join(":", array(__FILE__, __METHOD__, "Could not parse file", $path)));
+	  };
+	  return $result;
+	}
+
+
+}

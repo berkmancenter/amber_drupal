@@ -135,6 +135,44 @@ function amber_config_form($form, &$form_state) {
      ),    
   );
 
+  /* Settings for AWS S3 storage strategy */
+  $form['amber_cache']['amber_aws_access_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('AWS Access Key'),
+    '#size' => 50,
+    '#default_value' => variable_get('amber_aws_access_key', ''),
+    '#description' => t('Text TBD - Instructions on how to get a key'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="amber_backend"]' => array('value' => '3'),
+      ),
+     ),    
+  );
+  $form['amber_cache']['amber_aws_secret_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('AWS Secret Access Key'),
+    '#size' => 50,
+    '#default_value' => variable_get('amber_aws_secret_key', ''),
+    '#description' => t('Text TBD - Instructions on how to get a key'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="amber_backend"]' => array('value' => '3'),
+      ),
+     ),    
+  );
+  $form['amber_cache']['amber_aws_bucket'] = array(
+    '#type' => 'textfield',
+    '#title' => t('AWS Bucket'),
+    '#size' => 50,
+    '#default_value' => variable_get('amber_aws_bucket', ''),
+    '#description' => t('Text TBD - Instructions on what this is used for, and that it is unique'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="amber_backend"]' => array('value' => '3'),
+      ),
+     ),    
+  );
+
 
   global $base_url;
   $form['amber_cache']['advanced']['amber_excluded_sites'] = array(

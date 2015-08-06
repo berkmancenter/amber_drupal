@@ -4,13 +4,14 @@
  * Implements hook_requirements().
 */
 function amber_requirements($phase) {
+  $t = get_t();
   switch ($phase) {
     case 'install':
-      $t = get_t();
       drupal_set_message($t('You should probably go to the Amber dashboard, scan existing content for links to preserve and then preserve them by clicking !here',array('!here' => l($t('here'),'admin/reports/amber'))),'warning');
       break;
     
     case 'runtime':
+
       $status = amber_get_status();
       $max_size = variable_get('amber_max_disk', '1000') * 1024 * 1024;
       $formatted_max = format_size($max_size);
@@ -18,7 +19,20 @@ function amber_requirements($phase) {
       $formatted_current_size = $current_size ? format_size($current_size) : "0 MB";
       $value = t('@current (of @max)', array('@current' => $formatted_current_size, '@max' => $formatted_max));
       $severity = $current_size < (0.9 * $max_size) ? REQUIREMENT_OK : REQUIREMENT_WARNING;
-      return array('amber' => array('title' => 'Amber disk usage', 'value' => $value, 'severity' => $severity ));
+      $requirements['amber_storage'] = array('title' => 'Amber disk usage', 'value' => $value, 'severity' => $severity );
+      if (function_exists('libraries_detect')) {
+        $requirements['amber_aws'] = array('title' => 'Amber AWS library');
+        if (libraries_detect('aws')['installed']) {
+          $requirements['amber_aws']['severity'] = REQUIREMENT_OK;
+          $requirements['amber_aws']['value'] = $t("Installed");
+        } else {
+          $requirements['amber_aws']['severity'] = REQUIREMENT_WARNING;
+          $requirements['amber_aws']['value'] = $t("Not installed");
+          $requirements['amber_aws']['description'] = $t("The AWS library is required to store captures on AWS. Here are some instructions on how to install the library");
+        } 
+      }
+      return $requirements;
+      break;
     
     default:
       break;

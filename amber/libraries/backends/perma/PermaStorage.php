@@ -4,36 +4,40 @@ require_once dirname( __FILE__ ) . '/../../AmberInterfaces.php';
 
 class PermaStorage implements iAmberStorage {
 
-  function __construct(array $options) {
+  public function __construct(array $options) {
   }
 
-  function get($id) {
+  public function provider_id() {
+    return 1;
+  }
+
+  public function get($id) {
     throw new Exception("Not implemented for PermaStorage");
   }
 
-  function get_asset($id, $path) {
+  public function get_asset($id, $path) {
     throw new Exception("Not implemented for PermaStorage");    
   }
 
-  function get_metadata($key) {
+  public function get_metadata($key) {
     throw new Exception("Not implemented for PermaStorage");    
   }
   
-  function get_id($url) {
+  public function get_id($url) {
     throw new Exception("Not implemented for PermaStorage");    
   }
   
-  function save($url, $root, array $headers = array(), array $assets = array()) {
+  public function save($url, $root, array $headers = array(), array $assets = array()) {
     throw new Exception("Not implemented for PermaStorage");    
   }
   
   /* We do not attempt to delete Perma captures */
-  function delete_all() {
+  public function delete_all() {
     return TRUE;
   }
 
   /* We do not attempt to delete Perma captures */
-  function delete($cache_metadata) {
+  public function delete($cache_metadata) {
     return TRUE;
   }
 

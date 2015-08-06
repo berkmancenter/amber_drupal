@@ -48,6 +48,7 @@ function _amber_get_view_link($row) {
       return l('View on Internet Archive', $row['location']);
       break;
     case AMBER_BACKEND_LOCAL:
+    case AMBER_BACKEND_AMAZON_S3:
       return isset($row['size']) ? l('View', $row['location']) : "";
       break;
   } 
@@ -61,6 +62,7 @@ function _amber_get_size_column($row) {
       return "";
       break;
     case AMBER_BACKEND_INTERNET_ARCHIVE:
+    case AMBER_BACKEND_AMAZON_S3:
     case AMBER_BACKEND_LOCAL:
       return $size;
       break;

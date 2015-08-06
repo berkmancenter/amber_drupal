@@ -53,16 +53,23 @@ function amber_get_storage_for_item($id) {
  */
 function amber_get_storage_by_id($storage_id) {
   switch ($storage_id) {
+    case AMBER_BACKEND_LOCAL:
+      $file_path = join(DIRECTORY_SEPARATOR,
+        array(DRUPAL_ROOT, variable_get('amber_storage_location', 'sites/default/files/amber')));
+      $storage = new AmberStorage($file_path);
+      break;
     case AMBER_BACKEND_PERMA:
       $storage = new PermaStorage(array());
       break;
     case AMBER_BACKEND_INTERNET_ARCHIVE:
       $storage = new InternetArchiveStorage(array());
       break;
-    case AMBER_BACKEND_LOCAL:
-      $file_path = join(DIRECTORY_SEPARATOR,
-        array(DRUPAL_ROOT, variable_get('amber_storage_location', 'sites/default/files/amber')));
-      $storage = new AmberStorage($file_path);
+    case AMBER_BACKEND_AMAZON_S3:
+      $storage = new AmazonS3Storage(array(
+        'access_key' => variable_get('amber_aws_access_key',''),
+        'secret_key' => variable_get('amber_aws_secret_key',''),
+        'bucket' => variable_get('amber_aws_bucket',''),
+      ));
       break;
   }
   return $storage;
@@ -92,6 +99,13 @@ function amber_get_fetcher() {
         break;
       case AMBER_BACKEND_INTERNET_ARCHIVE:
         $fetcher = new InternetArchiveFetcher(amber_get_storage(), array());
+        break;
+      case AMBER_BACKEND_AMAZON_S3:
+        $fetcher = new AmberFetcher(amber_get_storage(), array(
+          'amber_max_file' => 5000000, /* Max size for S3 file */
+          'header_text' => t("You are viewing an archive of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
+          'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
+        ));      
         break;
     }
   }
@@ -138,13 +152,29 @@ function amber_init() {
 /**
  *  Implements hook_permission()
 **/
-function amber_permission()
-{
+function amber_permission() {
   return array('administer amber' => array(
       'title' => t('Administer Amber'),
       'description' => t('Adminster Amber storage and display of site captures'),
     )
   );  
+}
+
+/**
+ * Implements hook_library_info()
+ * Defined by the 'libraries' module
+ */
+function amber_libraries_info() {
+  $libraries['aws'] = array(
+    'name' => 'AWS',
+    'vendor url' => 'https://aws.amazon.com/sdk-for-php/',
+    'download url' => 'https://github.com/aws/aws-sdk-php',
+    'version' => 3,
+    'files' => array(
+      'php' => array('aws-autoloader.php')
+      )
+    );
+  return $libraries;
 }
 
 /**

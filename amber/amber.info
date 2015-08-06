@@ -14,6 +14,7 @@ files[] = libraries/backends/perma/PermaFetcher.php
 files[] = libraries/backends/perma/PermaStorage.php
 files[] = libraries/backends/internetarchive/InternetArchiveFetcher.php
 files[] = libraries/backends/internetarchive/InternetArchiveStorage.php
+files[] = libraries/backends/aws/AmazonS3Storage.php
 files[] = amber.test
 files[] = amber.extract.inc
 files[] = amber.drush.inc
