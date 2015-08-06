@@ -22,7 +22,7 @@ function amber_requirements($phase) {
       $requirements['amber_storage'] = array('title' => 'Amber disk usage', 'value' => $value, 'severity' => $severity );
       if (function_exists('libraries_detect')) {
         $requirements['amber_aws'] = array('title' => 'Amber AWS library');
-        if (libraries_detect('aws')['installed']) {
+        if (($library = libraries_detect('aws')) && $library['installed']) {
           $requirements['amber_aws']['severity'] = REQUIREMENT_OK;
           $requirements['amber_aws']['value'] = $t("Installed");
         } else {
