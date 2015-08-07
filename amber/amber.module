@@ -65,6 +65,10 @@ function amber_get_storage_by_id($storage_id) {
       $storage = new InternetArchiveStorage(array());
       break;
     case AMBER_BACKEND_AMAZON_S3:
+      $library = libraries_load('aws');
+      if (!$library || !$library['loaded']) {
+        throw new RuntimeException("AWS Library not available");
+      }
       $storage = new AmazonS3Storage(array(
         'access_key' => variable_get('amber_aws_access_key',''),
         'secret_key' => variable_get('amber_aws_secret_key',''),

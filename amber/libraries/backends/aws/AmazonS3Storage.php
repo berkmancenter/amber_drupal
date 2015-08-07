@@ -6,33 +6,32 @@ require_once dirname( __FILE__ ) . '/../amber/AmberStorage.php';
 class AmazonS3Storage extends AmberStorage implements iAmberStorage  {
 
 	public function __construct($options) {
+		if (!class_exists("Aws\S3\S3Client")) {
+			return NULL;
+		}
 		$bucket = $options['bucket'];
-	  parent::__construct('s3://' . $bucket);
-	  $library = libraries_load('aws');
-	  if (!$library || !$library['loaded']) {
-	    throw new RuntimeException("AWS Library not available");
-	  }
-	  $this->aws = new Aws\S3\S3Client(array(
-	  		'version' => 'latest',
-	  		'region' => $options['region'],
+	  	parent::__construct('s3://' . $bucket);
+	  	$this->aws = new Aws\S3\S3Client(array(
+			'version' => 'latest',
+			'region' => $options['region'],
 	  		'credentials' => array(
 	  			'key' => $options['access_key'],
 	  			'secret' => $options['secret_key'],
-	  	)));
-	  $this->aws->registerStreamWrapper();   
-	  
-	  /* Create bucket for storage, if it does not already exist, 
-	     and confirm that we have write access to the selected bucket.
-	     We suppress warning messages here, knowing that if there is
-	     a problem the PutObject/DeleteObject calls will cause
-	     an exception to be thrown */
-	  if (!$this->aws->doesBucketExist($bucket)) {
-	  	@mkdir($this->file_root);    	
-	  }
-	  @$this->aws->PutObject(array("Bucket" => $bucket, 
+			)));
+		$this->aws->registerStreamWrapper();   
+
+		/* Create bucket for storage, if it does not already exist,
+		   and confirm that we have write access to the selected bucket.
+		   We suppress warning messages here, knowing that if there is
+		   a problem the PutObject/DeleteObject calls will cause
+		   an exception to be thrown */
+		if (!$this->aws->doesBucketExist($bucket)) {
+			@mkdir($this->file_root);
+		}
+		@$this->aws->PutObject(array("Bucket" => $bucket,
 								  "Key" => "credentials_test", 
 								  "Body" => "It works"));
-	  @$this->aws->DeleteObject(array("Bucket" => $bucket, 
+		@$this->aws->DeleteObject(array("Bucket" => $bucket,
 								     "Key" => "credentials_test"));
 	}
 

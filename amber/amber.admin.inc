@@ -377,28 +377,32 @@ function amber_settings_validate($form, &$form_state) {
       }      
     }
     if (!$aws_missing_field) {
-      /* Validate the AWS settings */
-      try {
-        $storage = new AmazonS3Storage(array(
-            'access_key' => $form_state['values']['amber_aws_access_key'],
-            'secret_key' => $form_state['values']['amber_aws_secret_key'],
-            'bucket' => $form_state['values']['amber_aws_bucket'],
-            'region' => $form_state['values']['amber_aws_region'],
-          ));
-      } catch (\Aws\S3\Exception\S3Exception $e) {
-        foreach (array('amber_aws_access_key', 'amber_aws_secret_key', 'amber_aws_bucket', 'amber_aws_region') as $field) {
-          form_set_error($field);
-        }
-        drupal_set_message(t("There is a problem with the provided Amazon configuration. Check that
-          the access key and secret key are correct, and that they provide write access to the 
-          selected bucket. Ensure that that your bucket name is unique - it cannot have the same 
-          name as any other bucket in S3."), 'error');
-      } catch (RuntimeException $e) {
+      /* Validate the AWS settings.  Duplicates some of the logic in amber_get_storage_by_id() to achieve this */
+      $library = libraries_load('aws');
+      if (!$library || !$library['loaded']) {
         $library_info = libraries_info('aws');
-        form_set_error('amber_backend', "The AWS PHP library is required to use the AWS S3 backend, 
-          but is not available.
-          <a href='${library_info['download url']}'>Download</a> the library and unpack the zip file and 
-          install into sites/all/libraries/aws.");
+          form_set_error('amber_backend', "The AWS PHP library is required to use the AWS S3 backend, 
+            but is not available.
+            <a href='${library_info['download url']}'>Download</a> the library and unpack the zip file and 
+            install into sites/all/libraries/aws.");
+      } else {
+        try {
+          $storage = new AmazonS3Storage(array(
+              'access_key' => $form_state['values']['amber_aws_access_key'],
+              'secret_key' => $form_state['values']['amber_aws_secret_key'],
+              'bucket' => $form_state['values']['amber_aws_bucket'],
+              'region' => $form_state['values']['amber_aws_region'],
+            ));
+        } catch (\Aws\S3\Exception\S3Exception $e) {
+          foreach (array('amber_aws_access_key', 'amber_aws_secret_key', 'amber_aws_bucket', 'amber_aws_region') as $field) {
+            form_set_error($field);
+          }
+          drupal_set_message(t("There is a problem with the provided Amazon 
+            configuration. Check that the access key and secret key are correct, 
+            and that they provide write access to the selected bucket. Ensure that
+            your bucket name is unique - it cannot have the same name as any other 
+            bucket in S3."), 'error');
+        }
       }
     }
   }
