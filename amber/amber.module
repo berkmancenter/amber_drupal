@@ -69,6 +69,7 @@ function amber_get_storage_by_id($storage_id) {
         'access_key' => variable_get('amber_aws_access_key',''),
         'secret_key' => variable_get('amber_aws_secret_key',''),
         'bucket' => variable_get('amber_aws_bucket',''),
+        'region' => variable_get('amber_aws_region','us-east-1'),
       ));
       break;
   }

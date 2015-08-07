@@ -34,7 +34,7 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('Amber will store captures up to a specified size. Links to pages that exceed this size will not be preserved.'),
     '#states' => array(
       'visible' => array(
-        ':input[name="amber_backend"]' => array('value' => '0'),
+        ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_LOCAL),
       ),
      ),    
   );
@@ -46,7 +46,7 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('The maximum amount of disk space to be used for all cached items. If this disk space usage is exceeded, old items will be removed from the cache'),
     '#states' => array(
       'visible' => array(
-        ':input[name="amber_backend"]' => array('value' => '0'),
+        ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_LOCAL),
       ),
      ),    
   );
@@ -57,7 +57,7 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('Path to the location where captures are stored on disk, relative to the Drupal root'),
     '#states' => array(
       'visible' => array(
-        ':input[name="amber_backend"]' => array('value' => '0'),
+        ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_LOCAL),
       ),
      ),    
   );
@@ -69,7 +69,7 @@ function amber_config_form($form, &$form_state) {
     '#collapsed' => TRUE,
     '#states' => array(
       'visible' => array(
-        ':input[name="amber_backend"]' => array('value' => '0'),
+        ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_LOCAL),
       ),
      ),    
   );
@@ -94,7 +94,7 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('Text TBD - Instructions on how to get a key'),
     '#states' => array(
       'visible' => array(
-        ':input[name="amber_backend"]' => array('value' => '1'),
+        ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_PERMA),
       ),
      ),    
   );
@@ -105,7 +105,7 @@ function amber_config_form($form, &$form_state) {
     '#collapsed' => TRUE,
     '#states' => array(
       'visible' => array(
-        ':input[name="amber_backend"]' => array('value' => '1'),
+        ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_PERMA),
       ),
      ),    
   );  
@@ -115,11 +115,6 @@ function amber_config_form($form, &$form_state) {
     '#size' => 30,
     '#default_value' => variable_get('amber_perma_server_url', 'http://perma.cc'),
     '#description' => t('Text TBD - Which Perma server to use. '),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="amber_backend"]' => array('value' => '1'),
-      ),
-     ),    
   );
   $form['amber_cache']['advanced_perma']['amber_perma_server_api_url'] = array(
     '#type' => 'textfield',
@@ -127,11 +122,6 @@ function amber_config_form($form, &$form_state) {
     '#size' => 30,
     '#default_value' => variable_get('amber_perma_server_api_url', 'http://api.perma.cc'),
     '#description' => t('Text TBD - API endpoint for the Perma server. '),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="amber_backend"]' => array('value' => '1'),
-      ),
-     ),    
   );
 
   /* Settings for AWS S3 storage strategy */
@@ -143,7 +133,7 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('Text TBD - Instructions on how to get a key'),
     '#states' => array(
       'visible' => array(
-        ':input[name="amber_backend"]' => array('value' => '3'),
+        ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_AMAZON_S3),
       ),
      ),    
   );
@@ -155,7 +145,7 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('Text TBD - Instructions on how to get a key'),
     '#states' => array(
       'visible' => array(
-        ':input[name="amber_backend"]' => array('value' => '3'),
+        ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_AMAZON_S3),
       ),
      ),    
   );
@@ -167,9 +157,27 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('Text TBD - Instructions on what this is used for, and that it must be unique'),
     '#states' => array(
       'visible' => array(
-        ':input[name="amber_backend"]' => array('value' => '3'),
+        ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_AMAZON_S3),
       ),
      ),    
+  );
+  $form['amber_cache']['advanced_aws'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_AMAZON_S3),
+      ),
+     ),    
+  );  
+  $form['amber_cache']['advanced_aws']['amber_aws_region'] = array(
+    '#type' => 'textfield',
+    '#title' => t('AWS Region'),
+    '#size' => 30,
+    '#default_value' => variable_get('amber_aws_region', 'us-east-1'),
+    '#description' => t('Text TBD - AWS region to use'),
   );
 
 
@@ -361,29 +369,33 @@ function amber_settings_validate($form, &$form_state) {
     }
   }
   if ($form_state['values']['amber_backend'] == AMBER_BACKEND_AMAZON_S3) {
-    foreach (array('amber_aws_access_key', 'amber_aws_secret_key', 'amber_aws_bucket') as $field) {
+    $aws_missing_field = FALSE;
+    foreach (array('amber_aws_access_key', 'amber_aws_secret_key', 'amber_aws_bucket', 'amber_aws_region') as $field) {
       if (empty($form_state['values'][$field])) {
         form_set_error($field,"Required if using the Amazon S3 storage engine");
+        $aws_missing_field = TRUE;
       }      
     }
-    /* Validate the AWS settings */
-    try {
-      $storage = new AmazonS3Storage(array(
-          'access_key' => $form_state['values']['amber_aws_access_key'],
-          'secret_key' => $form_state['values']['amber_aws_secret_key'],
-          'bucket' => $form_state['values']['amber_aws_bucket'],
-        ));
-    } catch (\Aws\S3\Exception\S3Exception $e) {
-      foreach (array('amber_aws_access_key', 'amber_aws_secret_key', 'amber_aws_bucket') as $field) {
-        form_set_error($field);
-      }
-      drupal_set_message(t("There is a problem with the provided Amazon configuration. Check that
-        the access key and secret key are correct, and that they provide write access to the 
-        selected bucket. Ensure that that your bucket name is unique - it cannot have the same 
-        name as any other bucket in S3."), 'error');
-    } 
+    if (!$aws_missing_field) {
+      /* Validate the AWS settings */
+      try {
+        $storage = new AmazonS3Storage(array(
+            'access_key' => $form_state['values']['amber_aws_access_key'],
+            'secret_key' => $form_state['values']['amber_aws_secret_key'],
+            'bucket' => $form_state['values']['amber_aws_bucket'],
+            'region' => $form_state['values']['amber_aws_region'],
+          ));
+      } catch (\Aws\S3\Exception\S3Exception $e) {
+        foreach (array('amber_aws_access_key', 'amber_aws_secret_key', 'amber_aws_bucket', 'amber_aws_region') as $field) {
+          form_set_error($field);
+        }
+        drupal_set_message(t("There is a problem with the provided Amazon configuration. Check that
+          the access key and secret key are correct, and that they provide write access to the 
+          selected bucket. Ensure that that your bucket name is unique - it cannot have the same 
+          name as any other bucket in S3."), 'error');
+      } 
+    }
   }
-
 }
 
 /* Custom submit handler to flush filter cache after the settings are updated */

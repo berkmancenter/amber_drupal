@@ -14,7 +14,7 @@ class AmazonS3Storage extends AmberStorage implements iAmberStorage  {
 	  }
 	  $this->aws = new Aws\S3\S3Client(array(
 	  		'version' => 'latest',
-	  		'region' => 'us-east-1',
+	  		'region' => $options['region'],
 	  		'credentials' => array(
 	  			'key' => $options['access_key'],
 	  			'secret' => $options['secret_key'],
