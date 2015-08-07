@@ -393,7 +393,13 @@ function amber_settings_validate($form, &$form_state) {
           the access key and secret key are correct, and that they provide write access to the 
           selected bucket. Ensure that that your bucket name is unique - it cannot have the same 
           name as any other bucket in S3."), 'error');
-      } 
+      } catch (RuntimeException $e) {
+        $library_info = libraries_info('aws');
+        form_set_error('amber_backend', "The AWS PHP library is required to use the AWS S3 backend, 
+          but is not available.
+          <a href='${library_info['download url']}'>Download</a> the library and unpack the zip file and 
+          install into sites/all/libraries/aws.");
+      }
     }
   }
 }

@@ -28,7 +28,9 @@ function amber_requirements($phase) {
         } else {
           $requirements['amber_aws']['severity'] = REQUIREMENT_WARNING;
           $requirements['amber_aws']['value'] = $t("Not installed");
-          $requirements['amber_aws']['description'] = $t("The AWS library is required to store captures on AWS. Here are some instructions on how to install the library");
+          $library_info = libraries_info('aws');
+          $requirements['amber_aws']['description'] = $t("The AWS library is required to store captures on AWS. <a href='${library_info['download url']}'>Download</a> the library and unpack the zip file and 
+          install into sites/all/libraries/aws.");
         } 
       }
       return $requirements;
