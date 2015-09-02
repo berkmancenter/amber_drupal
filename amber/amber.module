@@ -513,8 +513,11 @@ function amber_entity_insert($entity, $type) {
  * Convert a string representation of a date into RFC1123 format
  */
 function amber_RFC1123_date($date_string) {
-  $storage = amber_get_storage();
-  $dt = DateTime::createFromFormat($storage->ISO8601_FORMAT, $date_string);
+  /* The default ISO8601 date string formatter doesn't include the colons in the time-zone component, which
+     is incompatible with javascript's date.parse() function in at least some implementations (Safari, definitely) */
+  $ISO8601_FORMAT = 'Y-m-d\TH:i:sP';
+
+  $dt = DateTime::createFromFormat($ISO8601_FORMAT, $date_string);
   $result = $dt->format(DateTime::RFC1123);
   return $result;
 }
