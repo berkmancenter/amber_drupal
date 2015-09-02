@@ -15,14 +15,16 @@ function amber_config_form($form, &$form_state) {
   $form['amber_cache']['amber_backend'] = array(
     '#type' => 'select',
     '#title' => t('Backend to use for storing captures'),
-    '#options' => array (
-      AMBER_BACKEND_LOCAL => t('Local'),
-      AMBER_BACKEND_PERMA => t('Perma'),
-      AMBER_BACKEND_INTERNET_ARCHIVE => t('Internet Archive'),
-      AMBER_BACKEND_AMAZON_S3 => t('Amazon S3'),
-    ),
+    '#options' => array_merge(
+      array (
+          AMBER_BACKEND_LOCAL => t('Local'),
+          AMBER_BACKEND_PERMA => t('Perma'),
+          AMBER_BACKEND_INTERNET_ARCHIVE => t('Internet Archive')
+        ),
+        (version_compare(PHP_VERSION, "5.5") >= 0) ? array(AMBER_BACKEND_AMAZON_S3 => t('Amazon S3')) : array()        
+      ),
     '#default_value' => variable_get('amber_backend', 0),
-    '#description' => t('Text TBD'),
+    '#description' => t('Text TBD. Note that Amazon S4 requires PHP version >= 5.5'),
   );
 
   /* Settings for Local storage strategy */
