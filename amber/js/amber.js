@@ -306,6 +306,24 @@ var amber = {
       hover.parentNode.removeChild(hover);
   },
 
+  timegate : function() {
+    console.log("Looking for timegates");
+  },
+
+  /* Get memento URL for a given URL */
+  get_memento : function(href) {
+    console.log(href);
+    var timegate = "http://timetravel.mementoweb.org/timegate/";
+    var request = new XMLHttpRequest();
+    request.onload = function() {
+      if (request.readyState === 4) {
+        console.log("I got a response");
+      }
+    };
+    request.open('HEAD', timegate + href);
+    request.send();
+  },
+
   /* Utility functions to provide support for IE8+ */
   util_addEventListener : function (el, eventName, handler) {
     if (el.addEventListener) {
@@ -378,5 +396,11 @@ amber.util_ready(function($) {
     if (typeof amber_locale != 'undefined') {
       amber.set_locale(amber_locale);
     }
+
+    /* Query timegate for mementos */
+    amber.util_forEachElement("a[data-versionurl]", function(e, i) {
+      amber.get_memento(e.href);
+    });
+
 
 });
