@@ -255,6 +255,17 @@ function amber_config_form($form, &$form_state) {
      ),
   );
 
+  $form['amber_delivery']['amber_external_availability'] = array(
+    '#type' => 'select',
+    '#title' => t('Use a third-party database to check site availability'),
+    '#options' => array (
+      AMBER_EXTERNAL_AVAILABILITY_NONE => t('Do not use an external service'),
+      AMBER_EXTERNAL_AVAILABILITY_NETCLERK => t('Use NetClerk'),
+    ),
+    '#default_value' => variable_get('amber_external_availability', AMBER_EXTERNAL_AVAILABILITY_NETCLERK),
+    '#description' => t('TBD: Describe what it means to use NetClerk'),
+  );
+
   $form['amber_country'] = array(
     '#type' => 'fieldset',
     '#title' => t('Activity for a specific country'),
