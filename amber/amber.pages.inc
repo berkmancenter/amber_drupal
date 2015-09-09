@@ -69,6 +69,27 @@ function _amber_get_size_column($row) {
   } 
 }
 
+function _amber_get_method_column($row) {
+  $p = isset($row['provider']) ? $row['provider'] : "";
+  if (!isset($row['size'])) {
+    return "";
+  }
+  switch ($p) {
+    case AMBER_BACKEND_PERMA:
+      return "Perma";
+      break;
+    case AMBER_BACKEND_INTERNET_ARCHIVE:
+      return "Internet Archive";
+      break;
+    case AMBER_BACKEND_AMAZON_S3:
+      return "Amazon S3";
+      break;
+    case AMBER_BACKEND_LOCAL:
+      return "Local storage";
+      break;
+  } 
+}
+
 function amber_dashboard_detail_form() {
 
   $build = array();
@@ -81,6 +102,7 @@ function amber_dashboard_detail_form() {
     array('data' => t('Size'), 'field' => 'ca.size' ),
     array('data' => t('Last viewed'), 'field' => 'a.date' ),
     array('data' => t('Total views'), 'field' => 'a.views' ),
+    array('data' => t('Archive Method'),),
     array('data' => t(''),  ),
     array('data' => t(''),  ),
   );
@@ -105,6 +127,7 @@ function amber_dashboard_detail_form() {
         'size' => _amber_get_size_column($r),
         'a.date' => isset($r['a_date']) ? format_date($r['a_date']) : "",
         'views' => isset($r['views']) ? $r['views'] : "",
+        'method' => _amber_get_method_column($r),
         'view' => _amber_get_view_link($r),
         'delete' => l('Delete', 'admin/reports/amber/delete/' . $r['id'], array('query' => array('destination' => current_path()))),
       ),
