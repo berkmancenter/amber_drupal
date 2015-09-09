@@ -1,7 +1,7 @@
 <?php
 require_once ("AmberNetworkUtils.php");
 require_once ("AmberAvailabilityLookup.php");
-class AmberCheckerTest extends PHPUnit_Framework_TestCase {
+class AmberNetClerkAvailabilityLookupTest extends PHPUnit_Framework_TestCase {
 
   protected function setUp() {
     date_default_timezone_set('UTC');
