@@ -143,6 +143,18 @@ function amber_get_status() {
 }
 
 /**
+ * Return an initialized AmberAvailabilityLookup module
+ * @return IAmberAvailabilityLookup
+ */
+function amber_get_availability_lookup() {
+  $lookup = &drupal_static(__FUNCTION__);
+  if (!isset($availability_lookup)) {
+    $lookup = new AmberNetClerkAvailabilityLookup(array());
+  }
+  return $lookup;
+}
+
+/**
  * Implements hook_init()
  */
 function amber_init() {
@@ -274,6 +286,14 @@ function amber_menu() {
     'page callback' => 'amber_log_cache_view',
     'access callback' => true,
     'delivery callback' => 'amber_deliver_cache_view_result',    
+    'type' => MENU_CALLBACK,
+  );
+  $items['amber/status'] = array(
+    'title' => 'Get status for URLs',    
+    'description' => 'Get availability status for a list of URLs through a POST request',
+    'page callback' => 'amber_get_url_status',
+    'access callback' => true,
+    'delivery callback' => 'amber_deliver_status',    
     'type' => MENU_CALLBACK,
   );
 
@@ -726,6 +746,43 @@ function amber_deliver_cache_view_result($data) {
     drupal_add_http_header('Status', '404 Not Found');
   }
 }
+
+/**
+ * Perform an availability lookup against NetClerk to get site availability status
+ * Requires some POST or GET parameters:
+ *  url : array of URLs to check
+ *  country : two-character ISO code for the user's country
+ * @return string json response to send to the client with availability status
+ */
+function amber_get_url_status() {
+  if (isset($_REQUEST['url']) && isset($_REQUEST['country'])) {
+    $lookup = amber_get_availability_lookup();
+    $result = $lookup->getStatus($_REQUEST['url'], $_REQUEST['country']);
+  } else {
+    $result = '{}';
+  }
+  return $result;
+}
+
+/**
+ * Format and deliver HTTP response to availability lookup
+ * @param  string $data JSON to return to the client, or integer return code
+ * @return none
+ */
+function amber_deliver_status($data) {
+  drupal_add_http_header('Content-Type', "application/json");
+  drupal_add_http_header('Cache-Control', "no-cache, must-revalidate");
+  drupal_add_http_header('Pragma', "no-cache");
+  drupal_add_http_header('Expires', 0);
+  if (is_int($data) && $data == MENU_NOT_FOUND) {
+    drupal_add_http_header('Status', '404 Not Found');
+  } else {
+    print $data;
+  }
+}
+
+
+
 
 
 
