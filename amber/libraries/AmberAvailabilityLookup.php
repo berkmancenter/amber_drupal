@@ -35,6 +35,8 @@ class AmberNetClerkAvailabilityLookup implements iAmberAvailabilityLookup {
 		$options = array(
 			CURLOPT_POST => true,
 			CURLOPT_POSTFIELDS => $fields_string,
+          // CURLOPT_PROXY => 'localhost:8889',
+          // CURLOPT_PROXYTYPE => CURLPROXY_SOCKS5,
 		);
 		$result = AmberNetworkUtils::open_single_url($this->serverUrl, $options);
 
@@ -46,11 +48,11 @@ class AmberNetClerkAvailabilityLookup implements iAmberAvailabilityLookup {
 	}
 
 	/**
-	 * Parse the response from the NetClerk server and format a response to be passed 
+	 * Parse the response from the NetClerk server and extract data to be passed 
 	 * to the client-side code that's querying the web server for the availability 
 	 * information 
 	 * @param  string $response JSON string returned from NetClerk
-	 * @return string 			JSON string to be send to the browser
+	 * @return string 			object array with URLs and availability status
 	 */
 	public function parseResponse($response) {
 		$result = array('data' => array());
@@ -61,13 +63,13 @@ class AmberNetClerkAvailabilityLookup implements iAmberAvailabilityLookup {
 					if ($value->type == 'statuses') {
 						$result['data'][] = array(
 							'url' => $value->attributes->url,
-							'status' => $value->attributes->available === true ? "available" : "unavailable",
+							'available' => $value->attributes->available,
 							);
 					}
 				}
 			}
 		} 
-		return json_encode($result, JSON_UNESCAPED_SLASHES);		
+		return $result;
 	}
 
 

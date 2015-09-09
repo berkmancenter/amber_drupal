@@ -12,6 +12,9 @@ define("AMBER_BACKEND_PERMA",1);
 define("AMBER_BACKEND_INTERNET_ARCHIVE",2);
 define("AMBER_BACKEND_AMAZON_S3",3);
 
+define("AMBER_EXTERNAL_AVAILABILITY_NONE",0);
+define("AMBER_EXTERNAL_AVAILABILITY_NETCLERK",1);
+
 define("AMBER_QUEUE_CACHE", "amber_cache");
 define("AMBER_QUEUE_CHECK_NEW", "amber_check_new");
 define("AMBER_QUEUE_CHECK_EXISTING","amber_check_existing");
@@ -162,6 +165,8 @@ function amber_init() {
     drupal_add_js(array(
       'amber' => array(
         'name' => variable_get('site_name',t('This site')),
+        'lookup_availability' => 
+            (variable_get('amber_external_availability', AMBER_EXTERNAL_AVAILABILITY_NETCLERK) == AMBER_EXTERNAL_AVAILABILITY_NETCLERK)
       )), 'setting');
   }
 }
@@ -757,7 +762,11 @@ function amber_deliver_cache_view_result($data) {
 function amber_get_url_status() {
   if (isset($_REQUEST['url']) && isset($_REQUEST['country'])) {
     $lookup = amber_get_availability_lookup();
-    $result = $lookup->getStatus($_REQUEST['url'], $_REQUEST['country']);
+    $lookup_result = $lookup->getStatus($_REQUEST['url'], $_REQUEST['country']);
+    foreach ($lookup_result['data'] as $key => $value) {
+      $lookup_result['data'][$key]['behavior'] = _amber_get_behavior($lookup_result['data'][$key]['available']);
+    }
+    $result = json_encode($lookup_result, JSON_UNESCAPED_SLASHES);
   } else {
     $result = '{}';
   }
