@@ -8,6 +8,7 @@ files[] = libraries/AmberInterfaces.php
 files[] = libraries/AmberNetworkUtils.php
 files[] = libraries/AmberChecker.php
 files[] = libraries/AmberStatus.php
+files[] = libraries/AmberAvailabilityLookup.php
 files[] = libraries/backends/amber/AmberStorage.php
 files[] = libraries/backends/amber/AmberFetcher.php
 files[] = libraries/backends/perma/PermaFetcher.php
