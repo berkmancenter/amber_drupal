@@ -10,7 +10,7 @@ require_once("AmazonS3Storage.php");
   */
 class AmazonS3StorageTest extends AmberStorageTest {
 
-    protected static $bucket = "jeffryelichtherewego";
+    protected static $bucket = uniqid("ambertest");
     protected static $access_key;
     protected static $secret_key;
 
