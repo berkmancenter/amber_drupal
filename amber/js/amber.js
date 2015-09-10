@@ -340,7 +340,7 @@ var amber = {
     var data = availability.data;
     if (data) {
       for (var i = 0; i < data.length; i++) {
-        amber.util_forEachElement("a[href='" + data[i].url + "']", function(e, i) {
+        amber.util_forEachElement("a[href='" + data[i].url + "']", function(e, index) {
           e.setAttribute('data-amber-behavior', data[i].behavior);
         });
       };
