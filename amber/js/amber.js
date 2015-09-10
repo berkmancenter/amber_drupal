@@ -47,7 +47,7 @@ var amber = {
     } catch (e) { /* Not supported */ }
   },
 
-  get_country : function() { return 'BR';
+  get_country : function() {
     try {
       if (!amber.country) {
         amber.country = localStorage.getItem('country');
