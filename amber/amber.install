@@ -127,21 +127,21 @@ function amber_schema() {
         'type' => 'varchar',
         'not null' => TRUE,
         'length' => 2000,
-        'description' => 'The location of the cached data'
+        'description' => 'The location of preserved content'
       ),
       'date' => array(
         'type' => 'int',
-        'description' => 'The date the data was cached',
+        'description' => 'The date the capture was preserved',
       ),
       'type' => array(
         'type' => 'varchar',
         'not null' => TRUE,
         'length' => 200,
-        'description' => 'The mimetype of the cached data'
+        'description' => 'The mimetype of the capture'
       ),
       'size' => array(
         'type' => 'int',
-        'description' => 'The size of the cached data, in bytes',
+        'description' => 'The size of the capture, in bytes',
       ),
       'provider' => array(
         'type' => 'int',
@@ -172,7 +172,7 @@ function amber_schema() {
       'views' => array(
         'type' => 'int',
         'not null' => TRUE,
-        'description' => 'The number of page views for the cached item'
+        'description' => 'The number of page views for the capture'
       ),
     ),
     'primary key' => array('id'),
