@@ -45,7 +45,7 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('Maximum disk usage (MB)'),
     '#size' => 10,
     '#default_value' => variable_get('amber_max_disk', '1000'),
-    '#description' => t('The maximum amount of disk space to be used for all cached items. If this disk space usage is exceeded, old items will be removed from the cache'),
+    '#description' => t('The maximum amount of disk space to be used for all preserved content. If this disk space usage is exceeded, old captures will be removed'),
     '#states' => array(
       'visible' => array(
         ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_LOCAL),
@@ -236,7 +236,7 @@ function amber_config_form($form, &$form_state) {
       AMBER_ACTION_NONE => t('None'),
       AMBER_ACTION_HOVER => t('Hover'),
       AMBER_ACTION_POPUP => t('Link to popup'),
-      AMBER_ACTION_CACHE => t('Link to cache'),
+      AMBER_ACTION_CACHE => t('Link directly to capture'),
     ),
     '#default_value' => variable_get('amber_unavailable_action', 1),
     '#description' => t('How a visitor to your site will experience links to pages that are currently unavailable.'),
@@ -320,7 +320,7 @@ function amber_config_form($form, &$form_state) {
       AMBER_ACTION_NONE => t('None'),
       AMBER_ACTION_HOVER => t('Hover'),
       AMBER_ACTION_POPUP => t('Link to popup'),
-      AMBER_ACTION_CACHE => t('Link to cache'),
+      AMBER_ACTION_CACHE => t('Link directly to capture'),
     ),
     '#default_value' => variable_get('amber_country_unavailable_action', 1),
     '#description' => t('How links that are available will appear to visitors to your site.'),
