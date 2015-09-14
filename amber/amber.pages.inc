@@ -177,7 +177,7 @@ function _amber_disk_usage() {
   $current_size = $status->get_cache_size();
   $formatted_current_size = $current_size ? format_size($current_size) : t('0 MB');
   if ($current_size > (0.9 * $max_size)) {
-    drupal_set_message(t("You are approaching the maximum space allocated for the cache."),'warning',FALSE);
+    drupal_set_message(t("You are approaching the maximum space allocated for preserved content."),'warning',FALSE);
   }
   return t('@current (of @max)', array('@current' => $formatted_current_size, '@max' => $formatted_max));
 }
