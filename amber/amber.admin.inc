@@ -17,11 +17,11 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('Backend to use for storing captures'),
     '#options' => array_merge(
       array (
-          AMBER_BACKEND_LOCAL => t('Local'),
-          AMBER_BACKEND_PERMA => t('Perma'),
-          AMBER_BACKEND_INTERNET_ARCHIVE => t('Internet Archive')
+          AMBER_BACKEND_LOCAL => t('Store captures directly in this website\'s storage space.'),
+          AMBER_BACKEND_PERMA => t('Store captures in Perma.cc rather than in your own storage space'),
+          AMBER_BACKEND_INTERNET_ARCHIVE => t('Store captures in the Internet Archive, rather than in your own storage space')
         ),
-        (version_compare(PHP_VERSION, "5.5") >= 0) ? array(AMBER_BACKEND_AMAZON_S3 => t('Amazon S3')) : array()        
+        (version_compare(PHP_VERSION, "5.5") >= 0) ? array(AMBER_BACKEND_AMAZON_S3 => t('Store captures in the cloud through an Amazon Web Services S3 account')) : array()        
       ),
     '#default_value' => variable_get('amber_backend', 0),
     '#description' => t('Text TBD. Note that Amazon S4 requires PHP version >= 5.5'),
@@ -93,7 +93,7 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('Perma API Key'),
     '#size' => 50,
     '#default_value' => variable_get('amber_perma_apikey', ''),
-    '#description' => t('Text TBD - Instructions on how to get a key'),
+    '#description' => t('Generate an API key in your Perma.cc Dashboard under Settings > Tools'),
     '#states' => array(
       'visible' => array(
         ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_PERMA),
@@ -116,14 +116,14 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('Perma URL'),
     '#size' => 30,
     '#default_value' => variable_get('amber_perma_server_url', 'http://perma.cc'),
-    '#description' => t('Text TBD - Which Perma server to use. '),
+    '#description' => t('This should not need to be changed.'),
   );
   $form['amber_cache']['advanced_perma']['amber_perma_server_api_url'] = array(
     '#type' => 'textfield',
     '#title' => t('Perma API URL'),
     '#size' => 30,
     '#default_value' => variable_get('amber_perma_server_api_url', 'http://api.perma.cc'),
-    '#description' => t('Text TBD - API endpoint for the Perma server. '),
+    '#description' => t('This should not need to be changed.'),
   );
 
   /* Settings for AWS S3 storage strategy */
@@ -156,7 +156,7 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('AWS Bucket'),
     '#size' => 50,
     '#default_value' => variable_get('amber_aws_bucket', ''),
-    '#description' => t('Text TBD - Instructions on what this is used for, and that it must be unique'),
+    '#description' => t('Name of the bucket where captures will be stored'),
     '#states' => array(
       'visible' => array(
         ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_AMAZON_S3),
