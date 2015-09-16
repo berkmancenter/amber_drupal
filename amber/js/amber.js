@@ -444,10 +444,15 @@ amber.util_ready(function($) {
     amber.util_addEventListener(window, 'unload', amber.clear_hover);
     amber.get_country();
 
-    /* Drupal-specific code */
-    if ((typeof Drupal != 'undefined') && (typeof Drupal.settings.amber != 'undefined')){
+    /* Drupal-specific configuration */
+    if ((typeof Drupal != 'undefined') && (typeof Drupal.settings.amber != 'undefined')) {
       amber.name = Drupal.settings.amber.name;
       amber.lookup_availability = Drupal.settings.amber.lookup_availability;
+    }
+
+    /* Wordpress-specific configuration */
+    if (typeof amber_config != 'undefined') {
+      amber.lookup_availability = amber_config.lookup_availability;
     }
 
     /* Set the locale, based on global variable */
