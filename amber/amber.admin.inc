@@ -153,7 +153,7 @@ function amber_config_form($form, &$form_state) {
   );
   $form['amber_cache']['amber_aws_bucket'] = array(
     '#type' => 'textfield',
-    '#title' => t('AWS Bucket'),
+    '#title' => t('S3 Bucket'),
     '#size' => 50,
     '#default_value' => variable_get('amber_aws_bucket', ''),
     '#description' => t('Name of the bucket where captures will be stored'),
@@ -176,7 +176,7 @@ function amber_config_form($form, &$form_state) {
   );  
   $form['amber_cache']['advanced_aws']['amber_aws_region'] = array(
     '#type' => 'textfield',
-    '#title' => t('AWS Region'),
+    '#title' => t('S3 Region'),
     '#size' => 30,
     '#default_value' => variable_get('amber_aws_region', 'us-east-1'),
     '#description' => t('Text TBD - AWS region to use'),
