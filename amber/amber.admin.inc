@@ -17,14 +17,14 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('Backend to use for storing captures'),
     '#options' => array_merge(
       array (
-          AMBER_BACKEND_LOCAL => t('Store captures directly in this website\'s storage space.'),
-          AMBER_BACKEND_PERMA => t('Store captures in Perma.cc rather than in your own storage space'),
-          AMBER_BACKEND_INTERNET_ARCHIVE => t('Store captures in the Internet Archive, rather than in your own storage space')
+          AMBER_BACKEND_LOCAL => t('Local'),
+          AMBER_BACKEND_PERMA => t('Perma.cc'),
+          AMBER_BACKEND_INTERNET_ARCHIVE => t('Internet Archive')
         ),
-        (version_compare(PHP_VERSION, "5.5") >= 0) ? array(AMBER_BACKEND_AMAZON_S3 => t('Store captures in the cloud through an Amazon Web Services S3 account')) : array()        
+        (version_compare(PHP_VERSION, "5.5") >= 0) ? array(AMBER_BACKEND_AMAZON_S3 => t('Amazon Web Services S3')) : array()        
       ),
     '#default_value' => variable_get('amber_backend', 0),
-    '#description' => t('Text TBD. Note that Amazon S4 requires PHP version >= 5.5'),
+    '#description' => t('Amber can store captures locally, in your website\'s storage space. If you prefer, you can store captures in an alternative backend. At this time, Amber is compatible with the following services: <a href="http://perma.cc/" target="_blank">Perma.cc</a>, the Internet Archive, and Amazon Web Services S3.'),
   );
 
   /* Settings for Local storage strategy */
@@ -107,9 +107,9 @@ function amber_config_form($form, &$form_state) {
     '#collapsed' => TRUE,
     '#states' => array(
       'visible' => array(
-        ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_PERMA),
+         ':input[name="amber_backend"]' => array('value' => "Never displayed"),
       ),
-     ),    
+     ),
   );  
   $form['amber_cache']['advanced_perma']['amber_perma_server_url'] = array(
     '#type' => 'textfield',
@@ -132,7 +132,7 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('AWS Access Key'),
     '#size' => 50,
     '#default_value' => variable_get('amber_aws_access_key', ''),
-    '#description' => t('Text TBD - Instructions on how to get a key'),
+    '#description' => t('Visit <a href="http://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html" target="_blank">Managing Access Keys for your AWS Account</a> for instructions to generate an access key'),
     '#states' => array(
       'visible' => array(
         ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_AMAZON_S3),
@@ -144,7 +144,7 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('AWS Secret Access Key'),
     '#size' => 50,
     '#default_value' => variable_get('amber_aws_secret_key', ''),
-    '#description' => t('Text TBD - Instructions on how to get a key'),
+    '#description' => t('Visit <a href="http://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html" target="_blank">Managing Access Keys for your AWS Account</a> for instructions to generate a secret access key'),
     '#states' => array(
       'visible' => array(
         ':input[name="amber_backend"]' => array('value' => AMBER_BACKEND_AMAZON_S3),
@@ -179,7 +179,7 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('S3 Region'),
     '#size' => 30,
     '#default_value' => variable_get('amber_aws_region', 'us-east-1'),
-    '#description' => t('Text TBD - AWS region to use'),
+    '#description' => t('Your captures will be stored in this <a href="http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region" target="_blank">S3 region</a>. Unless you are an advanced user, do not modify this setting'),
   );
 
 
