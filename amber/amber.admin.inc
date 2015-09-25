@@ -269,7 +269,7 @@ function amber_config_form($form, &$form_state) {
   $form['amber_delivery']['amber_timegate'] = array(
     '#type' => 'textfield',
     '#title' => t('Check a TimeGate server for additional copies of captured content'),
-    '#default_value' => variable_get('amber_timegate', "http://timetravel.mementoweb.org/"),
+    '#default_value' => variable_get('amber_timegate', "http://timetravel.mementoweb.org/timegate"),
     '#description' => t('TBD: Describe what it means to use an external TimeGate server'),
   );
 
