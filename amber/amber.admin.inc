@@ -266,6 +266,13 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('TBD: Describe what it means to use NetClerk'),
   );
 
+  $form['amber_delivery']['amber_timegate'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Check a TimeGate server for additional copies of captured content'),
+    '#default_value' => variable_get('amber_timegate', "http://timetravel.mementoweb.org/"),
+    '#description' => t('TBD: Describe what it means to use an external TimeGate server'),
+  );
+
   $form['amber_country'] = array(
     '#type' => 'fieldset',
     '#title' => t('Activity for a specific country'),

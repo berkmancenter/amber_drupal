@@ -151,10 +151,23 @@ function amber_get_status() {
  */
 function amber_get_availability_lookup() {
   $lookup = &drupal_static(__FUNCTION__);
-  if (!isset($availability_lookup)) {
+  if (!isset($lookup)) {
     $lookup = new AmberNetClerkAvailabilityLookup(array());
   }
   return $lookup;
+}
+
+/**
+ * Return an initialized AmberMementoService
+ * @return IAmberMementoService
+ */
+function amber_get_memento_service() {
+  $service = &drupal_static(__FUNCTION__);
+  if (!isset($service)) {
+    $service = new AmberMementoService(array(
+      'server_url' => variable_get('amber_timegate', "http://timetravel.mementoweb.org/timegate/")));
+  }
+  return $service;
 }
 
 /**
@@ -298,7 +311,15 @@ function amber_menu() {
     'description' => 'Get availability status for a list of URLs through a POST request',
     'page callback' => 'amber_get_url_status',
     'access callback' => true,
-    'delivery callback' => 'amber_deliver_status',    
+    'delivery callback' => 'amber_deliver_json',    
+    'type' => MENU_CALLBACK,
+  );
+  $items['amber/memento'] = array(
+    'title' => 'Get memento for a URL',    
+    'description' => 'Get a memento for a URLs',
+    'page callback' => 'amber_get_memento',
+    'access callback' => true,
+    'delivery callback' => 'amber_deliver_json',    
     'type' => MENU_CALLBACK,
   );
 
@@ -778,7 +799,7 @@ function amber_get_url_status() {
  * @param  string $data JSON to return to the client, or integer return code
  * @return none
  */
-function amber_deliver_status($data) {
+function amber_deliver_json($data) {
   drupal_add_http_header('Content-Type', "application/json");
   drupal_add_http_header('Cache-Control', "no-cache, must-revalidate");
   drupal_add_http_header('Pragma', "no-cache");
@@ -789,6 +810,27 @@ function amber_deliver_status($data) {
     print $data;
   }
 }
+
+/**
+ * Search for a Memento from the configured Timegate server for the given
+ * URL and date, and return it to the front-end page
+ * Requires some POST or GET parameters:
+ *  url : url to find a memento for
+ *  date : preferred date for the memento
+ * @return string json response to send to the client with memento location and date
+ */
+function amber_get_memento() {
+  if (isset($_REQUEST['url']) && isset($_REQUEST['date'])) {
+    $lookup = amber_get_memento_service();
+    $lookup_result = $lookup->getMemento($_REQUEST['url'], $_REQUEST['date']);
+    $result = json_encode($lookup_result, JSON_UNESCAPED_SLASHES);
+  } else {
+    $result = '{}';
+  }
+  return $result;
+}
+
+
 
 
 
