@@ -213,6 +213,14 @@ function amber_cache_link($item, $force = false) {
     /* There's an updated check result to save */
     $status->save_check($update);
 
+
+    /* Report the results of the check to NetClerk (if configured) */
+    $availability = amber_get_availability();
+    if ($availability && isset($update['details'])) {
+      $availability->report_status($item, $update['details']);
+      // watchdog('amber', "Looking for availability: @details", array('@details' => print_r($update['details'], true)), WATCHDOG_NOTICE);
+    }
+
     /* Now cache the item if we should */
     $existing_cache = $status->get_cache($item);
     if ($update['status'] && (!variable_get('amber_update_strategy',0) || !$existing_cache)) {

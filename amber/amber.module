@@ -146,13 +146,13 @@ function amber_get_status() {
 }
 
 /**
- * Return an initialized AmberAvailabilityLookup module
- * @return IAmberAvailabilityLookup
+ * Return an initialized AmberAvailability module
+ * @return IAmberAvailability
  */
-function amber_get_availability_lookup() {
+function amber_get_availability() {
   $lookup = &drupal_static(__FUNCTION__);
   if (!isset($lookup)) {
-    $lookup = new AmberNetClerkAvailabilityLookup(array());
+    $lookup = new AmberNetClerkAvailability(array());
   }
   return $lookup;
 }
@@ -782,8 +782,8 @@ function amber_deliver_cache_view_result($data) {
  */
 function amber_get_url_status() {
   if (isset($_REQUEST['url']) && isset($_REQUEST['country'])) {
-    $lookup = amber_get_availability_lookup();
-    $lookup_result = $lookup->getStatus($_REQUEST['url'], $_REQUEST['country']);
+    $lookup = amber_get_availability();
+    $lookup_result = $lookup->get_status($_REQUEST['url'], $_REQUEST['country']);
     foreach ($lookup_result['data'] as $key => $value) {
       $lookup_result['data'][$key]['behavior'] = _amber_get_behavior($lookup_result['data'][$key]['available']);
     }
