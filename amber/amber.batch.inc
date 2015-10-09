@@ -213,7 +213,6 @@ function amber_cache_link($item, $force = false) {
     /* There's an updated check result to save */
     $status->save_check($update);
 
-
     /* Report the results of the check to NetClerk (if configured) */
     $availability = amber_get_availability();
     if ($availability && isset($update['details'])) {
@@ -223,31 +222,57 @@ function amber_cache_link($item, $force = false) {
     /* Now cache the item if we should */
     $existing_cache = $status->get_cache($item);
     if ($update['status'] && (!variable_get('amber_update_strategy',0) || !$existing_cache)) {
-      $cache_metadata = array();
-      try {
-        $cache_metadata = $fetcher->fetch($item);
-      } catch (RuntimeException $re) {
-        watchdog('amber', "Did not cache: @url: @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_NOTICE);
-        $update['message'] = $re->getMessage();
-        $status->save_check($update);        
-        return false;
-      }
-      if ($cache_metadata) {
-        $status->save_cache($cache_metadata);
-        /* Clear caches that could contain HTML with versions of the links that don't contain data- attributes */
-        /* TODO: Ideally we would clear the cache only once per cron job */
-        cache_clear_all('*', 'cache_filter',TRUE);
-        cache_clear_all('*', 'cache_field',TRUE);
-        amber_disk_space_purge();
-        watchdog('amber', "Cached: @url in @seconds seconds", array('@url' => $item, '@seconds' => time() - $start), WATCHDOG_DEBUG);
-        return true;
-      }
+
+        /* Save the item to the primary storage location */
+        watchdog('amber', "Caching: @url using @object", array('@url' => $item, '@object' => get_class($fetcher)), WATCHDOG_DEBUG);
+        $result = _amber_fetch_item($item, $fetcher, $status);
+
+        /* Save the item to any alternate storage locations */
+        foreach (amber_get_alternate_fetchers() as $alternate_fetcher) {
+          watchdog('amber', "Caching: @url using @object", array('@url' => $item, '@object' => get_class($alternate_fetcher)), WATCHDOG_DEBUG);
+          _amber_fetch_item($item, $alternate_fetcher, $status);          
+        }
+
+        if ($result) {
+          watchdog('amber', "Cached: @url in @seconds seconds", array('@url' => $item, '@seconds' => time() - $start), WATCHDOG_DEBUG);
+          /* Clear caches that could contain HTML with versions of the links that don't contain data- attributes */
+          /* TODO: Ideally we would clear the cache only once per cron job */
+          cache_clear_all('*', 'cache_filter',TRUE);
+          cache_clear_all('*', 'cache_field',TRUE);
+          amber_disk_space_purge();
+        }
+        return $result;
     }
   } else {
     return false;
   }
-
 }
+
+/**
+ * Fetch an item and save the metadata
+ * @param  string $item    url to fetch
+ * @param  iAmberFetcher $fetcher instance of a fetcher to use to get the item
+ * @param  iAmberStatus  $status  instance of a status to use to save the item
+ * @return boolean  TRUE if succesfully cached
+ */
+function _amber_fetch_item($item, $fetcher, $status) {
+  $cache_metadata = array();
+  try {
+    $cache_metadata = $fetcher->fetch($item);
+  } catch (RuntimeException $re) {
+    watchdog('amber', "Did not cache: @url: @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_NOTICE);
+    $update['message'] = $re->getMessage();
+    $status->save_check($update);        
+    return false;
+  }
+  if ($cache_metadata) {
+    $status->save_cache($cache_metadata);
+    return true;
+  } else {
+    return false;
+  }
+}
+
 
 /**
  * If the total disk space usage is over the configured limit, delete enough items to bring it under

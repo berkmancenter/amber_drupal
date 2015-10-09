@@ -153,7 +153,7 @@ function amber_schema() {
         'description' => 'The unique id for the cached data at the selected provider',
       ),
     ),
-    'primary key' => array('id'),
+    'primary key' => array('id', 'provider'),
   );
 
   $schema['amber_activity'] = array(
@@ -209,3 +209,14 @@ function amber_update_7101()
         'description' => 'The unique id for the cached data at the selected provider',
       ));
 }
+
+/**
+ * Include provider in the primary key
+ */
+function amber_update_7102()
+{
+  db_drop_primary_key('amber_cache');
+  db_add_primary_key('amber_cache', array('id', 'provider'));
+}
+
+

@@ -22,7 +22,7 @@ define("AMBER_QUEUE_CHECK_EXISTING","amber_check_existing");
 define("AMBER_VAR_LAST_CHECK_RUN","amber_last_check_run");
 
 module_load_include('inc', 'amber', 'amber.batch');
-
+amber_get_alternate_fetchers();
 /**
  * Get an initialized iAmberStorage implementation, and cache it in a static variable
  * Used to retrieve the currently selected iAmberStorage implementation that's being
@@ -34,7 +34,7 @@ function amber_get_storage() {
   $storage = &drupal_static(__FUNCTION__);
   if (!isset($storage)) {
     $storage_id = variable_get('amber_backend', 0);
-    $storage = amber_get_storage_by_id($storage_id);
+    $storage = amber_get_storage_instance($storage_id);
   }
   return $storage;
 }
@@ -46,16 +46,16 @@ function amber_get_storage() {
  */
 function amber_get_storage_for_item($id) {
   $item = amber_get_status()->get_cache_by_id($id);
-  return ($item) ? amber_get_storage_by_id($item['provider']) : null;
+  return ($item) ? amber_get_storage_instance($item['provider']) : null;
 }
 
 /**
- * Select and initialize an implementation of iAmberStorage based on the engine ID
- * @param  int $storage_id ID of the storage engine to use
+ * Select and initialize an implementation of iAmberStorage based on the backend ID
+ * @param  int $backend ID of the storage engine to use
  * @return iAmberStorage
  */
-function amber_get_storage_by_id($storage_id) {
-  switch ($storage_id) {
+function amber_get_storage_instance($backend) {
+  switch ($backend) {
     case AMBER_BACKEND_LOCAL:
       $file_path = join(DIRECTORY_SEPARATOR,
         array(DRUPAL_ROOT, variable_get('amber_storage_location', 'sites/default/files/amber')));
@@ -90,35 +90,65 @@ function amber_get_storage_by_id($storage_id) {
 function amber_get_fetcher() {
   $fetcher = &drupal_static(__FUNCTION__);
   if (!isset($fetcher)) {
-    switch (variable_get('amber_backend', 0)) {
-      case AMBER_BACKEND_LOCAL:
-        $fetcher = new AmberFetcher(amber_get_storage(), array(
-          'amber_max_file' => variable_get('amber_max_file',1000),
-          'header_text' => t("You are viewing an archive of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
-          'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
-        ));
-        break;
-      case AMBER_BACKEND_PERMA:
-        $fetcher = new PermaFetcher(amber_get_storage(), array(
-          'perma_api_key' => variable_get('amber_perma_apikey',''),
-          'perma_archive_url' => variable_get('amber_perma_server_url', 'http://perma.cc'),
-          'perma_api_url' => variable_get('amber_perma_server_api_url', 'http://api.perma.cc',''),
-        ));
-        break;
-      case AMBER_BACKEND_INTERNET_ARCHIVE:
-        $fetcher = new InternetArchiveFetcher(amber_get_storage(), array());
-        break;
-      case AMBER_BACKEND_AMAZON_S3:
-        $fetcher = new AmberFetcher(amber_get_storage(), array(
-          'amber_max_file' => 5000000, /* Max size for S3 file */
-          'header_text' => t("You are viewing an archive of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
-          'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
-        ));      
-        break;
-    }
+    $fetcher = _amber_get_fetcher_instance(variable_get('amber_backend', 0));
   }
   return $fetcher;
 }
+
+/**
+ * Return a list of alternate fetchers
+ * @return array of IAmberFetcher
+ */
+function amber_get_alternate_fetchers() {
+  $fetchers = &drupal_static(__FUNCTION__);
+  if (!isset($fetchers)) {
+    $fetchers = array();
+    $backends = variable_get('amber_alternate_backends', array());
+    foreach ($backends as $value) {
+      $fetchers[] = _amber_get_fetcher_instance($value);
+    }
+  }
+  return $fetchers;
+}
+
+
+/**
+ * Select and initialize an implementation of iAmberFetcher based on the backend ID
+ * @param  int $backend ID of the storage engine to use
+ * @return iAmberStorage
+ */
+function _amber_get_fetcher_instance($backend) {
+  switch ($backend) {
+    case AMBER_BACKEND_LOCAL:
+      $fetcher = new AmberFetcher(amber_get_storage_instance($backend), array(
+        'amber_max_file' => variable_get('amber_max_file',1000),
+        'header_text' => t("You are viewing an archive of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
+        'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
+      ));
+      break;
+    case AMBER_BACKEND_PERMA:
+      $fetcher = new PermaFetcher(amber_get_storage_instance($backend), array(
+        'perma_api_key' => variable_get('amber_perma_apikey',''),
+        'perma_archive_url' => variable_get('amber_perma_server_url', 'https://perma.cc'),
+        'perma_api_url' => variable_get('amber_perma_server_api_url', 'https://api.perma.cc',''),
+      ));
+      break;
+    case AMBER_BACKEND_INTERNET_ARCHIVE:
+      $fetcher = new InternetArchiveFetcher(amber_get_storage_instance($backend), array());
+      break;
+    case AMBER_BACKEND_AMAZON_S3:
+      $fetcher = new AmberFetcher(amber_get_storage_instance($backend), array(
+        'amber_max_file' => 5000000, /* Max size for S3 file */
+        'header_text' => t("You are viewing an archive of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
+        'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
+      ));      
+      break;
+    default:
+      $fetcher = null;
+  }
+  return $fetcher;
+}
+
 
 /**
  * Return an initialized AmberChecker module
@@ -706,12 +736,12 @@ function amber_delete_all() {
   db_delete('queue')->condition('data', '%amber_batch_cache_process%', 'LIKE')->execute();
 }
 
-function amber_delete_item($id) {
+function amber_delete_item($id, $provider) {
   $status = amber_get_status();
-  $storage = amber_get_storage_for_item($id);
+  $storage = amber_get_storage_instance($provider);
   $cache_metadata = $status->get_cache_by_id($id);
   if (is_null($storage) || $storage->delete($cache_metadata)) {
-    $status->delete($id);
+    $status->delete($id, $provider);
     return TRUE;
   } else {
     return FALSE;

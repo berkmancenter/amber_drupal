@@ -46,16 +46,14 @@ class AmberStatus implements iAmberStatus {
   }
 
   public function get_check_by_id($id, $source = 'amber') {
-    return $this->get_item_by_id($id, 'amber_check');
+    $prefix = $this->table_prefix;
+    $result = $this->db->select("SELECT * FROM ${prefix}amber_check WHERE id = %s", array($id));
+    return $result;
   }
 
   public function get_cache_by_id($id, $source = 'amber') {
-    return $this->get_item_by_id($id, 'amber_cache');
-  }
-
-  private function get_item_by_id($id, $table) {
     $prefix = $this->table_prefix;
-    $result = $this->db->select("SELECT * FROM ${prefix}${table} WHERE id = %s", array($id));
+    $result = $this->db->select("SELECT * FROM ${prefix}amber_cache WHERE id = %s ORDER BY provider ASC", array($id));
     return $result;
   }
 
@@ -126,7 +124,8 @@ class AmberStatus implements iAmberStatus {
         return false;
       }
     }
-    $result = $this->db->select("SELECT COUNT(id) as count FROM ${prefix}amber_cache WHERE id = %s", array($data['id']));
+    $result = $this->db->select("SELECT COUNT(id) as count FROM ${prefix}amber_cache WHERE id = %s AND provider = %d", 
+                                array($data['id'], $data['provider']));
     $params = array($data['url'], $data['location'], $data['date'], $data['type'], 
                     $data['size'], $data['provider'], $data['provider_id'], $data['id']);
     if ($result['count']) {
@@ -139,7 +138,9 @@ class AmberStatus implements iAmberStatus {
                                         'size = %d, ' .
                                         'provider = %d, ' .
                                         'provider_id = %s ' .
-                                        'WHERE id = %s';
+                                        'WHERE id = %s ' .
+                                        'AND provider = %d ';
+      $params[] = $data['provider'];
       $this->db->update($updateQuery, $params);
     } else {
       $updateQuery = "INSERT into ${prefix}amber_cache " .
@@ -266,16 +267,15 @@ class AmberStatus implements iAmberStatus {
   }
 
   /**
-   * Delete an item from the cache and check tables. Do NOT delete activity data.
+   * Delete an item from the cache table, and from the check table
+   * if all caches have been deleted. Do NOT delete activity data.
    * @param $id
    */
-  public function delete($id) {
+  public function delete($id, $provider = 0) {
     $prefix = $this->table_prefix;
 
-    foreach (array('amber_cache', 'amber_check') as $table) {
-      $this->db->delete("DELETE FROM ${prefix}${table} WHERE id = %s", array($id));
-    }
+    $this->db->delete("DELETE FROM ${prefix}amber_cache WHERE id = %s AND provider = %d", array($id, $provider));    
+    $this->db->delete("DELETE FROM ${prefix}amber_check WHERE id = %s AND %s not in (select id from ${prefix}amber_cache where id = %s)", array($id, $id, $id));
   }
-
 
 } 

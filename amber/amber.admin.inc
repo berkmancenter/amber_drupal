@@ -27,6 +27,18 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('Amber can store captures locally, in your website\'s storage space. If you prefer, you can store captures in an alternative backend. At this time, Amber is compatible with the following services: <a href="http://perma.cc/" target="_blank">Perma.cc</a>, the Internet Archive, and Amazon Web Services S3.'),
   );
 
+  $form['amber_cache']['amber_alternate_backends'] = array(
+    '#type' => 'select',
+    '#title' => t('Alternate backend(s) to use for storing captures'),
+    '#options' => array (
+          AMBER_BACKEND_PERMA => t('Perma.cc'),
+          AMBER_BACKEND_INTERNET_ARCHIVE => t('Internet Archive'),
+      ),
+    '#multiple' => TRUE,
+    '#default_value' => variable_get('amber_alternate_backends', 0),
+    '#description' => t('TK'),
+  );
+
   /* Settings for Local storage strategy */
   $form['amber_cache']['amber_max_file'] = array(
     '#type' => 'textfield',

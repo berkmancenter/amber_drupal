@@ -129,7 +129,7 @@ function amber_dashboard_detail_form() {
         'views' => isset($r['views']) ? $r['views'] : "",
         'method' => _amber_get_method_column($r),
         'view' => _amber_get_view_link($r),
-        'delete' => l('Delete', 'admin/reports/amber/delete/' . $r['id'], array('query' => array('destination' => current_path()))),
+        'delete' => l('Delete', 'admin/reports/amber/delete/' . $r['id'] . "/" . $r['provider'], array('query' => array('destination' => current_path()))),
       ),
       'data-url' => $r['url']);
   }
@@ -272,9 +272,9 @@ function _amber_dashboard_detail_query() {
  * Callback function to delete single item from the cache
  * @param $id
  */
-function amber_dashboard_delete_item($id) {
+function amber_dashboard_delete_item($id, $provider = 0) {
   if ($id) {
-    if (amber_delete_item($id)) {
+    if (amber_delete_item($id, $provider)) {
       drupal_set_message(t("Deleted record with id: @id.", array('@id' => $id)));
     } else {
       drupal_set_message(t("Could not delete record with id: @id.", array('@id' => $id)), 'warning');
