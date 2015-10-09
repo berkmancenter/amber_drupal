@@ -16,6 +16,12 @@ class AmberNetClerkAvailability implements iAmberAvailability {
 		return $this->parseResponse($response);		
 	}
 
+	/**
+	 * Report the results of a status check we performed to NetClerk
+	 * @param  string $url  URL being checked
+	 * @param  array $data  results from the HTTP request that checked the URL
+	 * @return None
+	 */
 	public function report_status($url, $data) {
 
 		$fields = array(
@@ -23,7 +29,7 @@ class AmberNetClerkAvailability implements iAmberAvailability {
 				'type' => 'requests',
 				'attributes' => array(
 					'url' => $url,
-					'dns_ip' => "", // $this->get_dns_for_server($url),
+					'dns_ip' => "",
 					'request_ip' => $data['info']['primary_ip'],
 					'request_headers' => isset($data['info']['request_header']) ? $data['info']['request_header'] : "",
 					'redirect_headers' => "",
@@ -41,7 +47,7 @@ class AmberNetClerkAvailability implements iAmberAvailability {
 			// CURLOPT_PROXY => 'localhost:8889',
 			// CURLOPT_PROXYTYPE => CURLPROXY_SOCKS5,
 		);
-		$result = AmberNetworkUtils::open_single_url($this->serverUrl . "/requests", $options);		
+		AmberNetworkUtils::open_single_url($this->serverUrl . "/requests", $options);		
 	}
 
 	/**
@@ -107,20 +113,6 @@ class AmberNetClerkAvailability implements iAmberAvailability {
 			$headers[] = $key . ": " . $value;
 		}
 		return implode("\r\n", $headers);
-	}
-
-	private function get_dns_for_server($url) {
-		$ip = "";
-		$host = parse_url($url,PHP_URL_HOST);
-			      watchdog('amber', "DNS host: @details", array('@details' => $host), WATCHDOG_NOTICE);
-
-		$dns_record = dns_get_record($host);
-	      watchdog('amber', "DNS: @details", array('@details' => print_r($dns_record, true)), WATCHDOG_NOTICE);
-
-		if ((count($dns_record) > 0)  && isset($dns_record[0]['target'])) {
-			$ip = gethostbyname($dns_record[0]['target']);
-		}
-		return $ip;
 	}
 
 }	

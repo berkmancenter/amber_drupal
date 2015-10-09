@@ -218,7 +218,6 @@ function amber_cache_link($item, $force = false) {
     $availability = amber_get_availability();
     if ($availability && isset($update['details'])) {
       $availability->report_status($item, $update['details']);
-      // watchdog('amber', "Looking for availability: @details", array('@details' => print_r($update['details'], true)), WATCHDOG_NOTICE);
     }
 
     /* Now cache the item if we should */
