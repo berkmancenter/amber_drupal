@@ -42,10 +42,11 @@ function amber_get_storage() {
 /**
  * Get an AmberStorage module of the same type that was used to store a particular capture
  * @param  string $id of an item
+ * @param  array $providers list of provider IDs to look in
  * @return iAmberStorage
  */
-function amber_get_storage_for_item($id) {
-  $item = amber_get_status()->get_cache_by_id($id);
+function amber_get_storage_for_item($id, $providers) {
+  $item = amber_get_status()->get_cache_by_id($id, $providers);
   return ($item) ? amber_get_storage_instance($item['provider']) : null;
 }
 
@@ -449,7 +450,7 @@ function _amber_build_link_attributes($summaries) {
  */
 function _amber_lookup_url($url) {
   $status = amber_get_status();
-  return _amber_build_link_attributes($status->get_summary($url));
+  return _amber_build_link_attributes($status->get_summary($url, array(variable_get('amber_backend', 0))));
 }
 
 /**
@@ -604,7 +605,7 @@ function amber_RFC1123_date($date_string) {
  * @return array with information about the item, or MENU_NOT_FOUND if item not found
  */
 function amber_retrieve_cache_item_data($id) {
-  $storage = amber_get_storage_for_item($id);
+  $storage = amber_get_storage_for_item($id, array(AMBER_BACKEND_LOCAL, AMBER_BACKEND_AMAZON_S3));
   if (is_null($storage)) {
     return MENU_NOT_FOUND;
   }
@@ -641,7 +642,7 @@ function amber_retrieve_cache_item($id) {
 function amber_retrieve_cache_asset() {
   $args = func_get_args();
   $id = array_shift($args);
-  $storage = amber_get_storage_for_item($id);
+  $storage = amber_get_storage_for_item($id, array(AMBER_BACKEND_LOCAL, AMBER_BACKEND_AMAZON_S3));
   if (is_null($storage)) {
     return MENU_NOT_FOUND;
   }
@@ -739,7 +740,7 @@ function amber_delete_all() {
 function amber_delete_item($id, $provider) {
   $status = amber_get_status();
   $storage = amber_get_storage_instance($provider);
-  $cache_metadata = $status->get_cache_by_id($id);
+  $cache_metadata = $status->get_cache_by_id($id, array($provider));
   if (is_null($storage) || $storage->delete($cache_metadata)) {
     $status->delete($id, $provider);
     return TRUE;

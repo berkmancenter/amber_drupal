@@ -220,8 +220,7 @@ function amber_cache_link($item, $force = false) {
     }
 
     /* Now cache the item if we should */
-    $existing_cache = $status->get_cache($item);
-    if ($update['status'] && (!variable_get('amber_update_strategy',0) || !$existing_cache)) {
+    if ($update['status'] && (!variable_get('amber_update_strategy',0) || !$status->has_cache($item))) {
 
         /* Save the item to the primary storage location */
         watchdog('amber', "Caching: @url using @object", array('@url' => $item, '@object' => get_class($fetcher)), WATCHDOG_DEBUG);

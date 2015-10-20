@@ -2,7 +2,7 @@
 
 class AmberStatus {
 
-  function get_summary($url) {
+  function get_summary($url, $preferred_providers) {
     if ($url == "http://nodata.example.com") {
       return array();
     } else {
