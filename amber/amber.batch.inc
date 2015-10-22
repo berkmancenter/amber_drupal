@@ -215,7 +215,8 @@ function amber_cache_link($item, $force = false) {
 
     /* Report the results of the check to NetClerk (if configured) */
     $availability = amber_get_availability();
-    if ($availability && isset($update['details'])) {
+    if ($availability && isset($update['details']) && (variable_get('amber_report_availability', AMBER_REPORT_AVAILABILITY_NONE) == AMBER_REPORT_AVAILABILITY_NETCLERK)) {
+      watchdog("amber", "Reporting @url availability to NetClerk", array("@url" => $item), WATCHDOG_DEBUG);
       $availability->report_status($item, $update['details']);
     }
 

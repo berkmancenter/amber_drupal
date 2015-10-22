@@ -267,24 +267,6 @@ function amber_config_form($form, &$form_state) {
      ),
   );
 
-  $form['amber_delivery']['amber_external_availability'] = array(
-    '#type' => 'select',
-    '#title' => t('Use a third-party database to check site availability'),
-    '#options' => array (
-      AMBER_EXTERNAL_AVAILABILITY_NONE => t('Do not use an external service'),
-      AMBER_EXTERNAL_AVAILABILITY_NETCLERK => t('Use NetClerk'),
-    ),
-    '#default_value' => variable_get('amber_external_availability', AMBER_EXTERNAL_AVAILABILITY_NETCLERK),
-    '#description' => t('TBD: Describe what it means to use NetClerk'),
-  );
-
-  $form['amber_delivery']['amber_timegate'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Check a TimeGate server for additional copies of captured content'),
-    '#default_value' => variable_get('amber_timegate', "http://timetravel.mementoweb.org/timegate"),
-    '#description' => t('TBD: Describe what it means to use an external TimeGate server'),
-  );
-
   $form['amber_country'] = array(
     '#type' => 'fieldset',
     '#title' => t('Activity for a specific country'),
@@ -363,6 +345,46 @@ function amber_config_form($form, &$form_state) {
       ),
      ),
   );
+
+
+  $form['amber_services'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Section 3 to be named later'),
+    '#description' => t("Section 3 description to be added"),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['amber_services']['amber_external_availability'] = array(
+    '#type' => 'select',
+    '#title' => t('Use a third-party database to check site availability'),
+    '#options' => array (
+      AMBER_EXTERNAL_AVAILABILITY_NONE => t('Do not use an external service'),
+      AMBER_EXTERNAL_AVAILABILITY_NETCLERK => t('Use NetClerk'),
+    ),
+    '#default_value' => variable_get('amber_external_availability', AMBER_EXTERNAL_AVAILABILITY_NONE),
+    '#description' => t('TK: Describe what it means to use NetClerk'),
+  );
+
+  $form['amber_services']['amber_report_availability'] = array(
+    '#type' => 'select',
+    '#title' => t('Inform a third-party database of site availability'),
+    '#options' => array (
+      AMBER_REPORT_AVAILABILITY_NONE => t('Do not report site availability to an external service'),
+      AMBER_REPORT_AVAILABILITY_NETCLERK => t('Use NetClerk'),
+    ),
+    '#default_value' => variable_get('amber_report_availability', AMBER_REPORT_AVAILABILITY_NONE),
+    '#description' => t('TK: Describe what it means to report to NetClerk'),
+  );
+
+  $form['amber_services']['amber_timegate'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Check a TimeGate server for additional copies of captured content'),
+    '#default_value' => variable_get('amber_timegate', "http://timetravel.mementoweb.org/timegate"),
+    '#description' => t('TK: Describe what it means to use an external TimeGate server'),
+  );
+
+
 
   $form = system_settings_form($form);
   $form['#submit'][] = 'amber_settings_submit';
