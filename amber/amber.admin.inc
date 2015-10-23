@@ -5,16 +5,16 @@ function amber_config_form($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Enable Amber'),
     '#default_value' => variable_get('amber_enabled', 1),
-    '#description' => t('Enable all functionality, including the preservation of new captures and notifications to site visitors. Disabling this will not remove existing captures.'),
+    '#description' => t('Enable all functionality, including the preservation of new snapshots and notifications to site visitors. Disabling this will not remove existing snapshots.'),
   ); 
   $form['amber_cache'] = array(
     '#type' => 'fieldset',
     '#title' => t('Storage Settings'),
-    '#description' => t("Control how Amber stores captures"),
+    '#description' => t("Control how Amber stores snapshots"),
   );
   $form['amber_cache']['amber_backend'] = array(
     '#type' => 'select',
-    '#title' => t('Backend to use for storing captures'),
+    '#title' => t('Backend to use for storing snapshots'),
     '#options' => array_merge(
       array (
           AMBER_BACKEND_LOCAL => t('Local'),
@@ -24,12 +24,12 @@ function amber_config_form($form, &$form_state) {
         (version_compare(PHP_VERSION, "5.5") >= 0) ? array(AMBER_BACKEND_AMAZON_S3 => t('Amazon Web Services S3')) : array()        
       ),
     '#default_value' => variable_get('amber_backend', 0),
-    '#description' => t('Amber can store captures locally, in your website\'s storage space. If you prefer, you can store captures in an alternative backend. At this time, Amber is compatible with the following services: <a href="http://perma.cc/" target="_blank">Perma.cc</a>, the Internet Archive, and Amazon Web Services S3.'),
+    '#description' => t('Amber can store snapshots locally, in your website\'s storage space. If you prefer, you can store snapshots in an alternative backend. At this time, Amber is compatible with the following services: <a href="http://perma.cc/" target="_blank">Perma.cc</a>, the Internet Archive, and Amazon Web Services S3.'),
   );
 
   $form['amber_cache']['amber_alternate_backends'] = array(
     '#type' => 'select',
-    '#title' => t('Alternate backend(s) to use for storing captures'),
+    '#title' => t('Alternate backend(s) to use for storing snapshots'),
     '#options' => array (
           AMBER_BACKEND_PERMA => t('Perma.cc'),
           AMBER_BACKEND_INTERNET_ARCHIVE => t('Internet Archive'),
@@ -57,7 +57,7 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('Maximum file size (kB)'),
     '#size' => 10,
     '#default_value' => variable_get('amber_max_file', '1000'),
-    '#description' => t('Amber will store captures up to a specified size. Links to pages that exceed this size will not be preserved.'),
+    '#description' => t('Amber will store snapshots up to a specified size. Links to pages that exceed this size will not be preserved.'),
   );
 
   $form['amber_cache']['local']['amber_max_disk'] = array(
@@ -65,14 +65,14 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('Maximum disk usage (MB)'),
     '#size' => 10,
     '#default_value' => variable_get('amber_max_disk', '1000'),
-    '#description' => t('The maximum amount of disk space to be used for all preserved content. If this disk space usage is exceeded, old captures will be removed'),
+    '#description' => t('The maximum amount of disk space to be used for all preserved content. If this disk space usage is exceeded, old snapshots will be removed'),
   );
 
   $form['amber_cache']['local']['amber_storage_location'] = array(
     '#type' => 'textfield',
     '#title' => t('Storage location'),
     '#default_value' => variable_get('amber_storage_location', 'sites/default/files/amber'),
-    '#description' => t('Path to the location where captures are stored on disk, relative to the Drupal root'),
+    '#description' => t('Path to the location where snapshots are stored on disk, relative to the Drupal root'),
   );
 
   $form['amber_cache']['local']['advanced'] = array(
@@ -84,10 +84,10 @@ function amber_config_form($form, &$form_state) {
 
   $form['amber_cache']['local']['advanced']['amber_update_strategy'] = array(
     '#type' => 'select',
-    '#title' => t('Update strategy for captures'),
+    '#title' => t('Update strategy for snapshots'),
     '#options' => array (
-      0 => t('Update captures periodically'),
-      1 => t('Do not update captures'),
+      0 => t('Update snapshots periodically'),
+      1 => t('Do not update snapshots'),
     ),
     '#default_value' => variable_get('amber_update_strategy', 0),
     '#description' => t('Select "Do not update" if you want to preserve links at the time the content is published. Otherwise, link storage will be periodically updated.'),
@@ -176,7 +176,7 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('S3 Bucket'),
     '#size' => 50,
     '#default_value' => variable_get('amber_aws_bucket', ''),
-    '#description' => t('Name of the bucket where captures will be stored'),
+    '#description' => t('Name of the bucket where snapshots will be stored'),
   );
 
   $form['amber_cache']['aws']['advanced_aws'] = array(
@@ -191,7 +191,7 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('S3 Region'),
     '#size' => 30,
     '#default_value' => variable_get('amber_aws_region', 'us-east-1'),
-    '#description' => t('Your captures will be stored in this <a href="http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region" target="_blank">S3 region</a>. Unless you are an advanced user, do not modify this setting'),
+    '#description' => t('Your snapshots will be stored in this <a href="http://docs.aws.amazon.com/general/latest/gr/rande.html#s3_region" target="_blank">S3 region</a>. Unless you are an advanced user, do not modify this setting'),
   );
 
 
@@ -248,7 +248,7 @@ function amber_config_form($form, &$form_state) {
       AMBER_ACTION_NONE => t('None'),
       AMBER_ACTION_HOVER => t('Hover'),
       AMBER_ACTION_POPUP => t('Link to popup'),
-      AMBER_ACTION_CACHE => t('Link directly to capture'),
+      AMBER_ACTION_CACHE => t('Link directly to snapshots'),
     ),
     '#default_value' => variable_get('amber_unavailable_action', 1),
     '#description' => t('How a visitor to your site will experience links to pages that are currently unavailable.'),
@@ -321,7 +321,7 @@ function amber_config_form($form, &$form_state) {
       AMBER_ACTION_NONE => t('None'),
       AMBER_ACTION_HOVER => t('Hover'),
       AMBER_ACTION_POPUP => t('Link to popup'),
-      AMBER_ACTION_CACHE => t('Link directly to capture'),
+      AMBER_ACTION_CACHE => t('Link directly to snapshot'),
     ),
     '#default_value' => variable_get('amber_country_unavailable_action', 1),
     '#description' => t('How links that are available will appear to visitors to your site.'),
@@ -379,7 +379,7 @@ function amber_config_form($form, &$form_state) {
 
   $form['amber_services']['amber_timegate'] = array(
     '#type' => 'textfield',
-    '#title' => t('Check a TimeGate server for additional copies of captured content'),
+    '#title' => t('Check a TimeGate server for additional copies of preserved content'),
     '#default_value' => variable_get('amber_timegate', "http://timetravel.mementoweb.org/timegate"),
     '#description' => t('TK: Describe what it means to use an external TimeGate server'),
   );

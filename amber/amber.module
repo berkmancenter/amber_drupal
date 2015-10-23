@@ -28,7 +28,7 @@ amber_get_alternate_fetchers();
 /**
  * Get an initialized iAmberStorage implementation, and cache it in a static variable
  * Used to retrieve the currently selected iAmberStorage implementation that's being
- * used to save new captures
+ * used to save new snapshots
  * @return iAmberStorage
  */
 function amber_get_storage() {
@@ -42,7 +42,7 @@ function amber_get_storage() {
 }
 
 /**
- * Get an AmberStorage module of the same type that was used to store a particular capture
+ * Get an AmberStorage module of the same type that was used to store a particular snapshot
  * @param  string $id of an item
  * @param  array $providers list of provider IDs to look in
  * @return iAmberStorage
@@ -223,7 +223,7 @@ function amber_init() {
 function amber_permission() {
   return array('administer amber' => array(
       'title' => t('Administer Amber'),
-      'description' => t('Adminster Amber storage and display of site captures'),
+      'description' => t('Adminster Amber storage and display of site snapshots'),
     )
   );  
 }
@@ -284,7 +284,7 @@ function amber_menu() {
   );
   $items['admin/reports/amber/delete'] = array(
     'title' => 'Delete',
-    'description' => 'Delete a capture from storage',
+    'description' => 'Delete a snapshot from storage',
     'file' => 'amber.pages.inc',
     'page callback' => array('amber_dashboard_delete_item'),
     'access arguments' => array('administer amber'),

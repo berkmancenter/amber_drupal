@@ -4,8 +4,8 @@ function amber_dashboard_summary_form() {
 
   $header = array(t("Global Statistics"),"");
   $rows = array();
-  $rows[] = array(t('Captures preserved'), _amber_cache_size());
-  $rows[] = array(t('Links to capture'), _amber_queue_size(AMBER_QUEUE_CHECK_NEW) + _amber_queue_size(AMBER_QUEUE_CHECK_EXISTING));
+  $rows[] = array(t('Snapshots preserved'), _amber_cache_size());
+  $rows[] = array(t('Links to snapshot'), _amber_queue_size(AMBER_QUEUE_CHECK_NEW) + _amber_queue_size(AMBER_QUEUE_CHECK_EXISTING));
   $rows[] = array(t('Last check'), _amber_last_run(AMBER_VAR_LAST_CHECK_RUN));
   $rows[] = array(t('Disk space used'), _amber_disk_usage());
 
@@ -17,7 +17,7 @@ function amber_dashboard_summary_form() {
 
   $build['buttons']['clear'] = array(
     '#type' => 'submit',
-    '#value' => t('Delete all captures'),
+    '#value' => t('Delete all snapshots'),
     '#submit' => array('amber_dashboard_summary_form_clear')
   );
   $build['buttons']['cache'] = array(
@@ -186,7 +186,7 @@ function amber_dashboard_summary_form_clear($form, &$form_state) {
   amber_delete_all();
   cache_clear_all('*', 'cache_filter',TRUE);
   cache_clear_all('*', 'cache_field',TRUE);
-  drupal_set_message("All captures have been deleted");
+  drupal_set_message("All snapshots have been deleted");
 }
 
 function amber_dashboard_summary_form_scan($form, &$form_state) {
