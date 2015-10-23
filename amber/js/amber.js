@@ -249,7 +249,7 @@ var amber = {
 
   end_popup_hover_function : function (hover) {
     // Need to make sure that we're not hovering over one of the child elements.
-    // Return a function that snapshots the original node's descendants
+    // Return a function that captures the original node's descendants
     var descendants = hover.querySelectorAll('*');
     return function (e) {
       var el = e.toElement || e.relatedTarget;
