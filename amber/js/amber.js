@@ -453,7 +453,7 @@ var amber = {
         callback(JSON.parse(request.responseText));
       }
     };
-    request.open('GET', '/amber/mementoxx?date=' + date + '&url=' + href);
+    request.open('GET', '/amber/memento?date=' + date + '&url=' + href);
     request.send();
   },
 
