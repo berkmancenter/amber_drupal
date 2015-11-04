@@ -36,7 +36,7 @@ function amber_config_form($form, &$form_state) {
       ),
     '#multiple' => TRUE,
     '#default_value' => variable_get('amber_alternate_backends', 0),
-    '#description' => t('TK'),
+    '#description' => t('Preserve snapshots in multiple storage locations by selecting one or more alternates above. Amber will show your visitors only the storage location selected in the dropdown menu.'),
   );
 
   /* Settings for Local storage strategy */
@@ -349,8 +349,8 @@ function amber_config_form($form, &$form_state) {
 
   $form['amber_services'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Section 3 to be named later'),
-    '#description' => t("Section 3 description to be added"),
+    '#title' => t('Optional Functionality'),
+    '#description' => t("Connect to academic efforts to retrieve more accurate data and additional snapshots"),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
@@ -363,7 +363,7 @@ function amber_config_form($form, &$form_state) {
       AMBER_EXTERNAL_AVAILABILITY_NETCLERK => t('Use NetClerk'),
     ),
     '#default_value' => variable_get('amber_external_availability', AMBER_EXTERNAL_AVAILABILITY_NONE),
-    '#description' => t('TK: Describe what it means to use NetClerk'),
+    '#description' => t('Optional: Use site accessibility data from the Berkman Center for Internet & Society at Harvard University'),
   );
 
   $form['amber_services']['amber_report_availability'] = array(
@@ -374,14 +374,14 @@ function amber_config_form($form, &$form_state) {
       AMBER_REPORT_AVAILABILITY_NETCLERK => t('Use NetClerk'),
     ),
     '#default_value' => variable_get('amber_report_availability', AMBER_REPORT_AVAILABILITY_NONE),
-    '#description' => t('TK: Describe what it means to report to NetClerk'),
+    '#description' => t('Optional: Contribute site accessibility data for research as part of the Berkman Center for Internet & Society at Harvard University'),
   );
 
   $form['amber_services']['amber_timegate'] = array(
     '#type' => 'textfield',
     '#title' => t('Check a TimeGate server for additional copies of preserved content'),
     '#default_value' => variable_get('amber_timegate', "http://timetravel.mementoweb.org/timegate"),
-    '#description' => t('TK: Describe what it means to use an external TimeGate server'),
+    '#description' => t('Optional: Request additional snapshots from the Internet Archive, the Library of Congress web archive, archive.today, and more'),
   );
 
 
