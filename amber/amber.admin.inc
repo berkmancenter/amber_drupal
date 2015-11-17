@@ -355,27 +355,33 @@ function amber_config_form($form, &$form_state) {
     '#collapsed' => TRUE,
   );
 
-  $form['amber_services']['amber_external_availability'] = array(
-    '#type' => 'select',
-    '#title' => t('Use a third-party database to check site availability'),
-    '#options' => array (
-      AMBER_EXTERNAL_AVAILABILITY_NONE => t('Do not use an external service'),
-      AMBER_EXTERNAL_AVAILABILITY_NETCLERK => t('Use NetClerk'),
-    ),
-    '#default_value' => variable_get('amber_external_availability', AMBER_EXTERNAL_AVAILABILITY_NONE),
-    '#description' => t('TK: Describe what it means to use NetClerk'),
-  );
+  /* Do not display options to enable NetClerk functionality unless a particular
+     Drupal variable is set. It will be unset by default on install */
+  if (variable_get('amber_enable_netclerk', 0)) {
 
-  $form['amber_services']['amber_report_availability'] = array(
-    '#type' => 'select',
-    '#title' => t('Inform a third-party database of site availability'),
-    '#options' => array (
-      AMBER_REPORT_AVAILABILITY_NONE => t('Do not report site availability to an external service'),
-      AMBER_REPORT_AVAILABILITY_NETCLERK => t('Use NetClerk'),
-    ),
-    '#default_value' => variable_get('amber_report_availability', AMBER_REPORT_AVAILABILITY_NONE),
-    '#description' => t('TK: Describe what it means to report to NetClerk'),
-  );
+    $form['amber_services']['amber_external_availability'] = array(
+      '#type' => 'select',
+      '#title' => t('Use a third-party database to check site availability'),
+      '#options' => array (
+        AMBER_EXTERNAL_AVAILABILITY_NONE => t('Do not use an external service'),
+        AMBER_EXTERNAL_AVAILABILITY_NETCLERK => t('Use NetClerk'),
+      ),
+      '#default_value' => variable_get('amber_external_availability', AMBER_EXTERNAL_AVAILABILITY_NONE),
+      '#description' => t('TK: Describe what it means to use NetClerk'),
+    );
+
+    $form['amber_services']['amber_report_availability'] = array(
+      '#type' => 'select',
+      '#title' => t('Inform a third-party database of site availability'),
+      '#options' => array (
+        AMBER_REPORT_AVAILABILITY_NONE => t('Do not report site availability to an external service'),
+        AMBER_REPORT_AVAILABILITY_NETCLERK => t('Use NetClerk'),
+      ),
+      '#default_value' => variable_get('amber_report_availability', AMBER_REPORT_AVAILABILITY_NONE),
+      '#description' => t('TK: Describe what it means to report to NetClerk'),
+    );
+
+  }
 
   $form['amber_services']['amber_timegate'] = array(
     '#type' => 'textfield',
