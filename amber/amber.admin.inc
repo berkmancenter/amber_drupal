@@ -65,14 +65,14 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('Maximum disk usage (MB)'),
     '#size' => 10,
     '#default_value' => variable_get('amber_max_disk', '1000'),
-    '#description' => t('The maximum amount of disk space to be used for all preserved content. If this disk space usage is exceeded, old snapshots will be removed'),
+    '#description' => t('The maximum amount of disk space to be used for all preserved content. If this disk space usage is exceeded, old snapshots will be removed.'),
   );
 
   $form['amber_cache']['local']['amber_storage_location'] = array(
     '#type' => 'textfield',
     '#title' => t('Storage location'),
     '#default_value' => variable_get('amber_storage_location', 'sites/default/files/amber'),
-    '#description' => t('Path to the location where snapshots are stored on disk, relative to the Drupal root'),
+    '#description' => t('Path to the location where snapshots are stored on disk, relative to the Drupal root.'),
   );
 
   $form['amber_cache']['local']['advanced'] = array(
@@ -160,7 +160,7 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('AWS Access Key'),
     '#size' => 50,
     '#default_value' => variable_get('amber_aws_access_key', ''),
-    '#description' => t('Visit <a href="http://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html" target="_blank">Managing Access Keys for your AWS Account</a> for instructions to generate an access key'),
+    '#description' => t('Visit <a href="http://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html" target="_blank">Managing Access Keys for your AWS Account</a> for instructions to generate an access key.'),
   );
 
   $form['amber_cache']['aws']['amber_aws_secret_key'] = array(
@@ -168,7 +168,7 @@ function amber_config_form($form, &$form_state) {
     '#title' => t('AWS Secret Access Key'),
     '#size' => 50,
     '#default_value' => variable_get('amber_aws_secret_key', ''),
-    '#description' => t('Visit <a href="http://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html" target="_blank">Managing Access Keys for your AWS Account</a> for instructions to generate a secret access key'),
+    '#description' => t('Visit <a href="http://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html" target="_blank">Managing Access Keys for your AWS Account</a> for instructions to generate a secret access key.'),
   );
 
   $form['amber_cache']['aws']['amber_aws_bucket'] = array(
@@ -222,7 +222,7 @@ function amber_config_form($form, &$form_state) {
     '#options' => array (
       AMBER_ACTION_NONE => t('None'),
       AMBER_ACTION_HOVER => t('Hover'),
-      AMBER_ACTION_POPUP => t('Link to popup'),
+      AMBER_ACTION_POPUP => t('Link to pop-up'),
     ),
     '#default_value' => variable_get('amber_available_action', 0),
     '#description' => t('How a visitor to your site will experience links to pages that are currently available.'),
@@ -247,7 +247,7 @@ function amber_config_form($form, &$form_state) {
     '#options' => array (
       AMBER_ACTION_NONE => t('None'),
       AMBER_ACTION_HOVER => t('Hover'),
-      AMBER_ACTION_POPUP => t('Link to popup'),
+      AMBER_ACTION_POPUP => t('Link to pop-up'),
       AMBER_ACTION_CACHE => t('Link directly to snapshots'),
     ),
     '#default_value' => variable_get('amber_unavailable_action', 1),
@@ -289,7 +289,7 @@ function amber_config_form($form, &$form_state) {
     '#options' => array (
       AMBER_ACTION_NONE => t('None'),
       AMBER_ACTION_HOVER => t('Hover'),
-      AMBER_ACTION_POPUP => t('Link to popup'),
+      AMBER_ACTION_POPUP => t('Link to pop-up'),
     ),
     '#default_value' => variable_get('amber_country_available_action', 0),
     '#description' => t('How links that are available will appear to visitors to your site.'),
@@ -320,7 +320,7 @@ function amber_config_form($form, &$form_state) {
     '#options' => array (
       AMBER_ACTION_NONE => t('None'),
       AMBER_ACTION_HOVER => t('Hover'),
-      AMBER_ACTION_POPUP => t('Link to popup'),
+      AMBER_ACTION_POPUP => t('Link to pop-up'),
       AMBER_ACTION_CACHE => t('Link directly to snapshot'),
     ),
     '#default_value' => variable_get('amber_country_unavailable_action', 1),
