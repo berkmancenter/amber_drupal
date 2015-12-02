@@ -125,7 +125,7 @@ function _amber_get_fetcher_instance($backend) {
     case AMBER_BACKEND_LOCAL:
       $fetcher = new AmberFetcher(amber_get_storage_instance($backend), array(
         'amber_max_file' => variable_get('amber_max_file',1000),
-        'header_text' => t("You are viewing an archive of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
+        'header_text' => t("You are viewing a snapshot of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
         'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
       ));
       break;
@@ -142,7 +142,7 @@ function _amber_get_fetcher_instance($backend) {
     case AMBER_BACKEND_AMAZON_S3:
       $fetcher = new AmberFetcher(amber_get_storage_instance($backend), array(
         'amber_max_file' => 5000000, /* Max size for S3 file */
-        'header_text' => t("You are viewing an archive of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
+        'header_text' => t("You are viewing a snapshot of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
         'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
       ));      
       break;
