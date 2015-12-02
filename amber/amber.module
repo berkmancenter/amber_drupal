@@ -324,7 +324,7 @@ function amber_menu() {
     'type' => MENU_CALLBACK,
   );
   $items['node/%/cache'] = array(
-    'title' => 'Cache links now',
+    'title' => 'Preserve links now',
     'page callback' => 'amber_cache_node_now',
     'page arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
