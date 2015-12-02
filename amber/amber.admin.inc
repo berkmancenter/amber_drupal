@@ -24,7 +24,7 @@ function amber_config_form($form, &$form_state) {
         (version_compare(PHP_VERSION, "5.5") >= 0) ? array(AMBER_BACKEND_AMAZON_S3 => t('Amazon Web Services S3')) : array()        
       ),
     '#default_value' => variable_get('amber_backend', 0),
-    '#description' => t('Amber can store snapshots locally, in your website\'s storage space. If you prefer, you can store snapshots in an alternative backend. At this time, Amber is compatible with the following services: <a href="http://perma.cc/" target="_blank">Perma.cc</a>, the <a href="https://archive.org" target="_blank">Internet Archive</a>, and <a href="https://aws.amazon.com/s3/">Amazon S3</a>.'),
+    '#description' => t('Amber can store snapshots locally, in your website\'s storage space. If you prefer, you can store snapshots in an alternative backend. At this time, Amber is compatible with the following services: <a href="https://perma.cc/" target="_blank">Perma.cc</a>, the <a href="https://archive.org" target="_blank">Internet Archive</a>, and <a href="https://aws.amazon.com/s3/">Amazon S3</a>.'),
   );
 
   $form['amber_cache']['amber_alternate_backends'] = array(
