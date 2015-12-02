@@ -384,7 +384,7 @@ function amber_config_form($form, &$form_state) {
 
   $form['amber_services']['amber_timegate'] = array(
     '#type' => 'textfield',
-    '#title' => t('Check a TimeGate server for additional copies of preserved content'),
+    '#title' => t('Check a TimeGate server for additional snapshots'),
     '#default_value' => variable_get('amber_timegate', "http://timetravel.mementoweb.org/timegate"),
     '#description' => t('Optional: Request additional snapshots from the Internet Archive, the Library of Congress web archive, archive.today, and more.'),
   );
