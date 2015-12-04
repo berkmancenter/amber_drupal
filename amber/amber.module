@@ -553,13 +553,13 @@ function amber_cache_node($node, $immediately = false) {
   if ($immediately) {
     foreach ($links['cache'] as $url) {
       if (amber_cache_link($url, $immediately)) {
-        drupal_set_message(t("Sucessfully cached: @url.", array('@url' => $url)), 'status');
+        drupal_set_message(t("Sucessfully preserved: @url.", array('@url' => $url)), 'status');
       } else {
-        drupal_set_message(t("Could not cache: @url.", array('@url' => $url)), 'warning');
+        drupal_set_message(t("Could not preserve: @url.", array('@url' => $url)), 'warning');
       }
     }      
     foreach ($links['excluded'] as $url) {
-      drupal_set_message(t("Did not cache excluded site: @url.", array('@url' => $url)), 'warning');
+      drupal_set_message(t("Did not preserve excluded site: @url.", array('@url' => $url)), 'warning');
     }
   } else {
     amber_enqueue_check_links($links['cache']);
