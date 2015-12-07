@@ -23,4 +23,4 @@ files[] = amber.drush.inc
 scripts[] = js/amber.js
 stylesheets[all][] = css/amber.css
 configure = admin/config/content/amber
-dependencies[] = libraries
+dependencies[] = libraries 
