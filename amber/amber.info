@@ -1,5 +1,5 @@
 name = Amber
-description = Enables the preservation of content to which your website links.
+description = Amber keeps links working on blogs and websites.
 package = Amber
 core = 7.x
 version = 1.3
