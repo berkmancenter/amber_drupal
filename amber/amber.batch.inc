@@ -23,7 +23,7 @@ function amber_cron() {
  * @param $queue_name string with name of the queue
  * @param $url string with URL to check
  */
-function exists_in_queue($queue, $url) {
+function amber_exists_in_queue($queue, $url) {
   $result = db_query("SELECT COUNT(*) FROM queue WHERE name=:name AND data=:data",
                       array(':name' => $queue, ':data' => serialize($url)))->fetchCol();
   return ($result[0] > 0);
@@ -38,7 +38,7 @@ function amber_enqueue_check_links($links, $queue_name = AMBER_QUEUE_CHECK_NEW) 
   $queue = DrupalQueue::get($queue_name);
   $queue->createQueue();
   foreach ($links as $link) {
-    if ($link && !exists_in_queue($queue_name,$link)) {
+    if ($link && !amber_exists_in_queue($queue_name,$link)) {
       $queue->createItem($link);
     }
   }
