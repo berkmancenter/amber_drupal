@@ -139,5 +139,3 @@ Class AmberWPDB implements iAmberDB {
 		$this->db->query($query,$options);
 	}
 }
-
-?>
