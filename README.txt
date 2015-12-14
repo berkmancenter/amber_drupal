@@ -21,28 +21,19 @@ REQUIREMENTS
 RECOMMENDED MODULES
 -------------------
 
-* Libraries (https://drupal.org/project/libraries):
-* The AWS PHP library (https://github.com/aws/aws-sdk-php) is required if using AWS to store snapshots.
+The Libraries module (https://drupal.org/project/libraries) and the AWS PHP library (https://github.com/aws/aws-sdk-php) are required if using AWS to store snapshots.
 
 INSTALLATION
 ------------
 
-* Install as you would normally install a contributed Drupal module. See:
-  https://drupal.org/documentation/install/modules-themes/modules-7
-  for further information.
-* TODO: Describe how to install the AWS module
+* Install as you would normally install a contributed Drupal module. 
+* If using AWS to store snapshots, download version 3 of the AWS library from https://github.com/aws/aws-sdk-php and save it in sites/all/libraries/aws
 
 CONFIGURATION
 -------------
 
 * Configure this module at Administration » Content Authoring » Amber
 * View the snapshots preserved by Amber at Administration » Reports » Amber Dashboard
-
-TODO: Add more documentation here
-
-TROUBLESHOOTING
----------------
-TODO: Add  documentation here
 
 MAINTAINERS
 -----------
