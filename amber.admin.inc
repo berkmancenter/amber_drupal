@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Admin functionality
+ */
 
 function amber_config_form($form, &$form_state) {
   $form['amber_enabled'] = array(
@@ -16,7 +20,7 @@ function amber_config_form($form, &$form_state) {
     '#type' => 'select',
     '#title' => t('Backend to use for storing snapshots'),
     '#options' => array_merge(
-      array (
+      array(
           AMBER_BACKEND_LOCAL => t('Local'),
           AMBER_BACKEND_PERMA => t('Perma.cc'),
           AMBER_BACKEND_INTERNET_ARCHIVE => t('Internet Archive')
@@ -30,7 +34,7 @@ function amber_config_form($form, &$form_state) {
   $form['amber_cache']['amber_alternate_backends'] = array(
     '#type' => 'select',
     '#title' => t('Alternate backend(s) to use for storing snapshots'),
-    '#options' => array (
+    '#options' => array(
           AMBER_BACKEND_PERMA => t('Perma.cc'),
           AMBER_BACKEND_INTERNET_ARCHIVE => t('Internet Archive'),
       ),
@@ -85,7 +89,7 @@ function amber_config_form($form, &$form_state) {
   $form['amber_cache']['local']['advanced']['amber_update_strategy'] = array(
     '#type' => 'select',
     '#title' => t('Update strategy for snapshots'),
-    '#options' => array (
+    '#options' => array(
       0 => t('Update snapshots periodically'),
       1 => t('Do not update snapshots'),
     ),
@@ -199,7 +203,7 @@ function amber_config_form($form, &$form_state) {
   $form['amber_cache']['advanced']['amber_excluded_sites'] = array(
     '#type' => 'textarea',
     '#title' => t('Excluded URL patterns'),
-    '#default_value' => variable_get('amber_excluded_sites', parse_url($base_url,PHP_URL_HOST)),
+    '#default_value' => variable_get('amber_excluded_sites', parse_url($base_url, PHP_URL_HOST)),
     '#description' => t('A list of URL patterns, one per line. Amber will not preserve any link that matches one of these patterns. Regular expressions may be used.'),
   );
 
@@ -219,7 +223,7 @@ function amber_config_form($form, &$form_state) {
   $form['amber_delivery']['amber_available_action'] = array(
     '#type' => 'select',
     '#title' => t('Available links'),
-    '#options' => array (
+    '#options' => array(
       AMBER_ACTION_NONE => t('None'),
       AMBER_ACTION_HOVER => t('Hover'),
       AMBER_ACTION_POPUP => t('Link to pop-up'),
@@ -244,7 +248,7 @@ function amber_config_form($form, &$form_state) {
   $form['amber_delivery']['amber_unavailable_action'] = array(
     '#type' => 'select',
     '#title' => t('Unavailable links'),
-    '#options' => array (
+    '#options' => array(
       AMBER_ACTION_NONE => t('None'),
       AMBER_ACTION_HOVER => t('Hover'),
       AMBER_ACTION_POPUP => t('Link to pop-up'),
@@ -286,7 +290,7 @@ function amber_config_form($form, &$form_state) {
   $form['amber_country']['amber_country_available_action'] = array(
     '#type' => 'select',
     '#title' => t('Available sites'),
-    '#options' => array (
+    '#options' => array(
       AMBER_ACTION_NONE => t('None'),
       AMBER_ACTION_HOVER => t('Hover'),
       AMBER_ACTION_POPUP => t('Link to pop-up'),
@@ -317,7 +321,7 @@ function amber_config_form($form, &$form_state) {
   $form['amber_country']['amber_country_unavailable_action'] = array(
     '#type' => 'select',
     '#title' => t('Unavailable sites'),
-    '#options' => array (
+    '#options' => array(
       AMBER_ACTION_NONE => t('None'),
       AMBER_ACTION_HOVER => t('Hover'),
       AMBER_ACTION_POPUP => t('Link to pop-up'),
@@ -362,7 +366,7 @@ function amber_config_form($form, &$form_state) {
     $form['amber_services']['amber_external_availability'] = array(
       '#type' => 'select',
       '#title' => t('Use a third-party database to check site availability'),
-      '#options' => array (
+      '#options' => array(
         AMBER_EXTERNAL_AVAILABILITY_NONE => t('Do not use an external service'),
         AMBER_EXTERNAL_AVAILABILITY_NETCLERK => t('Use NetClerk'),
       ),
@@ -373,7 +377,7 @@ function amber_config_form($form, &$form_state) {
     $form['amber_services']['amber_report_availability'] = array(
       '#type' => 'select',
       '#title' => t('Inform a third-party database of site availability'),
-      '#options' => array (
+      '#options' => array(
         AMBER_REPORT_AVAILABILITY_NONE => t('Do not report site availability to an external service'),
         AMBER_REPORT_AVAILABILITY_NETCLERK => t('Use NetClerk'),
       ),
@@ -400,7 +404,7 @@ function amber_config_form($form, &$form_state) {
 
 /* Ensure that the user does not enter invalid regular expressions for excluded sites */
 function amber_settings_validate($form, &$form_state) {
-  $excluded_sites = explode(PHP_EOL,$form_state['values']['amber_excluded_sites']);
+  $excluded_sites = explode(PHP_EOL, $form_state['values']['amber_excluded_sites']);
   foreach ($excluded_sites as $site) {
     $blacklistitem = preg_replace("/https?:\\/\\//i", "", trim($site));
     if ($blacklistitem) {
@@ -415,7 +419,7 @@ function amber_settings_validate($form, &$form_state) {
       error_reporting($default_error_logging_level);
 
       if ($match_result === FALSE) {
-        form_set_error("amber_excluded_sites","The regular expression '${site}' is not valid");
+        form_set_error("amber_excluded_sites", "The regular expression '${site}' is not valid");
       }
     }
   }
@@ -424,7 +428,7 @@ function amber_settings_validate($form, &$form_state) {
       (array_key_exists(AMBER_BACKEND_PERMA, $form_state['values']['amber_alternate_backends']))) {
     foreach (array('amber_perma_apikey', 'amber_perma_server_url', 'amber_perma_server_api_url') as $field) {
       if (empty($form_state['values'][$field])) {
-        form_set_error($field,"Required if using the Perma storage engine");
+        form_set_error($field, "Required if using the Perma storage engine");
       }      
     }
   }
@@ -433,7 +437,7 @@ function amber_settings_validate($form, &$form_state) {
     $aws_missing_field = FALSE;
     foreach (array('amber_aws_access_key', 'amber_aws_secret_key', 'amber_aws_bucket', 'amber_aws_region') as $field) {
       if (empty($form_state['values'][$field])) {
-        form_set_error($field,"Required if using the Amazon S3 storage engine");
+        form_set_error($field, "Required if using the Amazon S3 storage engine");
         $aws_missing_field = TRUE;
       }      
     }
@@ -446,7 +450,8 @@ function amber_settings_validate($form, &$form_state) {
             but is not available.
             <a href='${library_info['download url']}'>Download</a> the library and unpack the zip file and 
             install into sites/all/libraries/aws.");
-      } else {
+      } 
+      else {
         try {
           $storage = new AmazonS3Storage(array(
               'access_key' => $form_state['values']['amber_aws_access_key'],
@@ -471,14 +476,15 @@ function amber_settings_validate($form, &$form_state) {
 
 /* Custom submit handler to flush filter cache after the settings are updated */
 function amber_settings_submit($form, &$form_state) {
-  cache_clear_all('*', 'cache_filter',TRUE);
-  cache_clear_all('*', 'cache_field',TRUE);
+  cache_clear_all('*', 'cache_filter', TRUE);
+  cache_clear_all('*', 'cache_field', TRUE);
 }
 
 function _amber_get_countries() {
   if (function_exists("country_get_list")) {
     $countries = country_get_list(); // From Locale module
-  } else {
+  } 
+  else {
     $countries = array(
       'AD' => t('Andorra'),
       'AE' => t('United Arab Emirates'),

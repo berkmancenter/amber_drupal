@@ -1,27 +1,31 @@
 <?php
+/**
+ * @file
+ * Core Drupal functionality for Amber
+ */
 
-define("AMBER_ACTION_NONE",0);
-define("AMBER_ACTION_HOVER",1);
-define("AMBER_ACTION_POPUP",2);
-define("AMBER_ACTION_CACHE",3);
-define("AMBER_STATUS_UP","up");
-define("AMBER_STATUS_DOWN","down");
+define("AMBER_ACTION_NONE", 0);
+define("AMBER_ACTION_HOVER", 1);
+define("AMBER_ACTION_POPUP", 2);
+define("AMBER_ACTION_CACHE", 3);
+define("AMBER_STATUS_UP", "up");
+define("AMBER_STATUS_DOWN", "down");
 
-define("AMBER_BACKEND_LOCAL",0);
-define("AMBER_BACKEND_PERMA",1);
-define("AMBER_BACKEND_INTERNET_ARCHIVE",2);
-define("AMBER_BACKEND_AMAZON_S3",3);
+define("AMBER_BACKEND_LOCAL", 0);
+define("AMBER_BACKEND_PERMA", 1);
+define("AMBER_BACKEND_INTERNET_ARCHIVE", 2);
+define("AMBER_BACKEND_AMAZON_S3", 3);
 
-define("AMBER_EXTERNAL_AVAILABILITY_NONE",0);
-define("AMBER_EXTERNAL_AVAILABILITY_NETCLERK",1);
-define("AMBER_REPORT_AVAILABILITY_NONE",0);
-define("AMBER_REPORT_AVAILABILITY_NETCLERK",1);
+define("AMBER_EXTERNAL_AVAILABILITY_NONE", 0);
+define("AMBER_EXTERNAL_AVAILABILITY_NETCLERK", 1);
+define("AMBER_REPORT_AVAILABILITY_NONE", 0);
+define("AMBER_REPORT_AVAILABILITY_NETCLERK", 1);
 
 define("AMBER_QUEUE_CACHE", "amber_cache");
 define("AMBER_QUEUE_CHECK_NEW", "amber_check_new");
-define("AMBER_QUEUE_CHECK_EXISTING","amber_check_existing");
+define("AMBER_QUEUE_CHECK_EXISTING", "amber_check_existing");
 
-define("AMBER_VAR_LAST_CHECK_RUN","amber_last_check_run");
+define("AMBER_VAR_LAST_CHECK_RUN", "amber_last_check_run");
 
 module_load_include('inc', 'amber', 'amber.batch');
 amber_get_alternate_fetchers();
@@ -49,7 +53,7 @@ function amber_get_storage() {
  */
 function amber_get_storage_for_item($id, $providers) {
   $item = amber_get_status()->get_cache_by_id($id, $providers);
-  return ($item) ? amber_get_storage_instance($item['provider']) : null;
+  return ($item) ? amber_get_storage_instance($item['provider']) : NULL;
 }
 
 /**
@@ -76,10 +80,10 @@ function amber_get_storage_instance($backend) {
         throw new RuntimeException("AWS Library not available");
       }
       $storage = new AmazonS3Storage(array(
-        'access_key' => variable_get('amber_aws_access_key',''),
-        'secret_key' => variable_get('amber_aws_secret_key',''),
-        'bucket' => variable_get('amber_aws_bucket',''),
-        'region' => variable_get('amber_aws_region','us-east-1'),
+        'access_key' => variable_get('amber_aws_access_key', ''),
+        'secret_key' => variable_get('amber_aws_secret_key', ''),
+        'bucket' => variable_get('amber_aws_bucket', ''),
+        'region' => variable_get('amber_aws_region', 'us-east-1'),
       ));
       break;
   }
@@ -124,16 +128,16 @@ function _amber_get_fetcher_instance($backend) {
   switch ($backend) {
     case AMBER_BACKEND_LOCAL:
       $fetcher = new AmberFetcher(amber_get_storage_instance($backend), array(
-        'amber_max_file' => variable_get('amber_max_file',1000),
+        'amber_max_file' => variable_get('amber_max_file', 1000),
         'header_text' => t("You are viewing a snapshot of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
-        'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
+        'excluded_content_types' => explode(PHP_EOL, variable_get("amber_excluded_formats", "")),
       ));
       break;
     case AMBER_BACKEND_PERMA:
       $fetcher = new PermaFetcher(amber_get_storage_instance($backend), array(
-        'perma_api_key' => variable_get('amber_perma_apikey',''),
+        'perma_api_key' => variable_get('amber_perma_apikey', ''),
         'perma_archive_url' => variable_get('amber_perma_server_url', 'https://perma.cc'),
-        'perma_api_url' => variable_get('amber_perma_server_api_url', 'https://api.perma.cc',''),
+        'perma_api_url' => variable_get('amber_perma_server_api_url', 'https://api.perma.cc', ''),
       ));
       break;
     case AMBER_BACKEND_INTERNET_ARCHIVE:
@@ -143,11 +147,11 @@ function _amber_get_fetcher_instance($backend) {
       $fetcher = new AmberFetcher(amber_get_storage_instance($backend), array(
         'amber_max_file' => 5000000, /* Max size for S3 file */
         'header_text' => t("You are viewing a snapshot of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
-        'excluded_content_types' => explode(PHP_EOL,variable_get("amber_excluded_formats","")),
+        'excluded_content_types' => explode(PHP_EOL, variable_get("amber_excluded_formats", "")),
       ));      
       break;
     default:
-      $fetcher = null;
+      $fetcher = NULL;
   }
   return $fetcher;
 }
@@ -210,7 +214,7 @@ function amber_init() {
   if (variable_get('amber_enabled', 1)) {
     drupal_add_js(array(
       'amber' => array(
-        'name' => variable_get('site_name',t('This site')),
+        'name' => variable_get('site_name', t('This site')),
         'lookup_availability' => 
             (variable_get('amber_external_availability', AMBER_EXTERNAL_AVAILABILITY_NETCLERK) == AMBER_EXTERNAL_AVAILABILITY_NETCLERK)
       )), 'setting');
@@ -302,7 +306,7 @@ function amber_menu() {
     'title' => 'Amber Cache Frame',
     'description' => 'Display cached items within an iframe',
     'page callback' => 'amber_retrieve_cache_item_frame',
-    'access callback' => true,
+    'access callback' => TRUE,
     'delivery callback' => 'amber_deliver_cache_item_frame',
     'type' => MENU_CALLBACK,
   );
@@ -310,7 +314,7 @@ function amber_menu() {
     'title' => 'Amber Cache',
     'description' => 'Retrieve items from the cache',
     'page callback' => 'amber_retrieve_cache_item',
-    'access callback' => true,
+    'access callback' => TRUE,
     'delivery callback' => 'amber_deliver_cache_item',
     'type' => MENU_CALLBACK,
   );
@@ -319,7 +323,7 @@ function amber_menu() {
     'description' => 'Retrieve assets related to an item from the cache',
     'page callback' => 'amber_retrieve_cache_asset',
     'page arguments' => array(2),
-    'access callback' => true,
+    'access callback' => TRUE,
     'delivery callback' => 'amber_deliver_cache_item',
     'type' => MENU_CALLBACK,
   );
@@ -335,7 +339,7 @@ function amber_menu() {
     'title' => 'Log cache view',    
     'description' => 'Log that an externally stored cache has been clicked',
     'page callback' => 'amber_log_cache_view',
-    'access callback' => true,
+    'access callback' => TRUE,
     'delivery callback' => 'amber_deliver_cache_view_result',    
     'type' => MENU_CALLBACK,
   );
@@ -343,7 +347,7 @@ function amber_menu() {
     'title' => 'Get status for URLs',    
     'description' => 'Get availability status for a list of URLs through a POST request',
     'page callback' => 'amber_get_url_status',
-    'access callback' => true,
+    'access callback' => TRUE,
     'delivery callback' => 'amber_deliver_json',    
     'type' => MENU_CALLBACK,
   );
@@ -351,7 +355,7 @@ function amber_menu() {
     'title' => 'Get memento for a URL',    
     'description' => 'Get a memento for a URLs',
     'page callback' => 'amber_get_memento',
-    'access callback' => true,
+    'access callback' => TRUE,
     'delivery callback' => 'amber_deliver_json',    
     'type' => MENU_CALLBACK,
   );
@@ -365,7 +369,7 @@ function amber_menu() {
  * @param bool $country true if we should be using the country-specific behavior settings
  * @return null|string
  */
-function _amber_get_behavior($status, $country = false) {
+function _amber_get_behavior($status, $country = FALSE) {
   $result = $status ? "up" : "down";
 
   $c = $country ? "country_" : "";
@@ -382,7 +386,8 @@ function _amber_get_behavior($status, $country = false) {
         $result .= " popup";
         break;
       }
-  } else {
+  } 
+  else {
     $action = variable_get("amber_${c}unavailable_action", AMBER_ACTION_NONE);
     switch ($action) {
       case AMBER_ACTION_NONE:
@@ -411,19 +416,21 @@ function _amber_get_behavior($status, $country = false) {
 function _amber_build_link_attributes($summaries) {
   $result = array();
   // Assume that we only have one cache of the data. This would need to change if we start tracking multiple caches
-  if (isset($summaries['default']['location'],$summaries['default']['date'])) {
+  if (isset($summaries['default']['location'], $summaries['default']['date'])) {
     if (strpos($summaries['default']['location'], "http") === 0) {
       $result['data-versionurl'] = $summaries['default']['location'];
-    } else {
+    } 
+    else {
       $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
       $result['data-versionurl'] = $protocol . $_SERVER['SERVER_NAME'] . base_path() . $summaries['default']['location'];      
     }
-    $result['data-versiondate'] = date('c',$summaries['default']['date']);
-  } else {
+    $result['data-versiondate'] = date('c', $summaries['default']['date']);
+  } 
+  else {
     return $result;
   }
 
-  $default_status = isset($summaries['default']['status']) ? $summaries['default']['status'] : null;
+  $default_status = isset($summaries['default']['status']) ? $summaries['default']['status'] : NULL;
   // Add default behavior
   if (!is_null($default_status)) {
     $behavior = _amber_get_behavior($default_status);
@@ -433,13 +440,13 @@ function _amber_build_link_attributes($summaries) {
   }
 
   // See if we have country-specific behavior
-  if ($country = variable_get('amber_country_id','')) {
+  if ($country = variable_get('amber_country_id', '')) {
     $country_status = isset($summaries[$country]['status']) ? $summaries[$country]['status'] : $default_status;
     if (!is_null($country_status)) {
-      $country_behavior = _amber_get_behavior($country_status, true);
+      $country_behavior = _amber_get_behavior($country_status, TRUE);
       // Add country-specific behavior only if it is different than the default behavior
       if ($country_behavior && ($country_behavior != $result['data-amber-behavior'])) {
-        $result['data-amber-behavior'] .= ",${country} ${country_behavior}";
+        $result['data-amber-behavior'] .= ", ${country} ${country_behavior}";
       }
     }
   }
@@ -538,7 +545,7 @@ function _amber_filter_tips($filter, $format, $long = FALSE) {
  */
 function amber_cache_node_now($nid) {
   $node = node_load($nid);
-  amber_cache_node($node,true);
+  amber_cache_node($node, TRUE);
   drupal_goto('node/' . $nid);
 }
 
@@ -547,21 +554,23 @@ function amber_cache_node_now($nid) {
  * or cache them immediately
  * @param $node object to scan for links to cache
  */
-function amber_cache_node($node, $immediately = false) {
+function amber_cache_node($node, $immediately = FALSE) {
   module_load_include('inc', 'amber', 'amber.extract');
   $links = _amber_extract_node_links($node);
   if ($immediately) {
     foreach ($links['cache'] as $url) {
       if (amber_cache_link($url, $immediately)) {
         drupal_set_message(t("Sucessfully preserved: @url.", array('@url' => $url)), 'status');
-      } else {
+      } 
+      else {
         drupal_set_message(t("Could not preserve: @url.", array('@url' => $url)), 'warning');
       }
     }      
     foreach ($links['excluded'] as $url) {
       drupal_set_message(t("Did not preserve excluded site: @url.", array('@url' => $url)), 'warning');
     }
-  } else {
+  } 
+  else {
     amber_enqueue_check_links($links['cache']);
   }
 }
@@ -648,7 +657,7 @@ function amber_retrieve_cache_asset() {
   if (is_null($storage)) {
     return MENU_NOT_FOUND;
   }
-  $d = $storage->get_asset($id, join('/',$args) . ($_SERVER['QUERY_STRING'] ? '?' . $_SERVER['QUERY_STRING'] : ''));
+  $d = $storage->get_asset($id, join('/', $args) . ($_SERVER['QUERY_STRING'] ? '?' . $_SERVER['QUERY_STRING'] : ''));
   if ($d) {
     $data['data'] = $d;
     // Set the mime-type for certain files
@@ -678,7 +687,7 @@ function amber_deliver_cache_item_frame($data) {
   $uri = request_uri();
   $id = $data['id'];
   $iframe_url = "";
-  if ($uri && (strrpos($uri,"/") == (strlen($uri) - 1))) {
+  if ($uri && (strrpos($uri, "/") == (strlen($uri) - 1))) {
     $iframe_url = "../";
   }
   $iframe_url .= "../" . "cacheframe/${id}/";  
@@ -710,7 +719,8 @@ EOF;
 function amber_deliver_cache_item($data) {
   if (is_int($data) && $data == MENU_NOT_FOUND) {
     drupal_deliver_html_page(MENU_NOT_FOUND);
-  } else {
+  } 
+  else {
     if (isset($data['metadata']['type'])) {
       drupal_add_http_header('Content-Type', $data['metadata']['type']);
     }
@@ -746,7 +756,8 @@ function amber_delete_item($id, $provider) {
   if (is_null($storage) || $storage->delete($cache_metadata)) {
     $status->delete($id, $provider);
     return TRUE;
-  } else {
+  } 
+  else {
     return FALSE;
   }
   //TODO: Delete the item from the queue (if possible)
@@ -786,7 +797,8 @@ function amber_log_cache_view() {
     $status = amber_get_status();
     if ($status->save_view_for_external_cache_location($_GET['cache'])) {
       return array();
-    } else {
+    } 
+    else {
       return MENU_NOT_FOUND;
     }
   }
@@ -821,7 +833,8 @@ function amber_get_url_status() {
       $lookup_result['data'][$key]['behavior'] = _amber_get_behavior($lookup_result['data'][$key]['available']);
     }
     $result = json_encode($lookup_result, JSON_UNESCAPED_SLASHES);
-  } else {
+  } 
+  else {
     $result = '{}';
   }
   return $result;
@@ -839,7 +852,8 @@ function amber_deliver_json($data) {
   drupal_add_http_header('Expires', 0);
   if (is_int($data) && $data == MENU_NOT_FOUND) {
     drupal_add_http_header('Status', '404 Not Found');
-  } else {
+  } 
+  else {
     print $data;
   }
 }
@@ -857,7 +871,8 @@ function amber_get_memento() {
     $lookup = amber_get_memento_service();
     $lookup_result = $lookup->getMemento($_REQUEST['url'], $_REQUEST['date']);
     $result = json_encode($lookup_result, JSON_UNESCAPED_SLASHES);
-  } else {
+  } 
+  else {
     $result = '{}';
   }
   return $result;

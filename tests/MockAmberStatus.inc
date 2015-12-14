@@ -1,11 +1,16 @@
 <?php
+/**
+ * @file
+ * Mock AmberStatus class to support tests
+ */
 
 class AmberStatus {
 
   function get_summary($url, $preferred_providers) {
     if ($url == "http://nodata.example.com") {
       return array();
-    } else {
+    } 
+    else {
       return array(
         'default' => array(
           'date' => '1395590225',

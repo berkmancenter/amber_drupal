@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Install routines for Amber
+ */
 
 /** 
  * Implements hook_requirements().
@@ -7,7 +11,7 @@ function amber_requirements($phase) {
   $t = get_t();
   switch ($phase) {
     case 'install':
-      drupal_set_message($t('You should probably go to the Amber dashboard, scan existing content for links to preserve and then preserve them by clicking !here',array('!here' => l($t('here'),'admin/reports/amber'))),'warning');
+      drupal_set_message($t('You should probably go to the Amber dashboard, scan existing content for links to preserve and then preserve them by clicking !here', array('!here' => l($t('here'), 'admin/reports/amber'))), 'warning');
       break;
     
     case 'runtime':
@@ -25,7 +29,8 @@ function amber_requirements($phase) {
         if (($library = libraries_detect('aws')) && $library['installed']) {
           $requirements['amber_aws']['severity'] = REQUIREMENT_OK;
           $requirements['amber_aws']['value'] = $t("Installed");
-        } else {
+        } 
+        else {
           $requirements['amber_aws']['severity'] = REQUIREMENT_WARNING;
           $requirements['amber_aws']['value'] = $t("Not installed");
           $library_info = libraries_info('aws');
@@ -184,26 +189,24 @@ function amber_schema() {
 /**
  * Add "message" column to amber_check table
  */
-function amber_update_7100()
-{
+function amber_update_7100() {
   $spec = array(
         'type' => 'varchar',
         'length' => 2000,
         'description' => 'More details about the check or cache results'
       );
-  db_add_field('amber_check','message',$spec);
+  db_add_field('amber_check', 'message', $spec);
 }
 
 /**
  * Add columns to support external storage providers
  */
-function amber_update_7101()
-{
-  db_add_field('amber_cache','provider',array(
+function amber_update_7101() {
+  db_add_field('amber_cache', 'provider', array(
         'type' => 'int',
         'description' => 'The id of the storage provider being used',
       ));
-  db_add_field('amber_cache','provider_id',array(
+  db_add_field('amber_cache', 'provider_id', array(
         'type' => 'varchar',
         'length' => 2000,
         'description' => 'The unique id for the cached data at the selected provider',
@@ -213,8 +216,7 @@ function amber_update_7101()
 /**
  * Include provider in the primary key
  */
-function amber_update_7102()
-{
+function amber_update_7102() {
   db_drop_primary_key('amber_cache');
   db_add_primary_key('amber_cache', array('id', 'provider'));
 }

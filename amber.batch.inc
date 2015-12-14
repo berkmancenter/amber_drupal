@@ -1,5 +1,6 @@
 <?php
 /**
+ * @file
  * Functions relating to queue management and batch processing
  */
 
@@ -24,7 +25,7 @@ function amber_cron() {
  * @param $url string with URL to check
  */
 function amber_exists_in_queue($queue, $url) {
-  $result = db_query("SELECT COUNT(*) FROM queue WHERE name=:name AND data=:data",
+  $result = db_query("SELECT COUNT(*) FROM {queue} WHERE name=:name AND data=:data",
                       array(':name' => $queue, ':data' => serialize($url)))->fetchCol();
   return ($result[0] > 0);
 }
@@ -38,7 +39,7 @@ function amber_enqueue_check_links($links, $queue_name = AMBER_QUEUE_CHECK_NEW) 
   $queue = DrupalQueue::get($queue_name);
   $queue->createQueue();
   foreach ($links as $link) {
-    if ($link && !amber_exists_in_queue($queue_name,$link)) {
+    if ($link && !amber_exists_in_queue($queue_name, $link)) {
       $queue->createItem($link);
     }
   }
@@ -79,8 +80,9 @@ function amber_batch_scan_all_setup() {
       'finished' => 'amber_batch_scan_all_finished',
     );
     return $batch;
-  } else {
-    return null;
+  } 
+  else {
+    return NULL;
   }
 }
 
@@ -107,7 +109,8 @@ function amber_batch_scan_process($nid, $context) {
 function amber_batch_scan_all_finished($success, $results, $operations) {
   if ($success) {
     drupal_set_message(t('@count nodes scanned', array('@count' => count($results))));
-  } else {
+  } 
+  else {
     $error_operation = reset($operations);
     drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
   }
@@ -133,8 +136,9 @@ function amber_batch_cache_all_setup() {
       'finished' => 'amber_batch_cache_all_finished',
     );
     return $batch;
-  } else {
-    return null;
+  } 
+  else {
+    return NULL;
   }
 }
 
@@ -154,7 +158,7 @@ function amber_batch_cache_process($queue_name, $context) {
     return;
   }
   $url = $item->data;
-  amber_process_check_queue($url, true);
+  amber_process_check_queue($url, TRUE);
   $queue->deleteItem($item);
   $context['results'][] = $url;
   $context['message'] = t('Processed URL "@url"', array('@url' => $url));
@@ -173,9 +177,10 @@ function amber_batch_cache_all_finished($success, $results, $operations) {
       drupal_set_message(t('@count URL processed', array('@count' => $count)));
     else
       drupal_set_message(t('@count URLs processed', array('@count' => $count)));
-    cache_clear_all('*', 'cache_filter',TRUE);
-    cache_clear_all('*', 'cache_field',TRUE);
-  } else {
+    cache_clear_all('*', 'cache_filter', TRUE);
+    cache_clear_all('*', 'cache_field', TRUE);
+  } 
+  else {
     $error_operation = reset($operations);
     drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation, TRUE))));
   }
@@ -185,10 +190,10 @@ function amber_batch_cache_all_finished($success, $results, $operations) {
  * Process an item in the queue to be checked and cached
  * @param $item string url of the item to be checked
  */
-function amber_process_check_queue($item, $force = false) {
+function amber_process_check_queue($item, $force = FALSE) {
   try {
-    amber_cache_link($item,true);
-    variable_set(AMBER_VAR_LAST_CHECK_RUN,time());
+    amber_cache_link($item, TRUE);
+    variable_set(AMBER_VAR_LAST_CHECK_RUN, time());
   } catch (Exception $e) {
     // If there is an error, log the error, and then continue. Otherwise the bad item will not be removed from the queue
     watchdog('amber', "Error checking @url : @msg ", array('@url' => $item, '@msg' => $e->getMessage()), WATCHDOG_NOTICE);
@@ -198,7 +203,7 @@ function amber_process_check_queue($item, $force = false) {
 /**
  * Check and cache a link
  **/
-function amber_cache_link($item, $force = false) {
+function amber_cache_link($item, $force = FALSE) {
   $start = time();
   watchdog('amber', "Checking and caching: @url ", array('@url' => $item), WATCHDOG_DEBUG);
 
@@ -208,7 +213,7 @@ function amber_cache_link($item, $force = false) {
 
   /* Check whether the site is up */
   $last_check = $status->get_check($item);
-  if (($update = $checker->check(empty($last_check) ? array('url' => $item) : $last_check, $force)) !== false) {
+  if (($update = $checker->check(empty($last_check) ? array('url' => $item) : $last_check, $force)) !== FALSE) {
     
     /* There's an updated check result to save */
     $status->save_check($update);
@@ -221,7 +226,7 @@ function amber_cache_link($item, $force = false) {
     }
 
     /* Now cache the item if we should */
-    if ($update['status'] && (!variable_get('amber_update_strategy',0) || !$status->has_cache($item))) {
+    if ($update['status'] && (!variable_get('amber_update_strategy', 0) || !$status->has_cache($item))) {
 
         /* Save the item to the primary storage location */
         watchdog('amber', "Caching: @url using @object", array('@url' => $item, '@object' => get_class($fetcher)), WATCHDOG_DEBUG);
@@ -237,14 +242,15 @@ function amber_cache_link($item, $force = false) {
           watchdog('amber', "Cached: @url in @seconds seconds", array('@url' => $item, '@seconds' => time() - $start), WATCHDOG_DEBUG);
           /* Clear caches that could contain HTML with versions of the links that don't contain data- attributes */
           /* TODO: Ideally we would clear the cache only once per cron job */
-          cache_clear_all('*', 'cache_filter',TRUE);
-          cache_clear_all('*', 'cache_field',TRUE);
+          cache_clear_all('*', 'cache_filter', TRUE);
+          cache_clear_all('*', 'cache_field', TRUE);
           amber_disk_space_purge();
         }
         return $result;
     }
-  } else {
-    return false;
+  } 
+  else {
+    return FALSE;
   }
 }
 
@@ -263,13 +269,14 @@ function _amber_fetch_item($item, $fetcher, $status) {
     watchdog('amber', "Did not cache: @url: @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_NOTICE);
     $update['message'] = $re->getMessage();
     $status->save_check($update);        
-    return false;
+    return FALSE;
   }
   if ($cache_metadata) {
     $status->save_cache($cache_metadata);
-    return true;
-  } else {
-    return false;
+    return TRUE;
+  } 
+  else {
+    return FALSE;
   }
 }
 
@@ -279,7 +286,7 @@ function _amber_fetch_item($item, $fetcher, $status) {
  */
 function amber_disk_space_purge() {
   $status = amber_get_status();
-  $purge = $status->get_items_to_purge(variable_get('amber_max_disk',1000) * 1024 * 1024);
+  $purge = $status->get_items_to_purge(variable_get('amber_max_disk', 1000) * 1024 * 1024);
   if ($purge) {
     $storage = amber_get_storage();
     foreach ($purge as $item) {

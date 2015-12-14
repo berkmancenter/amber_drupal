@@ -66,7 +66,8 @@ function drush_amber_scan($nid = NULL) {
   if ($nid) {
     if ($nid == 'all') {
       amber_cache_all();
-    } else {
+    }
+    else {
       $node = node_load($nid);
       if (!$node) {
         drush_set_error(dt("Could not load node"));
@@ -90,7 +91,8 @@ function drush_amber_cache_url($url) {
   if ($url) {
     amber_process_cache_queue($url);
     drush_print("URL fetched");
-  } else {
+  }
+  else {
     drush_set_error(dt("Specify a URL to cache"));
     return FALSE;
   }
@@ -101,10 +103,12 @@ function drush_amber_check_up($url) {
     $checker = amber_get_checker();
     if ($checker->up($url)) {
       drush_print("Up");
-    } else {
+    }
+    else {
       drush_print("Down");
     }
-  } else {
+  }
+  else {
     drush_set_error(dt("Specify a URL to check"));
     return FALSE;
   }
@@ -112,9 +116,10 @@ function drush_amber_check_up($url) {
 
 function drush_amber_check_url($url) {
   if ($url) {
-    amber_process_check_queue($url, true);
+    amber_process_check_queue($url, TRUE);
     drush_print("URL checked");
-  } else {
+  }
+  else {
     drush_set_error(dt("Specify a URL to check"));
     return FALSE;
   }
@@ -124,10 +129,12 @@ function drush_amber_delete_url($id) {
   if ($id) {
     if (amber_delete_item($id)) {
       drush_print("Item deleted");      
-    } else {
+    } 
+    else {
       drush_print("Could not delete item");      
     }
-  } else {
+  } 
+  else {
     drush_set_error(dt("Specify an ID to delete"));
     return FALSE;
   }

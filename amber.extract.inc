@@ -1,7 +1,9 @@
 <?php
-/*
+/**
+ * @file
  * Routines to extract links from a Drupal entities as candidates for caching.
- * Much of this module is based on (or lifted complete from) code from https://drupal.org/project/linkchecker
+ *
+ * Much of this module is based on code from https://drupal.org/project/linkchecker
  */
 
 /**
@@ -62,19 +64,20 @@ function _amber_filter_links($links, $blacklist) {
   }
   $result = array('cache' => array(), 'excluded' => array());
   foreach ($links as $link) {
-    $host = parse_url($link,PHP_URL_HOST);
+    $host = parse_url($link, PHP_URL_HOST);
     if ($host) {
       $exclude = FALSE;
       foreach ($blacklist as $blacklistitem) {
         $blacklistitem = trim($blacklistitem);
         $blacklistitem = preg_replace("/https?:\\/\\//i", "", $blacklistitem);
-        if (strcasecmp($host,$blacklistitem) === 0) {
+        if (strcasecmp($host, $blacklistitem) === 0) {
           $exclude = TRUE;
         }
       }
       if ($exclude) {
         $result['excluded'][] = $link;
-      } else {
+      } 
+      else {
           $result['cache'][] = $link;
       }
     }
@@ -108,7 +111,8 @@ function _amber_regexp_filter_links($links, $blacklist) {
     }
     if ($exclude) {
       $result['excluded'][] = $link;
-    } else {
+    } 
+    else {
         $result['cache'][] = $link;
     }
   }
@@ -221,6 +225,6 @@ function _amber_extract_node_links($node) {
   //  $links = _linkchecker_extract_links(implode(' ', $text_items), $path);
   $links = _amber_extract_links(implode(' ', $text_items));
   global $base_url;
-  $links = _amber_regexp_filter_links($links, explode(PHP_EOL,variable_get("amber_excluded_sites",parse_url($base_url,PHP_URL_HOST))));
+  $links = _amber_regexp_filter_links($links, explode(PHP_EOL, variable_get("amber_excluded_sites", parse_url($base_url, PHP_URL_HOST))));
   return $links;
 }

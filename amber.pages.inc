@@ -1,8 +1,12 @@
 <?php
+/**
+ * @file
+ * Dashboard pages for Amber
+ */
 
 function amber_dashboard_summary_form() {
 
-  $header = array(t("Global Statistics"),"");
+  $header = array(t("Global Statistics"), "");
   $rows = array();
   $rows[] = array(t('Snapshots preserved'), _amber_cache_size());
   $rows[] = array(t('Links to snapshot'), _amber_queue_size(AMBER_QUEUE_CHECK_NEW) + _amber_queue_size(AMBER_QUEUE_CHECK_EXISTING));
@@ -32,7 +36,7 @@ function amber_dashboard_summary_form() {
   );
 
   if (!variable_get('amber_content_scanned', 0) && (_amber_queue_size(AMBER_QUEUE_CHECK_NEW) == 0)) {
-    drupal_set_message(t('You should scan all existing content for links to preserve'),'warning',FALSE);
+    drupal_set_message(t('You should scan all existing content for links to preserve'), 'warning', FALSE);
   }
 
   return $build;
@@ -42,14 +46,14 @@ function _amber_get_view_link($row) {
   $p = isset($row['provider']) ? $row['provider'] : AMBER_BACKEND_LOCAL;
   switch ($p) {
     case AMBER_BACKEND_PERMA:
-      return l('View on Perma', $row['location']);
+      return l(t('View on Perma'), $row['location']);
       break;
     case AMBER_BACKEND_INTERNET_ARCHIVE:
-      return l('View on Internet Archive', $row['location']);
+      return l(t('View on Internet Archive'), $row['location']);
       break;
     case AMBER_BACKEND_LOCAL:
     case AMBER_BACKEND_AMAZON_S3:
-      return isset($row['size']) ? l('View', $row['location']) : "";
+      return isset($row['size']) ? l(t('View'), $row['location']) : "";
       break;
   } 
 }
@@ -102,7 +106,7 @@ function amber_dashboard_detail_form() {
     array('data' => t('Size'), 'field' => 'ca.size' ),
     array('data' => t('Last viewed'), 'field' => 'a.date' ),
     array('data' => t('Total views'), 'field' => 'a.views' ),
-    array('data' => t('Storage method'),),
+    array('data' => t('Storage method'), ),
     array('data' => t(''),  ),
     array('data' => t(''),  ),
   );
@@ -116,10 +120,10 @@ function amber_dashboard_detail_form() {
 
   $rows = array();
   while ($r = $result->fetchAssoc()) {
-    $host = parse_url($r['url'],PHP_URL_HOST);
+    $host = parse_url($r['url'], PHP_URL_HOST);
     $rows[] = array(
       'data' => array(
-        'site' => "$host (" . l('Blacklist', 'admin/reports/amber/blacklist/' . $host, array('query' => array('destination' => current_path()))) . ")",
+        'site' => "$host (" . l(t('Blacklist'), 'admin/reports/amber/blacklist/' . $host, array('query' => array('destination' => current_path()))) . ")",
         'url' => l($r['url'], $r['url']),
         'status' => $r['status'] ? t('Up') : t('Down'),
         'last_checked' => isset($r['last_checked']) ? format_date($r['last_checked']) : "",
@@ -129,7 +133,7 @@ function amber_dashboard_detail_form() {
         'views' => isset($r['views']) ? $r['views'] : "",
         'method' => _amber_get_method_column($r),
         'view' => _amber_get_view_link($r),
-        'delete' => l('Delete', 'admin/reports/amber/delete/' . $r['id'] . "/" . $r['provider'], array('query' => array('destination' => current_path()))),
+        'delete' => l(t('Delete'), 'admin/reports/amber/delete/' . $r['id'] . "/" . $r['provider'], array('query' => array('destination' => current_path()))),
       ),
       'data-url' => $r['url']);
   }
@@ -156,7 +160,7 @@ function amber_dashboard_detail_form() {
 }
 
 function _amber_cache_size() {
-  $result = db_query("SELECT COUNT(*) FROM amber_cache")->fetchCol();
+  $result = db_query("SELECT COUNT(*) FROM {amber_cache}")->fetchCol();
   return $result[0];
 }
 
@@ -166,7 +170,7 @@ function _amber_queue_size($q) {
 }
 
 function _amber_last_run($var) {
-  $time = variable_get($var,0);
+  $time = variable_get($var, 0);
   return ($time) ? format_date($time) : t('Never');
 }
 
@@ -177,16 +181,16 @@ function _amber_disk_usage() {
   $current_size = $status->get_cache_size();
   $formatted_current_size = $current_size ? format_size($current_size) : t('0 MB');
   if ($current_size > (0.9 * $max_size)) {
-    drupal_set_message(t("You are approaching the maximum space allocated for preserved content."),'warning',FALSE);
+    drupal_set_message(t("You are approaching the maximum space allocated for preserved content."), 'warning', FALSE);
   }
   return t('@current (of @max)', array('@current' => $formatted_current_size, '@max' => $formatted_max));
 }
 
 function amber_dashboard_summary_form_clear($form, &$form_state) {
   amber_delete_all();
-  cache_clear_all('*', 'cache_filter',TRUE);
-  cache_clear_all('*', 'cache_field',TRUE);
-  drupal_set_message("All snapshots have been deleted");
+  cache_clear_all('*', 'cache_filter', TRUE);
+  cache_clear_all('*', 'cache_field', TRUE);
+  drupal_set_message(t("All snapshots have been deleted");
 }
 
 function amber_dashboard_summary_form_scan($form, &$form_state) {
@@ -228,15 +232,15 @@ function amber_dashboard_detail_form_export($form, &$form_state) {
 
   $rows = array();
   while ($r = $result->fetchAssoc()) {
-    $host = parse_url($r['url'],PHP_URL_HOST);
+    $host = parse_url($r['url'], PHP_URL_HOST);
     $rows[] = array(
       'site' => $host,
       'url' => $r['url'],
       'status' => $r['status'] ? t('Up') : t('Down'),
-      'last_checked' => isset($r['last_checked']) ? date('c',$r['last_checked']) : "",
-      'date' => isset($r['date']) ? date('c',$r['date']) : "",
+      'last_checked' => isset($r['last_checked']) ? date('c', $r['last_checked']) : "",
+      'date' => isset($r['date']) ? date('c', $r['date']) : "",
       'size' => $r['size'],
-      'a.date' => isset($r['a_date']) ? date('c',$r['a_date']) : "",
+      'a.date' => isset($r['a_date']) ? date('c', $r['a_date']) : "",
       'views' => isset($r['views']) ? $r['views'] : 0,
       'message' => isset($r['message']) ? $r['message'] : ""
     );
@@ -247,7 +251,7 @@ function amber_dashboard_detail_form_export($form, &$form_state) {
 
   $fp = fopen('php://output', 'w');
   fputcsv($fp, $header);
-  foreach($rows as $line){
+  foreach ($rows as $line) {
     fputcsv($fp, $line);
   }
   fclose($fp);
@@ -259,9 +263,9 @@ function amber_dashboard_detail_form_export($form, &$form_state) {
  */
 function _amber_dashboard_detail_query() {
   $query = db_select('amber_check', 'c');
-  $query->leftjoin('amber_cache', 'ca','ca.id = c.id');
-  $query->leftJoin('amber_activity', 'a','ca.id = a.id');
-  $query = $query->fields('c', array('id', 'url', 'status','last_checked', 'message'));
+  $query->leftjoin('amber_cache', 'ca', 'ca.id = c.id');
+  $query->leftJoin('amber_activity', 'a', 'ca.id = a.id');
+  $query = $query->fields('c', array('id', 'url', 'status', 'last_checked', 'message'));
   $query = $query->fields('ca', array('id', 'date', 'size', 'location', 'provider'));
   $query = $query->fields('a', array('id', 'views', 'date'));
   $query->addExpression('substring_index(c.url,\'://\',-1)', 'url_sort');
@@ -276,7 +280,8 @@ function amber_dashboard_delete_item($id, $provider = 0) {
   if ($id) {
     if (amber_delete_item($id, $provider)) {
       drupal_set_message(t("Deleted record with id: @id.", array('@id' => $id)));
-    } else {
+    } 
+    else {
       drupal_set_message(t("Could not delete record with id: @id.", array('@id' => $id)), 'warning');
     }
   }
@@ -289,10 +294,10 @@ function amber_dashboard_delete_item($id, $provider = 0) {
  */
 function amber_dashboard_blacklist_site($site) {
   if ($site) {
-    $list = variable_get('amber_excluded_sites','');
+    $list = variable_get('amber_excluded_sites', '');
     $list .= PHP_EOL . filter_xss($site);
-    variable_set('amber_excluded_sites',$list);
-    drupal_set_message("Added $site to list of excluded sites");
+    variable_set('amber_excluded_sites', $list);
+    drupal_set_message(t("Added @site to list of excluded sites", array('@site' => $site)));
   }
   drupal_goto(drupal_get_destination());
 }
