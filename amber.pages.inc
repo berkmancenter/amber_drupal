@@ -55,7 +55,7 @@ function _amber_get_view_link($row) {
     case AMBER_BACKEND_AMAZON_S3:
       return isset($row['size']) ? l(t('View'), $row['location']) : "";
       break;
-  } 
+  }
 }
 
 function _amber_get_size_column($row) {
@@ -70,7 +70,7 @@ function _amber_get_size_column($row) {
     case AMBER_BACKEND_LOCAL:
       return $size;
       break;
-  } 
+  }
 }
 
 function _amber_get_method_column($row) {
@@ -91,7 +91,7 @@ function _amber_get_method_column($row) {
     case AMBER_BACKEND_LOCAL:
       return "Local storage";
       break;
-  } 
+  }
 }
 
 function amber_dashboard_detail_form() {
@@ -190,7 +190,7 @@ function amber_dashboard_summary_form_clear($form, &$form_state) {
   amber_delete_all();
   cache_clear_all('*', 'cache_filter', TRUE);
   cache_clear_all('*', 'cache_field', TRUE);
-  drupal_set_message(t("All snapshots have been deleted");
+  drupal_set_message(t("All snapshots have been deleted"));
 }
 
 function amber_dashboard_summary_form_scan($form, &$form_state) {
@@ -280,7 +280,7 @@ function amber_dashboard_delete_item($id, $provider = 0) {
   if ($id) {
     if (amber_delete_item($id, $provider)) {
       drupal_set_message(t("Deleted record with id: @id.", array('@id' => $id)));
-    } 
+    }
     else {
       drupal_set_message(t("Could not delete record with id: @id.", array('@id' => $id)), 'warning');
     }
