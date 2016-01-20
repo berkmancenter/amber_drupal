@@ -674,6 +674,20 @@ function amber_retrieve_cache_asset() {
   return (isset($data)) ? $data : MENU_NOT_FOUND;
 }
 
+
+/**
+ * Implements hook_theme().
+ */
+function amber_theme($existing, $type, $theme, $path) {
+  return array(
+    'amber_iframe' => array(
+      'variables' => array('url' => NULL),
+      'template' => 'amber_iframe',
+      'path' => drupal_get_path('module', 'amber') .'/theme'
+    )
+  );
+}
+
 /**
  * Display a page with an iframe referencing the cache content
  * @param $data string
@@ -690,26 +704,14 @@ function amber_deliver_cache_item_frame($data) {
   if ($uri && (strrpos($uri, "/") == (strlen($uri) - 1))) {
     $iframe_url = "../";
   }
-  $iframe_url .= "../" . "cacheframe/${id}/";  
+  $iframe_url .= "../" . "cacheframe/${id}/";
   if (isset($data['metadata']['cache']['amber']['date'])) {
     $memento_date = amber_RFC1123_date($data['metadata']['cache']['amber']['date']);
     drupal_add_http_header('Memento-Datetime', $memento_date);
   }
-  print <<<EOF
-<!DOCTYPE html>
-<html style="height: 100%">
-<head>
-<title>Amber</title>
-</head>
-<body style="margin:0; padding: 0; height: 100%">
-<iframe 
-sandbox="allow-scripts allow-forms allow-popups allow-pointer-lock"
-security="restricted"
-style="border:0 none transparent; background-color:transparent; width:100%; height:100%;" 
-src="${iframe_url}"></iframe>
-</body>
-</html>
-EOF;
+
+  $output = theme("amber_iframe", array('url' => $iframe_url));
+  print $output;
 }
 
 /**
