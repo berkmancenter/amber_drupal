@@ -148,7 +148,7 @@ function _amber_get_fetcher_instance($backend) {
         'amber_max_file' => 5000000, /* Max size for S3 file */
         'header_text' => t("You are viewing a snapshot of <a style='font-weight:bold !important; color:white !important' href='{{url}}'>{{url}}</a> created on {{date}}"),
         'excluded_content_types' => explode(PHP_EOL, variable_get("amber_excluded_formats", "")),
-      ));      
+      ));
       break;
     default:
       $fetcher = NULL;
@@ -215,7 +215,7 @@ function amber_init() {
     drupal_add_js(array(
       'amber' => array(
         'name' => variable_get('site_name', t('This site')),
-        'lookup_availability' => 
+        'lookup_availability' =>
             (variable_get('amber_external_availability', AMBER_EXTERNAL_AVAILABILITY_NETCLERK) == AMBER_EXTERNAL_AVAILABILITY_NETCLERK)
       )), 'setting');
   }
@@ -229,7 +229,7 @@ function amber_permission() {
       'title' => t('Administer Amber'),
       'description' => t('Adminster Amber storage and display of site snapshots'),
     )
-  );  
+  );
 }
 
 /**
@@ -336,27 +336,27 @@ function amber_menu() {
     'weight' => 20,
   );
   $items['amber/logcacheview'] = array(
-    'title' => 'Log cache view',    
+    'title' => 'Log cache view',
     'description' => 'Log that an externally stored cache has been clicked',
     'page callback' => 'amber_log_cache_view',
     'access callback' => TRUE,
-    'delivery callback' => 'amber_deliver_cache_view_result',    
+    'delivery callback' => 'amber_deliver_cache_view_result',
     'type' => MENU_CALLBACK,
   );
   $items['amber/status'] = array(
-    'title' => 'Get status for URLs',    
+    'title' => 'Get status for URLs',
     'description' => 'Get availability status for a list of URLs through a POST request',
     'page callback' => 'amber_get_url_status',
     'access callback' => TRUE,
-    'delivery callback' => 'amber_deliver_json',    
+    'delivery callback' => 'amber_deliver_json',
     'type' => MENU_CALLBACK,
   );
   $items['amber/memento'] = array(
-    'title' => 'Get memento for a URL',    
+    'title' => 'Get memento for a URL',
     'description' => 'Get a memento for a URLs',
     'page callback' => 'amber_get_memento',
     'access callback' => TRUE,
-    'delivery callback' => 'amber_deliver_json',    
+    'delivery callback' => 'amber_deliver_json',
     'type' => MENU_CALLBACK,
   );
 
@@ -386,7 +386,7 @@ function _amber_get_behavior($status, $country = FALSE) {
         $result .= " popup";
         break;
       }
-  } 
+  }
   else {
     $action = variable_get("amber_${c}unavailable_action", AMBER_ACTION_NONE);
     switch ($action) {
@@ -419,13 +419,13 @@ function _amber_build_link_attributes($summaries) {
   if (isset($summaries['default']['location'], $summaries['default']['date'])) {
     if (strpos($summaries['default']['location'], "http") === 0) {
       $result['data-versionurl'] = $summaries['default']['location'];
-    } 
+    }
     else {
       $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
-      $result['data-versionurl'] = $protocol . $_SERVER['SERVER_NAME'] . base_path() . $summaries['default']['location'];      
+      $result['data-versionurl'] = $protocol . $_SERVER['SERVER_NAME'] . base_path() . $summaries['default']['location'];
     }
     $result['data-versiondate'] = date('c', $summaries['default']['date']);
-  } 
+  }
   else {
     return $result;
   }
@@ -561,15 +561,15 @@ function amber_cache_node($node, $immediately = FALSE) {
     foreach ($links['cache'] as $url) {
       if (amber_cache_link($url, $immediately)) {
         drupal_set_message(t("Sucessfully preserved: @url.", array('@url' => $url)), 'status');
-      } 
+      }
       else {
         drupal_set_message(t("Could not preserve: @url.", array('@url' => $url)), 'warning');
       }
-    }      
+    }
     foreach ($links['excluded'] as $url) {
       drupal_set_message(t("Did not preserve excluded site: @url.", array('@url' => $url)), 'warning');
     }
-  } 
+  }
   else {
     amber_enqueue_check_links($links['cache']);
   }
@@ -626,7 +626,7 @@ function amber_retrieve_cache_item_data($id) {
 }
 
 /**
- * Retrieve a cache item for display in an iframe. 
+ * Retrieve a cache item for display in an iframe.
  * @param  $id string identifying the item to return
  * @return array with information about the item, or MENU_NOT_FOUND if item not found
  */
@@ -665,10 +665,10 @@ function amber_retrieve_cache_asset() {
     $extension = substr($last_element, strrpos($last_element, '.') + 1);
     switch ($extension) {
       case "css" : $data['metadata']['type'] = 'text/css'; break;
-      case "jpg" : $data['metadata']['type'] = 'image/jpeg'; break;      
-      case "png" : $data['metadata']['type'] = 'image/png'; break;      
-      case "svg" : $data['metadata']['type'] = 'image/svg+xml'; break;      
-      case "js" : $data['metadata']['type'] = 'application/javascript'; break;      
+      case "jpg" : $data['metadata']['type'] = 'image/jpeg'; break;
+      case "png" : $data['metadata']['type'] = 'image/png'; break;
+      case "svg" : $data['metadata']['type'] = 'image/svg+xml'; break;
+      case "js" : $data['metadata']['type'] = 'application/javascript'; break;
     }
   }
   return (isset($data)) ? $data : MENU_NOT_FOUND;
@@ -721,7 +721,7 @@ function amber_deliver_cache_item_frame($data) {
 function amber_deliver_cache_item($data) {
   if (is_int($data) && $data == MENU_NOT_FOUND) {
     drupal_deliver_html_page(MENU_NOT_FOUND);
-  } 
+  }
   else {
     if (isset($data['metadata']['type'])) {
       drupal_add_http_header('Content-Type', $data['metadata']['type']);
@@ -758,7 +758,7 @@ function amber_delete_item($id, $provider) {
   if (is_null($storage) || $storage->delete($cache_metadata)) {
     $status->delete($id, $provider);
     return TRUE;
-  } 
+  }
   else {
     return FALSE;
   }
@@ -799,7 +799,7 @@ function amber_log_cache_view() {
     $status = amber_get_status();
     if ($status->save_view_for_external_cache_location($_GET['cache'])) {
       return array();
-    } 
+    }
     else {
       return MENU_NOT_FOUND;
     }
@@ -835,7 +835,7 @@ function amber_get_url_status() {
       $lookup_result['data'][$key]['behavior'] = _amber_get_behavior($lookup_result['data'][$key]['available']);
     }
     $result = json_encode($lookup_result, JSON_UNESCAPED_SLASHES);
-  } 
+  }
   else {
     $result = '{}';
   }
@@ -854,7 +854,7 @@ function amber_deliver_json($data) {
   drupal_add_http_header('Expires', 0);
   if (is_int($data) && $data == MENU_NOT_FOUND) {
     drupal_add_http_header('Status', '404 Not Found');
-  } 
+  }
   else {
     print $data;
   }
@@ -873,7 +873,7 @@ function amber_get_memento() {
     $lookup = amber_get_memento_service();
     $lookup_result = $lookup->getMemento($_REQUEST['url'], $_REQUEST['date']);
     $result = json_encode($lookup_result, JSON_UNESCAPED_SLASHES);
-  } 
+  }
   else {
     $result = '{}';
   }

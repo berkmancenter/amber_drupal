@@ -4,7 +4,7 @@
  * Install routines for Amber
  */
 
-/** 
+/**
  * Implements hook_requirements().
 */
 function amber_requirements($phase) {
@@ -29,18 +29,18 @@ function amber_requirements($phase) {
         if (($library = libraries_detect('aws')) && $library['installed']) {
           $requirements['amber_aws']['severity'] = REQUIREMENT_OK;
           $requirements['amber_aws']['value'] = $t("Installed");
-        } 
+        }
         else {
           $requirements['amber_aws']['severity'] = REQUIREMENT_WARNING;
           $requirements['amber_aws']['value'] = $t("Not installed");
           $library_info = libraries_info('aws');
-          $requirements['amber_aws']['description'] = $t("The AWS library is required to store captures on AWS. <a href='${library_info['download url']}'>Download</a> the library and unpack the zip file and 
+          $requirements['amber_aws']['description'] = $t("The AWS library is required to store captures on AWS. <a href='${library_info['download url']}'>Download</a> the library and unpack the zip file and
           install into sites/all/libraries/aws.");
-        } 
+        }
       }
       return $requirements;
       break;
-    
+
     default:
       break;
   }
