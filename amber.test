@@ -62,14 +62,7 @@ class AmberTestCase extends DrupalUnitTestCase {
     $vars = array( 'text' => 'Test link', 'path' => 'node/1', 'options' => array( 'attributes' => array()) );
     amber_preprocess_link($vars);
     $this->assertTrue($vars['text']);
-    $this->assertTrue(empty($var['options']['attributes']));
-  }
-
-  public function testpreprocess_linkOptionsNotSet() {
-    $vars = array( 'text' => 'Test link', 'path' => 'http://www.google.com');
-    amber_preprocess_link($vars);
-    $this->assertTrue($vars['text']);
-    $this->assertTrue(empty($var['options']['attributes']));
+    $this->assertTrue(empty($vars['options']['attributes']));
   }
 
   public function testpreprocess_linkExistingAttributes() {
@@ -90,7 +83,7 @@ class AmberTestCase extends DrupalUnitTestCase {
       ));
     amber_preprocess_link($vars);
     $this->assertTrue($vars['text']);
-    $this->assertTrue(empty($var['options']['attributes']));
+    $this->assertTrue(empty($vars['options']['attributes']));
   }
 
   public function testAmberFilterEmpty() {
