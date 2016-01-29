@@ -208,9 +208,9 @@ function amber_get_memento_service() {
 }
 
 /**
- * Implements hook_init()
+ * Implements hook_page_build()
  */
-function amber_init() {
+function amber_page_build(&$page) {
   if (variable_get('amber_enabled', 1)) {
     drupal_add_js(array(
       'amber' => array(
@@ -306,6 +306,7 @@ function amber_menu() {
     'title' => 'Amber Cache Frame',
     'description' => 'Display cached items within an iframe',
     'page callback' => 'amber_retrieve_cache_item_frame',
+    /* All cache pages are available to any user */
     'access callback' => TRUE,
     'delivery callback' => 'amber_deliver_cache_item_frame',
     'type' => MENU_CALLBACK,
@@ -314,6 +315,7 @@ function amber_menu() {
     'title' => 'Amber Cache',
     'description' => 'Retrieve items from the cache',
     'page callback' => 'amber_retrieve_cache_item',
+    /* All cache pages are available to any user */
     'access callback' => TRUE,
     'delivery callback' => 'amber_deliver_cache_item',
     'type' => MENU_CALLBACK,
@@ -323,6 +325,7 @@ function amber_menu() {
     'description' => 'Retrieve assets related to an item from the cache',
     'page callback' => 'amber_retrieve_cache_asset',
     'page arguments' => array(2),
+    /* All cache pages are available to any user */
     'access callback' => TRUE,
     'delivery callback' => 'amber_deliver_cache_item',
     'type' => MENU_CALLBACK,
@@ -339,6 +342,7 @@ function amber_menu() {
     'title' => 'Log cache view',
     'description' => 'Log that an externally stored cache has been clicked',
     'page callback' => 'amber_log_cache_view',
+    /* Ajax call may be made by any user */
     'access callback' => TRUE,
     'delivery callback' => 'amber_deliver_cache_view_result',
     'type' => MENU_CALLBACK,
@@ -347,6 +351,7 @@ function amber_menu() {
     'title' => 'Get status for URLs',
     'description' => 'Get availability status for a list of URLs through a POST request',
     'page callback' => 'amber_get_url_status',
+    /* Ajax call may be made by any user */
     'access callback' => TRUE,
     'delivery callback' => 'amber_deliver_json',
     'type' => MENU_CALLBACK,
@@ -355,6 +360,7 @@ function amber_menu() {
     'title' => 'Get memento for a URL',
     'description' => 'Get a memento for a URLs',
     'page callback' => 'amber_get_memento',
+    /* Ajax call may be made by any user */
     'access callback' => TRUE,
     'delivery callback' => 'amber_deliver_json',
     'type' => MENU_CALLBACK,

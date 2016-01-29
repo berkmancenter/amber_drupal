@@ -21,7 +21,7 @@ function amber_requirements($phase) {
       $formatted_max = format_size($max_size);
       $current_size = $status->get_cache_size();
       $formatted_current_size = $current_size ? format_size($current_size) : "0 MB";
-      $value = t('@current (of @max)', array('@current' => $formatted_current_size, '@max' => $formatted_max));
+      $value = $t('@current (of @max)', array('@current' => $formatted_current_size, '@max' => $formatted_max));
       $severity = $current_size < (0.9 * $max_size) ? REQUIREMENT_OK : REQUIREMENT_WARNING;
       $requirements['amber_storage'] = array('title' => 'Amber disk usage', 'value' => $value, 'severity' => $severity );
       if (function_exists('libraries_detect')) {

@@ -76,7 +76,7 @@ function _amber_filter_links($links, $blacklist) {
       }
       if ($exclude) {
         $result['excluded'][] = $link;
-      } 
+      }
       else {
           $result['cache'][] = $link;
       }
@@ -101,17 +101,17 @@ function _amber_regexp_filter_links($links, $blacklist) {
       $blacklistitem = trim($blacklistitem);
       if ($blacklistitem) {
         $blacklistitem = preg_replace("/https?:\\/\\//i", "", $blacklistitem);
-        $blacklistitem = str_replace("@", "\@", $blacklistitem); 
+        $blacklistitem = str_replace("@", "\@", $blacklistitem);
         $blacklistitem = '@' . $blacklistitem . '@';
         $cleanedlink = preg_replace("/https?:\\/\\//i", "", $link);
         if (preg_match($blacklistitem, $cleanedlink)) {
           $exclude = TRUE;
-        }        
+        }
       }
     }
     if ($exclude) {
       $result['excluded'][] = $link;
-    } 
+    }
     else {
         $result['cache'][] = $link;
     }
@@ -211,18 +211,9 @@ function _amber_extract_node_links($node) {
 
   // Create array of node fields to scan.
   $text_items_by_field = array();
-
   $text_items_by_field = array_merge($text_items_by_field, _amber_parse_fields('node', $node->type, $node, TRUE));
   $text_items_by_field['title'][] = _filter_url($node->title, $filter);
   $text_items = _amber_array_values_recursive($text_items_by_field);
-  $languages = language_list();
-  // Note: An "undefined language" (value: 'und') isn't listed in the available languages variable $languages.
-  $url_options = (empty($node->language) || empty($languages[$node->language])) ? array('absolute' => TRUE) : array('language' => $languages[$node->language], 'absolute' => TRUE);
-
-  // Extract all links in a node.
-  // NOTE: The linkchecker module parses the HTML and then looks through the DOM. 
-  // Consider this if the current approach does not work
-  //  $links = _linkchecker_extract_links(implode(' ', $text_items), $path);
   $links = _amber_extract_links(implode(' ', $text_items));
   global $base_url;
   $links = _amber_regexp_filter_links($links, explode(PHP_EOL, variable_get("amber_excluded_sites", parse_url($base_url, PHP_URL_HOST))));
