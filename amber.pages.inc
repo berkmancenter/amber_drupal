@@ -118,6 +118,8 @@ function amber_dashboard_detail_form() {
   $query = $query->orderByHeader($header);
   $result = $query->execute();
 
+  $token = drupal_get_token('delete');
+
   $rows = array();
   while ($r = $result->fetchAssoc()) {
     $host = parse_url($r['url'], PHP_URL_HOST);
@@ -133,7 +135,10 @@ function amber_dashboard_detail_form() {
         'views' => isset($r['views']) ? $r['views'] : "",
         'method' => _amber_get_method_column($r),
         'view' => _amber_get_view_link($r),
-        'delete' => l(t('Delete'), 'admin/reports/amber/delete/' . $r['id'] . "/" . $r['provider'], array('query' => array('destination' => current_path()))),
+        'delete' => l(t('Delete'), 'admin/reports/amber/delete/' . $r['id'] . "/" . $r['provider'],
+                      array('query' => array('destination' => current_path(),
+                                             'token' => $token),
+                            'attributes' => array('rel' => 'nofollow'))),
       ),
       'data-url' => $r['url']);
   }
@@ -277,6 +282,9 @@ function _amber_dashboard_detail_query() {
  * @param $id
  */
 function amber_dashboard_delete_item($id, $provider = 0) {
+  if (!drupal_valid_token($_GET['token'], 'delete')) {
+    return drupal_access_denied();
+  }
   if ($id) {
     if (amber_delete_item($id, $provider)) {
       drupal_set_message(t("Deleted record with id: @id.", array('@id' => $id)));
