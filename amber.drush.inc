@@ -128,12 +128,12 @@ function drush_amber_check_url($url) {
 function drush_amber_delete_url($id) {
   if ($id) {
     if (amber_delete_item($id)) {
-      drush_print("Item deleted");      
-    } 
-    else {
-      drush_print("Could not delete item");      
+      drush_print("Item deleted");
     }
-  } 
+    else {
+      drush_print("Could not delete item");
+    }
+  }
   else {
     drush_set_error(dt("Specify an ID to delete"));
     return FALSE;

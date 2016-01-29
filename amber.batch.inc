@@ -17,8 +17,8 @@ function amber_cron() {
   }
 }
 
-/** 
- * Check whether an item already exists in the queue, to avoid filling up the queue with 
+/**
+ * Check whether an item already exists in the queue, to avoid filling up the queue with
  * duplicate entries. This isn't provided by the Drupal Queue interface, so we need to go
  * directly to the database to find out, unfortunately.
  * @param $queue_name string with name of the queue
@@ -80,7 +80,7 @@ function amber_batch_scan_all_setup() {
       'finished' => 'amber_batch_scan_all_finished',
     );
     return $batch;
-  } 
+  }
   else {
     return NULL;
   }
@@ -109,7 +109,7 @@ function amber_batch_scan_process($nid, $context) {
 function amber_batch_scan_all_finished($success, $results, $operations) {
   if ($success) {
     drupal_set_message(t('@count nodes scanned', array('@count' => count($results))));
-  } 
+  }
   else {
     $error_operation = reset($operations);
     drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation[0], TRUE))));
@@ -136,7 +136,7 @@ function amber_batch_cache_all_setup() {
       'finished' => 'amber_batch_cache_all_finished',
     );
     return $batch;
-  } 
+  }
   else {
     return NULL;
   }
@@ -179,7 +179,7 @@ function amber_batch_cache_all_finished($success, $results, $operations) {
       drupal_set_message(t('@count URLs processed', array('@count' => $count)));
     cache_clear_all('*', 'cache_filter', TRUE);
     cache_clear_all('*', 'cache_field', TRUE);
-  } 
+  }
   else {
     $error_operation = reset($operations);
     drupal_set_message(t('An error occurred while processing @operation with arguments : @args', array('@operation' => $error_operation[0], '@args' => print_r($error_operation, TRUE))));
@@ -214,7 +214,7 @@ function amber_cache_link($item, $force = FALSE) {
   /* Check whether the site is up */
   $last_check = $status->get_check($item);
   if (($update = $checker->check(empty($last_check) ? array('url' => $item) : $last_check, $force)) !== FALSE) {
-    
+
     /* There's an updated check result to save */
     $status->save_check($update);
 
@@ -235,7 +235,7 @@ function amber_cache_link($item, $force = FALSE) {
         /* Save the item to any alternate storage locations */
         foreach (amber_get_alternate_fetchers() as $alternate_fetcher) {
           watchdog('amber', "Caching: @url using @object", array('@url' => $item, '@object' => get_class($alternate_fetcher)), WATCHDOG_DEBUG);
-          _amber_fetch_item($item, $alternate_fetcher, $status);          
+          _amber_fetch_item($item, $alternate_fetcher, $status);
         }
 
         if ($result) {
@@ -248,7 +248,7 @@ function amber_cache_link($item, $force = FALSE) {
         }
         return $result;
     }
-  } 
+  }
   else {
     return FALSE;
   }
@@ -268,13 +268,13 @@ function _amber_fetch_item($item, $fetcher, $status) {
   } catch (RuntimeException $re) {
     watchdog('amber', "Did not cache: @url: @message", array('@url' => $item, '@message' => $re->getMessage()), WATCHDOG_NOTICE);
     $update['message'] = $re->getMessage();
-    $status->save_check($update);        
+    $status->save_check($update);
     return FALSE;
   }
   if ($cache_metadata) {
     $status->save_cache($cache_metadata);
     return TRUE;
-  } 
+  }
   else {
     return FALSE;
   }
