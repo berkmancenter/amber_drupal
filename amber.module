@@ -582,24 +582,20 @@ function amber_cache_node($node, $immediately = FALSE) {
 }
 
 /**
- * Implements hook_entity_update
+ * Implements hook_node_update
  */
-function amber_entity_update($entity, $type) {
-  if ("node" == $type) {
-    if (NODE_PUBLISHED == $entity->status) {
-      amber_cache_node($entity);
-    }
+function amber_node_update($node) {
+  if (NODE_PUBLISHED == $node->status) {
+    amber_cache_node($node);
   }
 }
 
 /**
- * Implements hook_entity_insert
+ * Implements hook_node_insert
  */
-function amber_entity_insert($entity, $type) {
-  if ("node" == $type) {
-    if (NODE_PUBLISHED == $entity->status) {
-      amber_cache_node($entity);
-    }
+function amber_node_insert($node) {
+  if (NODE_PUBLISHED == $node->status) {
+    amber_cache_node($node);
   }
 }
 
