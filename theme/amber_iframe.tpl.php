@@ -1,4 +1,9 @@
-<!DOCTYPE html>
+<?php
+/**
+ * @file
+ * Iframe for displaying cached content
+ */
+?><!DOCTYPE html>
 <html style="height: 100%">
 <head>
 <title>Amber</title>
