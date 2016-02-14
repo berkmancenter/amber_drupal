@@ -316,7 +316,7 @@ function amber_menu() {
     'description' => 'Retrieve items from the cache',
     'page callback' => 'amber_retrieve_cache_item',
     /* All cache pages are available to any user */
-    'access callback' => TRUE,
+    'access callback' => 'amber_validate_cache_iframe_referrer',
     'delivery callback' => 'amber_deliver_cache_item',
     'type' => MENU_CALLBACK,
   );
@@ -714,6 +714,37 @@ function amber_deliver_cache_item_frame($data) {
 
   $output = theme("amber_iframe", array('url' => $iframe_url));
   print $output;
+}
+
+
+/**
+ * Implements "access callback" for cached items displayed through an iframe
+ * Validates that iframe that enclosing the cached content is being served
+ * from the expected URL on the same server. We know that requests from this
+ * URL provide the proper sandbox attributes for the iframe to prevent XSS
+ * attacks.
+ * @return true if access is allowed
+ */
+function amber_validate_cache_iframe_referrer() {
+  $headers = getallheaders();
+  if (isset($headers['Referer'])) {
+    /* The Referer URL should be the same as the current URL, except with
+       'cache' instead of 'cacheframe' in the URL. */
+    $referer_uri = $headers['Referer'];
+    $requested_uri =  "http"
+                      . (isset($_SERVER['HTTPS']) ? 's' : '')
+                      . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+
+    /* The value that should be in the HTTP Referer header */
+    $expected_referer = str_replace("/cacheframe/", "/cache/", $requested_uri);
+    if (strcmp($expected_referer, $referer_uri) === 0) {
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+  }
+  /* No Referer header, so not allowed */
+  return FALSE;
 }
 
 /**
