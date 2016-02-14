@@ -283,7 +283,7 @@ function _amber_dashboard_detail_query() {
  */
 function amber_dashboard_delete_item($id, $provider = 0) {
   if (!drupal_valid_token($_GET['token'], 'delete')) {
-    return drupal_access_denied();
+    return MENU_ACCESS_DENIED;
   }
   if ($id) {
     if (amber_delete_item($id, $provider)) {
