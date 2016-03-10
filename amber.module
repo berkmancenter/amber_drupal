@@ -571,7 +571,7 @@ function amber_cache_node($node, $immediately = FALSE) {
   if ($immediately) {
     foreach ($links['cache'] as $url) {
       if (amber_cache_link($url, $immediately)) {
-        drupal_set_message(t("Sucessfully preserved: @url.", array('@url' => $url)), 'status');
+        drupal_set_message(t("Successfully preserved: @url.", array('@url' => $url)), 'status');
       }
       else {
         drupal_set_message(t("Could not preserve: @url.", array('@url' => $url)), 'warning');

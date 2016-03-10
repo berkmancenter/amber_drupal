@@ -260,7 +260,7 @@ function amber_cache_link($item, $force = FALSE) {
  * @param  string $item    url to fetch
  * @param  iAmberFetcher $fetcher instance of a fetcher to use to get the item
  * @param  iAmberStatus  $status  instance of a status to use to save the item
- * @return boolean  TRUE if succesfully cached
+ * @return boolean  TRUE if successfully cached
  */
 function _amber_fetch_item($item, $fetcher, $status) {
   $cache_metadata = array();
