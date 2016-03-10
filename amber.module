@@ -208,7 +208,7 @@ function amber_get_memento_service() {
 }
 
 /**
- * Implements hook_page_build()
+ * Implements hook_page_build().
  */
 function amber_page_build(&$page) {
   if (variable_get('amber_enabled', 1)) {
@@ -222,8 +222,8 @@ function amber_page_build(&$page) {
 }
 
 /**
- *  Implements hook_permission()
-**/
+ * Implements hook_permission().
+ */
 function amber_permission() {
   return array('administer amber' => array(
       'title' => t('Administer Amber'),
@@ -233,7 +233,7 @@ function amber_permission() {
 }
 
 /**
- * Implements hook_library_info()
+ * Implements hook_library_info().
  * Defined by the 'libraries' module
  */
 function amber_libraries_info() {
@@ -369,6 +369,11 @@ function amber_menu() {
   return $items;
 }
 
+// function amber_contextual_links_view_alter(&$element, $items) {
+//   dpm($element);
+// }
+
+
 /**
  * Figure out what behavior to set, based on the status of the page and the configuration settings
  * @param bool $status true if the site is up, false if the site is down
@@ -469,7 +474,7 @@ function _amber_lookup_url($url) {
 }
 
 /**
- * Implements hook_preprocess_link()
+ * Implements hook_preprocess_link().
  *
  * Rewrite all cached external links with data-* attributes describing the information in the cache
  */
@@ -582,7 +587,7 @@ function amber_cache_node($node, $immediately = FALSE) {
 }
 
 /**
- * Implements hook_node_update
+ * Implements hook_node_update().
  */
 function amber_node_update($node) {
   if (NODE_PUBLISHED == $node->status) {
@@ -591,7 +596,7 @@ function amber_node_update($node) {
 }
 
 /**
- * Implements hook_node_insert
+ * Implements hook_node_insert().
  */
 function amber_node_insert($node) {
   if (NODE_PUBLISHED == $node->status) {
@@ -685,7 +690,7 @@ function amber_theme($existing, $type, $theme, $path) {
     'amber_iframe' => array(
       'variables' => array('url' => NULL),
       'template' => 'amber_iframe',
-      'path' => drupal_get_path('module', 'amber') .'/theme'
+      'path' => drupal_get_path('module', 'amber') . '/theme'
     )
   );
 }
@@ -733,13 +738,15 @@ function amber_validate_cache_iframe_referrer() {
     $referer_uri = $headers['Referer'];
     $requested_uri =  "http"
                       . (isset($_SERVER['HTTPS']) ? 's' : '')
-                      . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+                      . "://{$_SERVER['HTTP_HOST']}"
+                      . request_uri();
 
     /* The value that should be in the HTTP Referer header */
     $expected_referer = str_replace("/cacheframe/", "/cache/", $requested_uri);
     if (strcmp($expected_referer, $referer_uri) === 0) {
       return TRUE;
-    } else {
+    }
+    else {
       return FALSE;
     }
   }
@@ -784,6 +791,9 @@ function amber_delete_all() {
   db_delete('queue')->condition('data', '%amber_batch_cache_process%', 'LIKE')->execute();
 }
 
+/**
+ * Delete a single item from the cache
+ */
 function amber_delete_item($id, $provider) {
   $status = amber_get_status();
   $storage = amber_get_storage_instance($provider);

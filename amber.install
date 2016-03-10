@@ -6,7 +6,7 @@
 
 /**
  * Implements hook_requirements().
-*/
+ */
 function amber_requirements($phase) {
   $t = get_t();
   switch ($phase) {
@@ -75,8 +75,10 @@ function amber_uninstall() {
   variable_del('amber_content_scanned');
 }
 
+/**
+ * Implements hook_schema().
+ */
 function amber_schema() {
-
   $schema['amber_check'] = array(
     'description' => 'Stores a list of URLs with their current status',
     'fields' => array(

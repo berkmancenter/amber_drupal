@@ -4,11 +4,17 @@
  * Tests
  */
 
+/**
+ * Drupal unit tests
+ */
 class AmberTestCase extends DrupalUnitTestCase {
 
   var $MOCK_METADATA_CACHE = "http://amber.org/Amber/cache/0a137b375cc3881a70e186ce2172c8d1";
   var $MOCK_METADATA_DATE = "2014-03-23T15:57:05+00:00";
 
+  /**
+   * Metadata describing these tests
+   */
   public static function getInfo() {
     return array(
       'name' => 'Amber unit tests',
@@ -42,7 +48,6 @@ class AmberTestCase extends DrupalUnitTestCase {
   /**
    * Make sure that the Storage class is being called correctly
    */
-
   public function testAmberLookup() {
     $result = _amber_lookup_url("http://google.com");
     $this->assertTrue(is_array($result));
@@ -50,6 +55,9 @@ class AmberTestCase extends DrupalUnitTestCase {
     $this->assertEqual($result['data-versiondate'], $this->MOCK_METADATA_DATE);
   }
 
+  /**
+   * Test processing a link
+   */
   public function testpreprocess_link() {
     $vars = array( 'text' => 'Test link', 'path' => 'http://www.google.com', 'options' => array( 'attributes' => array()) );
     amber_preprocess_link($vars);
@@ -58,6 +66,9 @@ class AmberTestCase extends DrupalUnitTestCase {
     $this->assertEqual($vars['options']['attributes']['data-versiondate'], $this->MOCK_METADATA_DATE);
   }
 
+  /**
+   * Test processing a local link
+   */
   public function testpreprocess_linkLocal() {
     $vars = array( 'text' => 'Test link', 'path' => 'node/1', 'options' => array( 'attributes' => array()) );
     amber_preprocess_link($vars);
@@ -65,6 +76,9 @@ class AmberTestCase extends DrupalUnitTestCase {
     $this->assertTrue(empty($vars['options']['attributes']));
   }
 
+  /**
+   * Test processing a link with local attributes
+   */
   public function testpreprocess_linkExistingAttributes() {
     $vars = array( 'text' => 'Test link', 'path' => 'http://www.google.com', 'options' => array( 'attributes' => array('data-bogus' => 'Franky')) );
     amber_preprocess_link($vars);
@@ -74,6 +88,9 @@ class AmberTestCase extends DrupalUnitTestCase {
     $this->assertTrue($vars['options']['attributes']['data-bogus'] == "Franky");
   }
 
+  /**
+   * Test processing a link with no data
+   */
   public function testpreprocess_linkNoData() {
     $vars = array( 'text' => 'Test link', 'path' => 'http://nodata.example.com',
       'options' => array('attributes' => array(),
@@ -86,18 +103,27 @@ class AmberTestCase extends DrupalUnitTestCase {
     $this->assertTrue(empty($vars['options']['attributes']));
   }
 
+  /**
+   * Test processing an empty file
+   */
   public function testAmberFilterEmpty() {
     $text = "";
     $result = _amber_filter_process($text, NULL, NULL);
     $this->assertEqual($result, "");
   }
 
+  /**
+   * Test processing an anchor using single quotes
+   */
   public function testAmberFilterSimpleReplaceSingleQuotes() {
     $text = "Hi there <a href='http://www.yahoo.com'>Yahoo</a>. Eat my donuts!";
     $result = _amber_filter_process($text, NULL, NULL);
     $this->assertTrue(strpos($result, 'data-versionurl') > 0);
   }
 
+  /**
+   * Test processing an anchor using double quotes
+   */
   public function testAmberFilterSimpleReplaceDoubleQuotes() {
     $text = "Hi there <a href=\"http://www.yahoo.com\">Yahoo</a>. Eat my donuts!";
     $result = _amber_filter_process($text, NULL, NULL);
@@ -105,6 +131,9 @@ class AmberTestCase extends DrupalUnitTestCase {
     $this->assertTrue(strpos($result, 'data-versionurl') > 0);
   }
 
+  /**
+   * Test processing a simple link
+   */
   public function testAmberFilterSimpleNoReplace() {
     $text = "Hi there <a href='node/1'>node links</a>. Eat my meatloaf!";
     $result = _amber_filter_process($text, NULL, NULL);
@@ -112,6 +141,9 @@ class AmberTestCase extends DrupalUnitTestCase {
   }
 
 
+  /**
+   * Test detecting links
+   */
   public function testAmberLinkDetection1() {
     $body = <<<EOT
 <!-- URL with uncommon chars that could potentially fail to extract. See http://drupal.org/node/465462. -->
@@ -131,6 +163,9 @@ EOT;
     $this->assertEqual($links[2], "http://www.pancake.com");
   }
 
+  /**
+   * Test detecting links with attributes and wonky quotes
+   */
   public function testAmberLinkDetectionWithAttributesAndWonkyQuotes() {
     $body = <<<EOT
 
@@ -153,6 +188,9 @@ EOT;
 
   }
 
+  /**
+   * Link filter test #1
+   */
   public function testAmberLinkFilter1() {
     $blacklist = array("yahoo.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake");
@@ -161,6 +199,9 @@ EOT;
     $this->assertEqual($result['cache'][1], "https://google.com");
   }
 
+  /**
+   * Link filter test #2
+   */
   public function testAmberLinkFilter2() {
     $blacklist = array("yahoo.com", "www.google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake");
@@ -169,6 +210,9 @@ EOT;
     $this->assertEqual($result['cache'][1], "https://google.com");
   }
 
+  /**
+   * Link filter test #3
+   */
   public function testAmberLinkFilter3() {
     $blacklist = array("yahoo.com", "google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake/www.yahoo.com");
@@ -177,6 +221,9 @@ EOT;
     $this->assertEqual($result['cache'][0], "http://www.yahoo.com");
   }
 
+  /**
+   * Link filter test #4
+   */
   public function testAmberLinkFilter4() {
     $blacklist = array("yahoo.com ", "google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake/www.yahoo.com");
@@ -184,6 +231,9 @@ EOT;
     $this->assertEqual(count($result['cache']), 2);
   }
 
+  /**
+   * Regexp link filter test #1
+   */
   public function testAmberRegexpLinkFilter1() {
     $blacklist = array("yahoo.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake");
@@ -193,6 +243,9 @@ EOT;
     $this->assertEqual($result['cache'][0], "https://google.com");
   }
 
+  /**
+   * Regexp link filter test #2
+   */
   public function testAmberRegexpLinkFilter2() {
     $blacklist = array("yahoo.com", "www.google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake");
@@ -201,6 +254,9 @@ EOT;
     $this->assertEqual($result['cache'][0], "https://google.com");
   }
 
+  /**
+   * Regexp link filter test #3
+   */
   public function testAmberRegexpLinkFilter3() {
     $blacklist = array("yahoo.com", "google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake/www.yahoo.com");
@@ -208,6 +264,9 @@ EOT;
     $this->assertEqual(count($result['cache']), 0);
   }
 
+  /**
+   * Regexp link filter test #4
+   */
   public function testAmberRegexpLinkFilter4() {
     $blacklist = array("yahoo.com ", "google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.peanuts.com/fruitcake/www.yahoo.com");
@@ -215,6 +274,9 @@ EOT;
     $this->assertEqual(count($result['cache']), 0);
   }
 
+  /**
+   * Regexp link filter test #5
+   */
   public function testAmberRegexpLinkFilter5() {
     $blacklist = array("yahoo.com$", "google.com");
     $links = array("http://www.yahoo.com", "https://google.com", "http://yahoo.com", "http://www.yahoo.com/fruitcake/");
@@ -223,6 +285,9 @@ EOT;
     $this->assertEqual($result['cache'][0], "http://www.yahoo.com/fruitcake/");
   }
 
+  /**
+   * Regexp link filter test #6
+   */
   public function testAmberRegexpLinkFilter6() {
     $blacklist = array("com/exclude");
     $links = array("http://www.yahoo.com", "https://google.com/exclude/blah", "http://yahoo.com/exclude-me", "http://www.yahoo.com/fruitcake/");
@@ -231,6 +296,9 @@ EOT;
     $this->assertEqual($result['cache'][0], "http://www.yahoo.com");
   }
 
+  /**
+   * Regexp link filter test #7
+   */
   public function testAmberRegexpLinkFilter7() {
     $blacklist = array("com/exclude", "");
     $links = array("http://www.yahoo.com", "https://google.com/exclude/blah", "http://yahoo.com/exclude-me", "http://www.yahoo.com/fruitcake/");
@@ -239,6 +307,9 @@ EOT;
     $this->assertEqual($result['cache'][0], "http://www.yahoo.com");
   }
 
+  /**
+   * Invalid regexp link filter test
+   */
   public function testAmberRegexpLinkFilterInvalidExpression() {
     $blacklist = array("*google.com");
     $links = array("http://www.yahoo.com");
@@ -252,8 +323,14 @@ EOT;
 
 }
 
+/**
+ * Amber Web Tests
+ */
 class AmberWebTestCase extends DrupalWebTestCase {
 
+  /**
+   * Descriptive information about the test case
+   */
   public static function getInfo() {
     return array(
       'name' => 'Amber Drupal tests',
@@ -282,12 +359,18 @@ class AmberWebTestCase extends DrupalWebTestCase {
     parent::tearDown();
   }
 
+  /**
+   * Test adding popup for link that's up
+   */
   public function testAmberAddBehaviourUpPopup() {
     variable_set('amber_available_action', AMBER_ACTION_POPUP);
     $result = _amber_get_behavior(1);
     $this->assertEqual($result, "up popup");
   }
 
+  /**
+   * Test adding hover for link that's up
+   */
   public function testAmberAddBehaviourUpHover() {
     variable_set('amber_available_action', AMBER_ACTION_HOVER);
     variable_set('amber_available_action_hover', 4);
@@ -295,12 +378,18 @@ class AmberWebTestCase extends DrupalWebTestCase {
     $this->assertEqual($result, "up hover:4");
   }
 
+  /**
+   * Test adding no action
+   */
   public function testAmberAddBehaviourUpNone() {
     variable_set('amber_available_action', AMBER_ACTION_NONE);
     $result = _amber_get_behavior(1);
     $this->assertNull($result);
   }
 
+  /**
+   * Test adding hover for link that's down
+   */
   public function testAmberAddBehaviourDownHover() {
     variable_set('amber_unavailable_action', AMBER_ACTION_HOVER);
     variable_set('amber_available_action', AMBER_ACTION_POPUP);
@@ -309,12 +398,18 @@ class AmberWebTestCase extends DrupalWebTestCase {
     $this->assertEqual($result, "down hover:1");
   }
 
+  /**
+   * Test adding cache link for link that's down
+   */
   public function testAmberAddBehaviourDownCache() {
     variable_set('amber_unavailable_action', AMBER_ACTION_CACHE);
     $result = _amber_get_behavior(0);
     $this->assertEqual($result, "down cache");
   }
 
+  /**
+   * Test when amber is disabled
+   */
   public function testAmberFilterDisabled() {
     variable_set('amber_enabled', 0);
     $text = "Hi there <a href='http://www.yahoo.com'>node links</a>. Eat my meatloaf!";
@@ -322,6 +417,9 @@ class AmberWebTestCase extends DrupalWebTestCase {
     $this->assertFalse(strpos($result, 'data-versionurl'));
   }
 
+  /**
+   * Test adding country-specific behavior
+   */
   public function testAmberAddCountryBehaviourDownCache() {
     variable_set('amber_country_unavailable_action', AMBER_ACTION_CACHE);
     variable_set('amber_unavailable_action', AMBER_ACTION_POPUP);
@@ -331,6 +429,9 @@ class AmberWebTestCase extends DrupalWebTestCase {
     $this->assertEqual($result, "down cache");
   }
 
+  /**
+   * Test adding an attribute
+   */
   public function testAmberAttributeAddingSimple() {
     $basic = array(
       'default' => array(
@@ -344,6 +445,9 @@ class AmberWebTestCase extends DrupalWebTestCase {
     $this->assertEqual($result['data-amber-behavior'], "down popup");
   }
 
+  /**
+   * Test adding a country-specific attribute
+   */
   public function testAmberAttributeAddingCountry() {
     $basic = array(
       'default' => array(
@@ -365,6 +469,9 @@ class AmberWebTestCase extends DrupalWebTestCase {
     $this->assertEqual($result['data-amber-behavior'], "down popup, us up hover:2");
   }
 
+  /**
+   * Test adding country-specific popup
+   */
   public function testAmberAttributeAddingCountryPopupCache() {
     $basic = array(
       'default' => array(
@@ -386,6 +493,9 @@ class AmberWebTestCase extends DrupalWebTestCase {
   }
 
 
+  /**
+   * Test that country specific information not added if same as global
+   */
   public function testAmberAttributeAddingCountryIgnoreIfSameAsDefault() {
     $basic = array(
       'default' => array(
@@ -406,6 +516,9 @@ class AmberWebTestCase extends DrupalWebTestCase {
     $this->assertEqual($result['data-amber-behavior'], "down popup");
   }
 
+  /**
+   * Test adding absolute URL
+   */
   public function testAmberAttributeAddingAbsoluteURL() {
     $basic = array(
       'default' => array(

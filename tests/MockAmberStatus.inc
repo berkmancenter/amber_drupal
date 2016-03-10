@@ -3,13 +3,15 @@
  * @file
  * Mock AmberStatus class to support tests
  */
-
 class AmberStatus {
 
+  /**
+   * Get a mock summary
+   */
   function get_summary($url, $preferred_providers) {
     if ($url == "http://nodata.example.com") {
       return array();
-    } 
+    }
     else {
       return array(
         'default' => array(

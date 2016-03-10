@@ -5,7 +5,7 @@
  */
 
 /**
- * Implements hook_cron
+ * Implements hook_cron().
  */
 function amber_cron() {
   if (variable_get('amber_enabled', 1)) {
@@ -25,9 +25,10 @@ function amber_cron() {
  * @param $url string with URL to check
  */
 function amber_exists_in_queue($queue, $url) {
+  // @ignore sql_count
   $result = db_query("SELECT COUNT(*) FROM {queue} WHERE name=:name AND data=:data",
                       array(':name' => $queue, ':data' => serialize($url)))->fetchCol();
-  return ($result[0] > 0);
+  return ($result);
 }
 
 /**
@@ -46,7 +47,7 @@ function amber_enqueue_check_links($links, $queue_name = AMBER_QUEUE_CHECK_NEW) 
 }
 
 /**
- * Implements hook_cron_queue_info
+ * Implements hook_cron_queue_info().
  */
 function amber_cron_queue_info() {
   return array(
@@ -202,7 +203,7 @@ function amber_process_check_queue($item, $force = FALSE) {
 
 /**
  * Check and cache a link
- **/
+ */
 function amber_cache_link($item, $force = FALSE) {
   $start = time();
   watchdog('amber', "Checking and caching: @url ", array('@url' => $item), WATCHDOG_DEBUG);

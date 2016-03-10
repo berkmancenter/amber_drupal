@@ -57,7 +57,6 @@ function _amber_array_values_recursive(array $array) {
  * @param $links array of links to check
  * @param $blacklist array of hostnames to exclude
  */
-
 function _amber_filter_links($links, $blacklist) {
   if (!$blacklist) {
     return $links;
@@ -120,7 +119,6 @@ function _amber_regexp_filter_links($links, $blacklist) {
 }
 
 
-
 /**
  * Extract links from the provided text
  *
@@ -167,7 +165,7 @@ function _amber_parse_fields($entity_type, $bundle_name, $entity) {
         foreach ($entity_field as $language) {
           foreach ($language as $item) {
             $format = isset($item['format']) ? $item['format'] : NULL;
-            //TODO: Don't run the Amber filter as part of check_markup
+            // TODO: Don't run the Amber filter as part of check_markup
             $text_items[] = check_markup($item['value'], $format, _amber_entity_language($entity_type, $entity), TRUE);
             if ($field['type'] == 'text_with_summary') {
               $text_items[] = check_markup($item['summary'], $format, _amber_entity_language($entity_type, $entity), TRUE);
@@ -182,7 +180,7 @@ function _amber_parse_fields($entity_type, $bundle_name, $entity) {
           foreach ($language as $item) {
             $options = drupal_parse_url($item['url']);
             $title = !empty($item['title']) ? $item['title'] : '';
-            // TODO: Handle link items that don't specify a protocol (e.g. "http://")
+            // TODO: Handle link items that don't specify a protocol (e.g., "http://")
             $text_items[] = l($title, $options['path'], $options);
             $text_items[] = check_markup($title, NULL, _amber_entity_language($entity_type, $entity), TRUE);
           }

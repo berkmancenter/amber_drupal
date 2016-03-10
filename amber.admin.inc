@@ -4,6 +4,9 @@
  * Admin functionality
  */
 
+/**
+ * Amber configuration settings form
+ */
 function amber_config_form($form, &$form_state) {
   $form['amber_enabled'] = array(
     '#type' => 'checkbox',
@@ -127,7 +130,7 @@ function amber_config_form($form, &$form_state) {
       'visible' => array(
          ':input[name="amber_backend"]' => array('value' => "Never displayed"),
       ),
-     ),
+    ),
   );
 
   $form['amber_cache']['perma']['advanced_perma']['amber_perma_server_url'] = array(
@@ -242,7 +245,7 @@ function amber_config_form($form, &$form_state) {
       'visible' => array(
         ':input[name="amber_available_action"]' => array('value' => '1'),
       ),
-     ),
+    ),
   );
 
   $form['amber_delivery']['amber_unavailable_action'] = array(
@@ -268,7 +271,7 @@ function amber_config_form($form, &$form_state) {
       'visible' => array(
         ':input[name="amber_unavailable_action"]' => array('value' => '1'),
       ),
-     ),
+    ),
   );
 
   $form['amber_country'] = array(
@@ -301,7 +304,7 @@ function amber_config_form($form, &$form_state) {
       'visible' => array(
         ':input[name="amber_country_id"]' => array('!value' => ''),
       ),
-     ),
+    ),
   );
 
   $form['amber_country']['amber_country_available_action_hover'] = array(
@@ -315,7 +318,7 @@ function amber_config_form($form, &$form_state) {
         ':input[name="amber_country_id"]' => array('!value' => ''),
         ':input[name="amber_country_available_action"]' => array('value' => '1'),
       ),
-     ),
+    ),
   );
 
   $form['amber_country']['amber_country_unavailable_action'] = array(
@@ -333,7 +336,7 @@ function amber_config_form($form, &$form_state) {
       'visible' => array(
         ':input[name="amber_country_id"]' => array('!value' => ''),
       ),
-     ),
+    ),
   );
 
   $form['amber_country']['amber_country_unavailable_action_hover'] = array(
@@ -347,7 +350,7 @@ function amber_config_form($form, &$form_state) {
         ':input[name="amber_country_id"]' => array('!value' => ''),
         ':input[name="amber_country_unavailable_action"]' => array('value' => '1'),
       ),
-     ),
+    ),
   );
 
 
@@ -482,6 +485,9 @@ function amber_settings_submit($form, &$form_state) {
   cache_clear_all('*', 'cache_field', TRUE);
 }
 
+/**
+ * Get a list of countries for the configuration settings
+ */
 function _amber_get_countries() {
   if (function_exists("country_get_list")) {
     $countries = country_get_list(); // From Locale module

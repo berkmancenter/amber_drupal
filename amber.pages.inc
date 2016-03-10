@@ -4,6 +4,9 @@
  * Dashboard pages for Amber
  */
 
+/**
+ * Dashboard summary form
+ */
 function amber_dashboard_summary_form() {
 
   $header = array(t("Global Statistics"), "");
@@ -42,6 +45,9 @@ function amber_dashboard_summary_form() {
   return $build;
 }
 
+/**
+ * Create link to view the capture
+ */
 function _amber_get_view_link($row) {
   $p = isset($row['provider']) ? $row['provider'] : AMBER_BACKEND_LOCAL;
   switch ($p) {
@@ -58,6 +64,9 @@ function _amber_get_view_link($row) {
   }
 }
 
+/**
+ * Get the size of the capture
+ */
 function _amber_get_size_column($row) {
   $p = isset($row['provider']) ? $row['provider'] : AMBER_BACKEND_LOCAL;
   $size = isset($row['size']) ? format_size($row['size']) : (isset($row['message']) ? $row['message'] : "");
@@ -73,6 +82,9 @@ function _amber_get_size_column($row) {
   }
 }
 
+/**
+ * Get the archival method
+ */
 function _amber_get_method_column($row) {
   $p = isset($row['provider']) ? $row['provider'] : "";
   if (!isset($row['size'])) {
@@ -94,6 +106,9 @@ function _amber_get_method_column($row) {
   }
 }
 
+/**
+ * Form to display details about all captures
+ */
 function amber_dashboard_detail_form() {
 
   $build = array();
@@ -164,21 +179,34 @@ function amber_dashboard_detail_form() {
   return $build;
 }
 
+/**
+ * Get the total number of items in the cache
+ */
 function _amber_cache_size() {
+  // @ignore sql_count
   $result = db_query("SELECT COUNT(*) FROM {amber_cache}")->fetchCol();
   return $result[0];
 }
 
+/**
+ * Get the number of items in the queue to be archived
+ */
 function _amber_queue_size($q) {
   $queue = DrupalQueue::get($q);
   return ($queue) ? $queue->numberOfItems() : 0;
 }
 
+/**
+ * Get the last time the archiving process ran
+ */
 function _amber_last_run($var) {
   $time = variable_get($var, 0);
   return ($time) ? format_date($time) : t('Never');
 }
 
+/**
+ * Get the total size of the amber cache on disk
+ */
 function _amber_disk_usage() {
   $status = amber_get_status();
   $max_size = variable_get('amber_max_disk', '1000') * 1024 * 1024;
@@ -191,6 +219,9 @@ function _amber_disk_usage() {
   return t('@current (of @max)', array('@current' => $formatted_current_size, '@max' => $formatted_max));
 }
 
+/**
+ * Delete all snapshots
+ */
 function amber_dashboard_summary_form_clear($form, &$form_state) {
   amber_delete_all();
   cache_clear_all('*', 'cache_filter', TRUE);
@@ -198,6 +229,9 @@ function amber_dashboard_summary_form_clear($form, &$form_state) {
   drupal_set_message(t("All snapshots have been deleted"));
 }
 
+/**
+ * Scan all content for links to snapshot
+ */
 function amber_dashboard_summary_form_scan($form, &$form_state) {
   drupal_get_messages(); /* Clear the 'You should scan for content' message */
   variable_set('amber_content_scanned', 1);
@@ -207,6 +241,9 @@ function amber_dashboard_summary_form_scan($form, &$form_state) {
   }
 }
 
+/**
+ * Cache all items
+ */
 function amber_dashboard_summary_form_cache($form, &$form_state) {
   $cache_batch = amber_batch_cache_all_setup();
   if ($cache_batch) {

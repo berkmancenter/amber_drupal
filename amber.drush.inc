@@ -87,6 +87,9 @@ function drush_amber_delete_all() {
   drush_print("Cache cleared");
 }
 
+/**
+ * Cache a single URL
+ */
 function drush_amber_cache_url($url) {
   if ($url) {
     amber_process_cache_queue($url);
@@ -98,6 +101,9 @@ function drush_amber_cache_url($url) {
   }
 }
 
+/**
+ * Check a single URL to see if it is up
+ */
 function drush_amber_check_up($url) {
   if ($url) {
     $checker = amber_get_checker();
@@ -114,6 +120,9 @@ function drush_amber_check_up($url) {
   }
 }
 
+/**
+ * Run the availability check on a single URL
+ */
 function drush_amber_check_url($url) {
   if ($url) {
     amber_process_check_queue($url, TRUE);
@@ -125,6 +134,9 @@ function drush_amber_check_url($url) {
   }
 }
 
+/**
+ * Delete and ID from the cache
+ */
 function drush_amber_delete_url($id) {
   if ($id) {
     if (amber_delete_item($id)) {
