@@ -28,7 +28,7 @@ function amber_exists_in_queue($queue, $url) {
   // @ignore sql_count
   $result = db_query("SELECT COUNT(*) FROM {queue} WHERE name=:name AND data=:data",
                       array(':name' => $queue, ':data' => serialize($url)))->fetchCol();
-  return ($result);
+  return ($result[0] > 0);
 }
 
 /**
