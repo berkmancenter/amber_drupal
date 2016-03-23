@@ -78,8 +78,8 @@ function amber_config_form($form, &$form_state) {
   $form['amber_cache']['local']['amber_storage_location'] = array(
     '#type' => 'textfield',
     '#title' => t('Storage location'),
-    '#default_value' => variable_get('amber_storage_location', 'sites/default/files/amber'),
-    '#description' => t('Path to the location where snapshots are stored on disk, relative to the Drupal root.'),
+    '#default_value' => variable_get('amber_storage_location', 'amber'),
+    '#description' => t('Path to the location where snapshots are stored on disk, relative to the Drupal private files directory.'),
   );
 
   $form['amber_cache']['local']['advanced'] = array(
@@ -427,6 +427,12 @@ function amber_settings_validate($form, &$form_state) {
     }
   }
 
+  if (($form_state['values']['amber_backend'] == AMBER_BACKEND_LOCAL)) {
+    if (empty(variable_get('file_private_path', ''))) {
+      form_set_error('amber_backend', t("The Drupal <a href='@url'>Private file system path</a> must be set to use the local storage method.", array('@url' => url('admin/config/media/file-system'))));
+    }
+  }
+
   if (($form_state['values']['amber_backend'] == AMBER_BACKEND_PERMA) ||
       (array_key_exists(AMBER_BACKEND_PERMA, $form_state['values']['amber_alternate_backends']))) {
     foreach (array('amber_perma_apikey', 'amber_perma_server_url', 'amber_perma_server_api_url') as $field) {
@@ -435,6 +441,7 @@ function amber_settings_validate($form, &$form_state) {
       }
     }
   }
+
   if (($form_state['values']['amber_backend'] == AMBER_BACKEND_AMAZON_S3) ||
       (array_key_exists(AMBER_BACKEND_AMAZON_S3, $form_state['values']['amber_alternate_backends']))) {
     $aws_missing_field = FALSE;

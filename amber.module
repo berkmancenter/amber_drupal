@@ -64,8 +64,7 @@ function amber_get_storage_for_item($id, $providers) {
 function amber_get_storage_instance($backend) {
   switch ($backend) {
     case AMBER_BACKEND_LOCAL:
-      $file_path = join(DIRECTORY_SEPARATOR,
-        array(DRUPAL_ROOT, variable_get('amber_storage_location', 'sites/default/files/amber')));
+      $file_path = drupal_realpath("private://" . variable_get('amber_storage_location', 'amber'));
       $storage = new AmberStorage($file_path);
       break;
     case AMBER_BACKEND_PERMA:
