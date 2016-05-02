@@ -11,7 +11,7 @@ function amber_requirements($phase) {
   $t = get_t();
   switch ($phase) {
     case 'install':
-      drupal_set_message($t('You should probably go to the Amber dashboard, scan existing content for links to preserve and then preserve them by clicking <a href="@url">here</a>.', array('@url' => url('admin/reports/amber'))), 'warning');
+      drupal_set_message($t('To retroactively preserve any existing links, scan your site content and preserve those links by clicking <a href="@url">here</a>.', array('@url' => url('admin/reports/amber'))), 'warning');
       break;
 
     case 'runtime':
