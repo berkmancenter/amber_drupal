@@ -24,7 +24,7 @@ Whether links fail because of DDoS attacks, censorship, or just plain old link r
 
 ## Installation ##
 
-To install Amber, you must download the module from the Drupal module directory: https://www.drupal.org/project/amber. We exclusively use the Drupal.org infrastructure for module development, versioning, and issue tracking. The code in this Github repo is not necessarily up-to-date with the code on Drupal.org.
+To install Amber, you must download the module from the Drupal module directory: https://drupal.org/project/amber. We exclusively use the Drupal.org infrastructure for module development, versioning, and issue tracking. The code in this Github repo is not necessarily up-to-date with the code on Drupal.org.
 
 Full installation instructions, as well as a guide for configurations and settings, can be found on our Wiki: https://github.com/berkmancenter/amber_drupal/wiki
 
