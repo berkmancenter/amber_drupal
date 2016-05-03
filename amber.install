@@ -38,6 +38,14 @@ function amber_requirements($phase) {
           install into sites/all/libraries/aws.");
         }
       }
+      if (variable_get('amber_backend', AMBER_BACKEND_LOCAL) == AMBER_BACKEND_LOCAL) {
+        if (empty(variable_get('file_private_path', ''))) {
+          $requirements['amber_local'] = array('title' => 'Amber local storage');
+          $requirements['amber_local']['severity'] = REQUIREMENT_ERROR;
+          $requirements['amber_local']['value'] = $t("Private files directory not configured");
+          $requirements['amber_local']['description'] = $t("The Drupal <a href='@url'>Private file system path</a> must be set to use the local storage method.", array('@url' => url('admin/config/media/file-system')));
+        }
+      }
       return $requirements;
       break;
 
