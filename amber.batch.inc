@@ -162,7 +162,7 @@ function amber_batch_cache_process($queue_name, $context) {
   amber_process_check_queue($url, TRUE);
   $queue->deleteItem($item);
   $context['results'][] = $url;
-  $context['message'] = t('Processed URL "@url"', array('@url' => $url));
+  $context['message'] = t('Preserved URL "@url"', array('@url' => $url));
 }
 
 /**
@@ -175,9 +175,9 @@ function amber_batch_cache_all_finished($success, $results, $operations) {
   if ($success) {
     $count = count($results);
     if ($count == 1)
-      drupal_set_message(t('@count URL processed', array('@count' => $count)));
+      drupal_set_message(t('@count URL preserved', array('@count' => $count)));
     else
-      drupal_set_message(t('@count URLs processed', array('@count' => $count)));
+      drupal_set_message(t('@count URLs preserved', array('@count' => $count)));
     cache_clear_all('*', 'cache_filter', TRUE);
     cache_clear_all('*', 'cache_field', TRUE);
   }

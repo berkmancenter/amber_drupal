@@ -5,7 +5,9 @@ Whether links fail because of DDoS attacks, censorship, or just plain old link r
 
 Amber automatically preserves a snapshot of every page linked to on a website, giving visitors a fallback option if links become inaccessible. If one of the pages linked to on this website were to ever go down, Amber can provide visitors with access to an alternate version. This safeguards the promise of the URL: that information placed online can remain there, even amidst network or endpoint disruptions.
 
-Amber is an open source project led by the Berkman Center for Internet & Society. It builds on a proposal from Tim Berners-Lee and Jonathan Zittrain for a "mutual aid treaty for the Internet" that would enable operators of websites to enter easily into mutually beneficial agreements and bolster the robustness of the entire web. The project also aims to mitigate risks associated with increasing centralization of online content.
+Lots of copies keeps stuff safe. By default, Amber stores snapshots directly on the host website. But users can choose to store snapshots using a combination of the following third party storage and archiving systems: the Internet Archive, Perma.cc, and Amazon Simple Storage Service (Amazon S3).
+
+Amber is an open source project led by the Berkman Center for Internet & Society (https://cyber.law.harvard.edu). It builds on a proposal from Tim Berners-Lee and Jonathan Zittrain for a "mutual aid treaty for the Internet" that would enable operators of websites to enter easily into mutually beneficial agreements and bolster the robustness of the entire web. The project also aims to mitigate risks associated with increasing centralization of online content.
 
 * For a full description of the module, visit the project page:
   http://amberlink.org/
@@ -16,7 +18,9 @@ Amber is an open source project led by the Berkman Center for Internet & Society
 REQUIREMENTS
 ------------
 
-* cURL - To see if cURL is installed, go to Administration > Reports > Status Report.
+* Drupal 7.x
+* PHP 5.3 or higher
+* cURL (To see if cURL is installed, go to Administration > Reports > Status Report)
 
 RECOMMENDED MODULES
 -------------------
@@ -28,6 +32,8 @@ INSTALLATION
 
 * Install as you would normally install a contributed Drupal module.
 * If using AWS to store snapshots, download version 3 of the AWS library from https://github.com/aws/aws-sdk-php and save it in sites/all/libraries/aws
+
+Full installation instructions, as well as a guide for configurations and settings, can be found on the Amber wiki guide (https://github.com/berkmancenter/amber_drupal/wiki).
 
 CONFIGURATION
 -------------
@@ -51,8 +57,7 @@ MAINTAINERS
 -----------
 
 Current maintainers:
+ * Berkman Center for Internet & Society (berkmancenter)
  * Jeffrey Licht (jlicht)
 
-This project has been sponsored by:
- * Berkman Center for Internet & Society (http://cyber.law.harvard.edu)
-
+This project has been sponsored by the Berkman Center for Internet & Society (http://cyber.law.harvard.edu).
