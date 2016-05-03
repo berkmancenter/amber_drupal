@@ -11,7 +11,7 @@ Whether links fail because of DDoS attacks, censorship, or just plain old link r
   https://drupal.org/project/issues/amber
 
 * To download and install the module:
-  https://www.drupal.org/project/amber
+  https://drupal.org/project/amber
 
 * For in-depth Drupal documentation:
   https://github.com/berkmancenter/amber_drupal/wiki
