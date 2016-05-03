@@ -1,13 +1,8 @@
-INTRODUCTION
-------------
+Amber Drupal plugin
+=================
+Amber keeps links working on blogs and websites.
 
 Whether links fail because of DDoS attacks, censorship, or just plain old link rot, reliably accessing linked content is a problem for Internet users everywhere. The more routes we provide to information, the more all people can freely share that information, even in the face of filtering or blockages. Amber adds to these routes.
-
-Amber automatically preserves a snapshot of every page linked to on a website, giving visitors a fallback option if links become inaccessible. If one of the pages linked to on this website were to ever go down, Amber can provide visitors with access to an alternate version. This safeguards the promise of the URL: that information placed online can remain there, even amidst network or endpoint disruptions.
-
-Lots of copies keeps stuff safe. By default, Amber stores snapshots directly on the host website. But users can choose to store snapshots using a combination of the following third party storage and archiving systems: the Internet Archive, Perma.cc, and Amazon Simple Storage Service (Amazon S3).
-
-Amber is an open source project led by the Berkman Center for Internet & Society (https://cyber.law.harvard.edu). It builds on a proposal from Tim Berners-Lee and Jonathan Zittrain for a "mutual aid treaty for the Internet" that would enable operators of websites to enter easily into mutually beneficial agreements and bolster the robustness of the entire web. The project also aims to mitigate risks associated with increasing centralization of online content.
 
 * For a full description of the module, visit the project page:
   http://amberlink.org/
@@ -20,3 +15,18 @@ Amber is an open source project led by the Berkman Center for Internet & Society
 
 * For in-depth Drupal documentation:
   https://github.com/berkmancenter/amber_drupal/wiki
+
+## System Requirements ##
+
+* Drupal 7.x
+* PHP 5.3 or higher
+* cURL (To see if cURL is installed, go to Administration > Reports > Status Report)
+
+## Installation ##
+
+To install Amber, you must download the module from the Drupal module directory: https://www.drupal.org/project/amber. We exclusively use the Drupal.org infrastructure for module development, versioning, and issue tracking. The code in this Github repo is not necessarily up-to-date with the code on Drupal.org.
+
+Full installation instructions, as well as a guide for configurations and settings, can be found on our Wiki: https://github.com/berkmancenter/amber_drupal/wiki
+
+## Help! ##
+The Berkman Center's devs are happy to help you get Amber up and running. Contact us directly with questions: amber@cyber.law.harvard.edu.
