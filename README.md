@@ -1,4 +1,4 @@
-Amber Drupal plugin
+Amber Drupal module
 =================
 Amber keeps links working on blogs and websites.
 
