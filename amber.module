@@ -176,7 +176,8 @@ function amber_get_status() {
   $status = &drupal_static(__FUNCTION__);
   if (!isset($status)) {
     $db = Database::getConnection();
-    $status = new AmberStatus(new AmberPDO($db));
+    $prefix = $db->getConnectionOptions()['prefix']['default'];
+    $status = new AmberStatus(new AmberPDO($db), $prefix);
   }
   return $status;
 }
