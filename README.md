@@ -31,4 +31,4 @@ Full installation instructions, as well as a guide for configurations and settin
 ## Help! ##
 Stuck? Check out our Drupal documentation: https://github.com/berkmancenter/amber_drupal/wiki.
 
-For everything else, the Berkman Center's devs are happy to help you get Amber up and running. Contact us directly with questions: amber@cyber.law.harvard.edu.
+For everything else, the Berkman Klein Center's devs are happy to help you get Amber up and running. Contact us directly with questions: amber@cyber.law.harvard.edu.
