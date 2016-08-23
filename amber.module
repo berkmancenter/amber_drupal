@@ -169,6 +169,98 @@ function amber_get_checker() {
 }
 
 /**
+ * Return the list of custom Amber timegate
+ * @return Array
+ */
+function amber_get_custom_timegates() {
+  global $base_url;
+  $custom_timegates = &drupal_static(__FUNCTION__);
+  if (!isset($custom_timegates)) {
+    $custom_timegates = [];
+    $registrations = json_decode(variable_get('amber_timegate_registration_hashes'), true);
+    foreach($registrations as $url => $token) {
+      $new_server = new AmberMementoService(array(
+        'server_url' => $url,
+        'custom_timegate' => true,
+        'token' => $token,
+        'site_url' => $base_url
+      ));
+      $custom_timegates[] = $new_server;
+    }
+  }
+  return $custom_timegates;
+}
+
+/**
+ * Register the site on newly added custom TimeGate url.
+ * This function is a helper function to abstracted register function written in AmberMementoService.
+ * @return Array
+ */
+function amber_register_on_timegate($url) {
+  global $base_url;
+  $hash = variable_get('amber_timegate_registration_hashes', '{}');
+  $server = new AmberMementoService(array(
+    'server_url' => $url,
+    'custom_timegate' => true,
+    'hash' => $hash,
+    'site_url' => $base_url
+  ));
+  $email = variable_get('site_mail');
+  $data = $server->registerSite($base_url, $email, $hash);
+  if($data[2] != $hash) {
+    error_log($hash);
+    variable_set('amber_timegate_registration_hashes', $data[2]);
+  }
+  return array($data[0], $data[1]);
+}
+
+/**
+ * DeRegister the site from custom TimeGate url.
+ * @return Array
+ */
+function amber_deregister_from_timegate() {
+  $custom_timegates = amber_get_custom_timegates();
+  foreach($custom_timegates as $server) {
+    $server->deRegisterSite();
+  }
+  variable_set('amber_timegate_registration_hashes', '{}');
+  return true;
+}
+
+/**
+ * Notify the timegate about new cache addition.
+ * @return void
+ */
+function amber_notify_add_to_timegate($cache_metadata) {
+  $custom_timegates = amber_get_custom_timegates();
+  foreach($custom_timegates as $server) {
+    $server->notifyAddToTimegate($cache_metadata['url'], $cache_metadata['provider_id'], $cache_metadata['date']);
+  }
+}
+
+/**
+ * Notify remove cache activity to custom timegate.
+ * @return void
+ */
+function amber_notify_remove_to_timegate($cache_id) {
+  $custom_timegates = amber_get_custom_timegates();
+  foreach($custom_timegates as $server) {
+    $server->notifyRemoveToTimegate($cache_id);
+  }
+}
+
+/**
+ * Notify remove all cache activity to custom timegate.
+ * @return void
+ */
+function amber_notify_remove_all_to_timegate() {
+  $custom_timegates = amber_get_custom_timegates();
+  foreach($custom_timegates as $server) {
+    $server->notifyRemoveAllToTimegate();
+  }
+}
+
+/**
  * Return an initialized AmberStatus module
  * @return IAmberStatus
  */
@@ -365,13 +457,27 @@ function amber_menu() {
     'delivery callback' => 'amber_deliver_json',
     'type' => MENU_CALLBACK,
   );
+  $items['amber/ping'] = array(
+    'title' => 'Healthcheck for Amber nodes',
+    'description' => 'Check if the Amber node is alive',
+    'page callback' => 'amber_ping',
+    /* Ajax call may be made by any user */
+    'access callback' => TRUE,
+    'delivery callback' => 'amber_deliver_json',
+    'type' => MENU_CALLBACK,
+  );
+  $items['amber/listall'] = array(
+    'title' => 'Endpoint for force sync of Amber timegate',
+    'description' => 'Endpoint to which cron listens (only for users who opt p2p)',
+    'page callback' => 'amber_listall',
+    /* Ajax call may be made by any user */
+    'access callback' => TRUE,
+    'delivery callback' => 'amber_deliver_json',
+    'type' => MENU_CALLBACK,
+  );
 
   return $items;
 }
-
-// function amber_contextual_links_view_alter(&$element, $items) {
-//   dpm($element);
-// }
 
 
 /**
@@ -915,6 +1021,18 @@ function amber_get_memento() {
   if (isset($_REQUEST['url']) && isset($_REQUEST['date'])) {
     $lookup = amber_get_memento_service();
     $lookup_result = $lookup->getMemento($_REQUEST['url'], $_REQUEST['date']);
+    if(!$lookup_result) {
+      $p2p_network = amber_get_custom_timegates();
+      foreach($p2p_network as $lookup) {
+        $lookup_result = $lookup->getMemento($_REQUEST['url'], $_REQUEST['date']);
+        if($lookup_result) {
+          break;
+        }
+      }
+    }
+    if(!$lookup_result) {
+      $lookup_result = array();
+    }
     $result = json_encode($lookup_result, JSON_UNESCAPED_SLASHES);
   }
   else {
@@ -923,10 +1041,44 @@ function amber_get_memento() {
   return $result;
 }
 
+/**
+ * Checks the opt-in value for the node, and response pong for healthcheck purpose.
+ * @return string json response to send to the client with pong and opt-in value
+ */
+function amber_ping() {
+  $reply = "pong";
+  $opt = true;
+  if(variable_get('amber_memento', '') == '') {
+    $opt = false;
+  }
+  return json_encode(array(
+    'reply' => $reply,
+    'timegate-opt-in' => $opt
+  ));
+}
 
-
-
-
-
-
+/**
+ * Returns all the mementos the node is having. General frequency is near to 24 hours of this sync.
+ * @return string json response
+ */
+function amber_listall() {
+  if(variable_get('amber_memento', '') == '') {
+    return json_encode(array(
+      'success' => false
+    ));
+  }
+  else {
+    $db = Database::getConnection();
+    $prefix = $db->getConnectionOptions()['prefix']['default'];
+    $result = db_query("SELECT url, date, provider_id FROM ${prefix}amber_cache");
+    $all_caches = [];
+    foreach ($result as $records) {
+      $all_caches[] = $records;
+    }
+    return json_encode(array(
+      'success' => true,
+      'cache' => $all_caches
+    ));
+  }
+}
 

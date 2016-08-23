@@ -240,6 +240,7 @@ function amber_cache_link($item, $force = FALSE) {
         }
 
         if ($result) {
+          amber_notify_add_to_timegate($result);
           watchdog('amber', "Cached: @url in @seconds seconds", array('@url' => $item, '@seconds' => time() - $start), WATCHDOG_DEBUG);
           /* Clear caches that could contain HTML with versions of the links that don't contain data- attributes */
           /* TODO: Ideally we would clear the cache only once per cron job */
@@ -260,7 +261,7 @@ function amber_cache_link($item, $force = FALSE) {
  * @param  string $item    url to fetch
  * @param  iAmberFetcher $fetcher instance of a fetcher to use to get the item
  * @param  iAmberStatus  $status  instance of a status to use to save the item
- * @return boolean  TRUE if successfully cached
+ * @return array Cache metadata if successfully cached
  */
 function _amber_fetch_item($item, $fetcher, $status) {
   $cache_metadata = array();
@@ -274,7 +275,7 @@ function _amber_fetch_item($item, $fetcher, $status) {
   }
   if ($cache_metadata) {
     $status->save_cache($cache_metadata);
-    return TRUE;
+    return $cache_metadata;
   }
   else {
     return FALSE;
@@ -292,6 +293,7 @@ function amber_disk_space_purge() {
     $storage = amber_get_storage();
     foreach ($purge as $item) {
       $storage->delete($item['id']);
+      amber_notify_remove_to_timegate($item['id']);
       $status->delete($item['id']);
       watchdog('amber', "Deleting to stay under disk space limits: @url", array('@url' => $item['url']), WATCHDOG_NOTICE);
     }

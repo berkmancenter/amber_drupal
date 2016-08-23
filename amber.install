@@ -81,6 +81,8 @@ function amber_uninstall() {
   variable_del('amber_country_unavailable_action');
   variable_del('amber_country_unavailable_action_hover');
   variable_del('amber_content_scanned');
+  variable_del('amber_memento');
+  variable_del('amber_timegate_registration_hashes');
 }
 
 /**

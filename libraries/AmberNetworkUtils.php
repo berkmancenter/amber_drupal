@@ -239,7 +239,7 @@ class AmberNetworkUtils {
         curl_setopt($ch, CURLOPT_URL, $newurl);
         $response = curl_exec($ch);
         $response_info = curl_getinfo($ch);
-        if ($response_info['http_code'] == 301 || $response_info['http_code'] == 302) {
+        if (in_array($response_info['http_code'], array(301,302,307,308))) {
           $newurl = $response_info['redirect_url'];
         } else if ($meta = AmberNetworkUtils::find_meta_redirect($response)) {
           $newurl = $meta;
@@ -287,7 +287,7 @@ class AmberNetworkUtils {
   public static function find_urls_requiring_redirects($urls) {
     $result = array();
     foreach ($urls as $url => $data) {
-      if (($data['info']['http_code'] == 301) || ($data['info']['http_code'] == 302)) {
+      if (in_array($data['info']['http_code'], array(301,302,307,308))) {
         $result[$url] = $data;
       } else if (AmberNetworkUtils::find_meta_redirect($data['body'])) {
         $result[$url] = $data;
@@ -346,6 +346,38 @@ class AmberNetworkUtils {
     } else {
       return FALSE;
     }
+  }
+
+  /**
+   * Make POST request to APIs.
+   * @param string $url URL of the API Endpoint.
+   * @param array $fields API Payload.
+   * @return array response of the API call (generally array)
+   */
+  public static function make_post_call($url, $fields, $json=true) {
+    $query = http_build_query($fields);
+    $options = array(
+      CURLOPT_RETURNTRANSFER => true,     // return web page
+      CURLOPT_HEADER         => false,    // don't return headers
+      CURLOPT_FOLLOWLOCATION => AmberNetworkUtils::curl_redirects_allowed(),     // follow redirects
+      CURLOPT_ENCODING       => "",       // handle all encodings
+      CURLOPT_USERAGENT      => AmberNetworkUtils::get_user_agent_string(), // who am i
+      CURLOPT_AUTOREFERER    => true,     // set referer on redirect
+      CURLOPT_CONNECTTIMEOUT => 5,      // timeout on connect
+      CURLOPT_TIMEOUT        => 5,      // timeout on response
+      CURLOPT_MAXREDIRS      => 10,       // stop after 10 redirects
+      CURLOPT_POST           => 1,        // Post request enabled
+      CURLOPT_POSTFIELDS     => $query
+    );
+    $ch = curl_init($url);
+    curl_setopt_array($ch, $options);
+    $content = curl_exec($ch);
+    if($json) {
+      $content = json_decode($content);
+    }
+    $header  = curl_getinfo( $ch );
+    curl_close($ch);
+    return array($header, $content);
   }
 
 }
