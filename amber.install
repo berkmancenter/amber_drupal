@@ -167,6 +167,11 @@ function amber_schema() {
         'length' => 2000,
         'description' => 'The unique id for the cached data at the selected provider',
       ),
+      'message' => array(
+        'type' => 'varchar',
+        'length' => 2000,
+        'description' => 'Error message in case the data cannot be cached',
+      ),
     ),
     'primary key' => array('id', 'provider'),
   );
@@ -229,5 +234,16 @@ function amber_update_7101() {
 function amber_update_7102() {
   db_drop_primary_key('amber_cache');
   db_add_primary_key('amber_cache', array('id', 'provider'));
+}
+
+/**
+ * Add columns to support status associated with cache attempts
+ */
+function amber_update_7103() {
+  db_add_field('amber_cache', 'message', array(
+    'type' => 'varchar',
+    'length' => 2000,
+    'description' => 'Error message in case the data cannot be cached',
+  ));
 }
 
