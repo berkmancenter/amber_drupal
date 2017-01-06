@@ -46,6 +46,12 @@ function amber_requirements($phase) {
           $requirements['amber_local']['description'] = $t("The Drupal <a href='@url'>Private file system path</a> must be set to use the local storage method.", array('@url' => url('admin/config/media/file-system')));
         }
       }
+      if (variable_get('amber_backend', AMBER_BACKEND_LOCAL) == AMBER_BACKEND_PERMA) {
+        $requirements['amber_storage'] = array('title' => 'Amber storage');
+        $requirements['amber_storage']['severity'] = REQUIREMENT_ERROR;
+        $requirements['amber_storage']['value'] = $t("Perma cannot be used as a primary storage location");
+        $requirements['amber_storage']['description'] = $t("The use of Perma as a primary storage location has been deprecated. Select a new primary storage location in the <a href='@url'>Amber preferences</a>. Perma may still be used as a secondary storage location", array('@url' => url('admin/config/content/amber')));
+      }
       return $requirements;
       break;
 
