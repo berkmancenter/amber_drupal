@@ -225,6 +225,7 @@ function _amber_disk_usage() {
  */
 function amber_dashboard_summary_form_clear($form, &$form_state) {
   amber_delete_all();
+  amber_notify_remove_all_to_timegate();
   cache_clear_all('*', 'cache_filter', TRUE);
   cache_clear_all('*', 'cache_field', TRUE);
   drupal_set_message(t("All snapshots have been deleted"));
@@ -329,6 +330,7 @@ function amber_dashboard_delete_item($id, $provider = 0) {
   }
   if ($id) {
     if (amber_delete_item($id, $provider)) {
+      amber_notify_remove_to_timegate($id);
       drupal_set_message(t("Deleted record with id: @id.", array('@id' => $id)));
     }
     else {

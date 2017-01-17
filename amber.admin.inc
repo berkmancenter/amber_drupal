@@ -395,6 +395,13 @@ function amber_config_form($form, &$form_state) {
     '#description' => t('Optional: Request additional snapshots from the Internet Archive, the Library of Congress web archive, archive.today, and more.'),
   );
 
+  $form['amber_services']['amber_memento'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Become part of p2p cache sharing network'),
+    '#default_value' => variable_get('amber_memento', "http://timegate.okrdx.com"),
+    '#description' => t('Optional: Share and request snapshots with p2p sharing community. (blank to disable)'),
+  );
+
 
 
   $form = system_settings_form($form);
@@ -481,6 +488,22 @@ function amber_settings_validate($form, &$form_state) {
             bucket in S3."), 'error');
         }
       }
+    }
+  }
+
+  $new_amber_custom_timegate = $form_state['values']['amber_memento'];
+  $old_amber_custom_timegate = $form_state['complete form']['amber_services']['amber_memento']['#default_value'];
+  if($new_amber_custom_timegate == "") {
+    amber_deregister_from_timegate();
+  }
+  else if($new_amber_custom_timegate != $old_amber_custom_timegate) {
+    list($success, $message) = amber_register_on_timegate($new_amber_custom_timegate);
+    if($success) {
+      drupal_set_message(t($message), 'success');
+    }
+    else {
+      drupal_set_message(t($message), 'error');
+      $form_state['values']['amber_memento'] = $old_amber_custom_timegate;
     }
   }
 }
